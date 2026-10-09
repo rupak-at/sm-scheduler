@@ -18,6 +18,7 @@
 - Docker Compose with persistent local PostgreSQL and Redis.
 - Requested frontend-design and web-design-guidelines skills installed and applied.
 - Living development guide with a required update log for every completed feature or fix.
+- Read-only `db:check` command for PostgreSQL connectivity, migration history, and IPv6-only DNS guidance.
 
 ## Not implemented
 
@@ -43,6 +44,11 @@ Authentication currently applies conservative shared buckets when no trusted cli
 
 Docker Compose configuration validates. Starting Docker on this machine requires a sudo password;
 temporary user-owned PostgreSQL/Redis instances are used for isolated runtime checks.
+
+The signup failure investigation identified `ENETUNREACH` with an IPv6-only Supabase direct
+hostname. A subsequent read-only check after local configuration changed reached PostgreSQL
+and reported pending migrations. The user is handling database configuration and migrations.
+Use `npm run db:check` to verify the latest state; signup requires a reachable, migrated database.
 
 ## Dependency maintenance
 

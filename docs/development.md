@@ -171,6 +171,18 @@ Never weaken origin checks or expose credentials while adding a feature.
 
 ## Troubleshooting
 
+- Signup/login returns 500: check `curl http://localhost:4000/health/ready`, then
+  `npm run db:check`. A `database: down` result is a connectivity problem; committed
+  migrations cannot be checked until the connection works. The command checks connectivity
+  and migration history without writing data or printing database credentials.
+- Supabase direct connection fails with `ENETUNREACH`: its default direct hostname can
+  resolve only to IPv6. On a machine without IPv6 access, copy the **Session pooler** URI
+  (port **5432**) from the Supabase dashboard's **Connect** panel into root `.env`
+  as `DATABASE_URL`. Use the supplied pooler username/hostname and URL-encode password
+  characters. See [Supabase's connection guide](https://supabase.com/docs/guides/database/connecting-to-postgres).
+  Run `npm run db:check`, apply pending migrations with `npm run db:deploy`, then restart
+  `npm run dev`. A session check uses database-backed throttling even for anonymous visitors,
+  so an unavailable database can prevent the signup page from rendering.
 - Missing auth secret: run `npm run setup:env`.
 - Database/Redis unavailable: check `npm run infra:logs` and root environment URLs.
 - API cannot bind its port: stop the conflicting service or change `API_PORT` and web `API_BASE_URL`.
@@ -193,6 +205,21 @@ Verification: formatting/lint/types/build pass; 12 unit and 3 PostgreSQL integra
 Runtime checks verify auth proxy cookies, protected planner, filters, session revocation,
 throttling, migrations, and worker delivery. Desktop/mobile login screenshots reviewed.
 Implementation commit: `0acc647`. Docker startup requires a sudo password on this machine.
+
+### 2026-10-09 — diagnose signup database connection failures
+
+Added `npm run db:check` to distinguish unreachable PostgreSQL from pending/unfinished
+migrations using read-only queries. It reports IPv6-only DNS and Supabase session pooler
+guidance without logging credentials. Documented the signup session dependency and recovery.
+
+Initial diagnosis: API readiness reported PostgreSQL down and Redis up; the Supabase direct
+hostname resolved only to IPv6, and connections failed with `ENETUNREACH`. A subsequent
+read-only check after local configuration changed reached PostgreSQL and reported pending
+migrations. The user is handling configuration and migrations; no remote migrations were run.
+
+Verification: formatting, lint, strict types, package compilation, and 12 unit tests passed.
+Temporary PostgreSQL checks verified the diagnostic's missing, applied, and unfinished
+migration paths, including exit codes and credential-safe output.
 
 ### Future entries
 

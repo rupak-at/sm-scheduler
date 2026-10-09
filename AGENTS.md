@@ -133,6 +133,7 @@ Use Node 24 LTS (`.nvmrc`) and npm. From the repository root:
 - `npm run setup:env`: create local environment files and a random untracked auth secret.
 - `npm run infra:up`: start local PostgreSQL and Redis.
 - `npm run db:generate`: generate the client without a running database.
+- `npm run db:check`: check database connectivity and committed migration history without writes.
 - `npm run db:migrate -- --name feature_name`: create/apply a development migration.
 - `npm run db:deploy`: apply committed migrations in CI/staging/production.
 - `npm run dev`: build shared packages, then watch packages and all three applications.

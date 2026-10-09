@@ -60,6 +60,7 @@ npm run test
 npm run check
 npm run build
 npm run db:validate
+npm run db:check
 npm run db:migrate -- --name your_change
 npm run db:deploy
 npm run db:studio
