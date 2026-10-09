@@ -1,0 +1,200 @@
+# Development guide
+
+Keep this guide current **on every completed feature or fix**. Update the implementation
+status at the same time. Record the change and its verification in the update log below.
+
+## Product and current scope
+
+Social Scheduler helps creators prepare and schedule Instagram content. Phase 1 is
+Instagram-first; future Facebook/TikTok providers share the domain model.
+
+The current application has email/password authentication, a protected empty planner,
+health checks, domain models/migrations, and an infrastructure-check worker.
+Instagram connection, upload, draft management, scheduling, and publishing are planned.
+Read [AGENTS.md](../AGENTS.md), [status](project-status.md), and [architecture](architecture.md)
+before choosing the next feature.
+
+## First-time setup
+
+Install Node 24 LTS, npm, and Docker with Compose. Use the version in `.nvmrc`
+with your preferred Node version manager.
+
+From the repository root:
+
+```sh
+npm ci
+npm run setup:env
+npm run infra:up
+npm run db:deploy
+npm run dev
+```
+
+Open [localhost:3000](http://localhost:3000) and create an account.
+PostgreSQL listens on port 5432, Redis on 6379, and the Express API on 4000.
+
+If your Linux user cannot access Docker, start infrastructure with:
+
+```sh
+sudo docker compose -f infra/docker-compose.yml up -d --wait
+```
+
+Setup creates an untracked root `.env`, preserves existing values, and adds a random
+`BETTER_AUTH_SECRET` if missing. It also creates `apps/web/.env.local`.
+Never copy development credentials into staging or production.
+
+## Configuration
+
+| Variable             | Used by                 | Purpose                                                    |
+| -------------------- | ----------------------- | ---------------------------------------------------------- |
+| `DATABASE_URL`       | API, worker, Prisma CLI | PostgreSQL connection                                      |
+| `REDIS_URL`          | API, worker             | Queue/readiness connection                                 |
+| `WEB_ORIGIN`         | API                     | Exact trusted web origin; HTTPS in production              |
+| `BETTER_AUTH_SECRET` | API                     | High-entropy authentication secret, at least 32 characters |
+| `API_PORT`           | API                     | HTTP listener, default 4000                                |
+| `LOG_LEVEL`          | API, worker             | Structured log level                                       |
+| `WORKER_CONCURRENCY` | Worker                  | Concurrent infrastructure checks                           |
+| `API_BASE_URL`       | Web server              | Express origin; never exposed to browser code              |
+| `TEST_DATABASE_URL`  | Integration tests       | Isolated test PostgreSQL database                          |
+| `TEST_REDIS_URL`     | Integration tests       | Isolated test Redis service                                |
+
+The root environment file serves API, worker, and Prisma CLI. Next.js reads its own
+workspace environment file. Hosting supplies production variables and keeps environments separate.
+
+## Daily workflow
+
+1. Read the feature context and existing package/module.
+2. Use a focused branch for future work, for example `git switch -c feat/post-drafts`.
+3. Implement the smallest useful feature through the correct boundaries.
+4. Add meaningful checks for behavior and failure paths.
+5. Update this guide, [implementation status](project-status.md), and relevant setup/architecture docs.
+6. Format the relevant files and run lint, then the required tests and builds.
+7. Review the diff, stage explicit relevant paths, and commit the completed change.
+8. Report the result, validation, remaining work, and commit hash.
+
+```sh
+npm run format
+npm run lint
+npm run check
+npm run build
+git diff --check
+git status --short
+git add path/to/feature path/to/tests docs/development.md docs/project-status.md
+git commit -m "feat(posts): add draft validation"
+```
+
+Use Conventional Commits such as `feat`, `fix`, `refactor`, or `docs`.
+Do not include unrelated changes. Do not push or deploy without authorization.
+
+## Pre-commit automation
+
+`npm ci` activates Husky through the prepare script. The hook runs lint-staged:
+
+- JavaScript/TypeScript: Prettier, then ESLint with zero warnings.
+- Markdown/JSON/CSS/YAML: Prettier.
+- Generated files follow the formatter/linter ignore rules.
+
+The hook stages formatting changes automatically. It does not replace full checks.
+If it fails, fix the reported issue and retry; do not bypass it.
+Intentionally ignored generated Next.js types do not produce hook warnings.
+
+## Where features belong
+
+| Concern                                | Location                          |
+| -------------------------------------- | --------------------------------- |
+| Pages and layout                       | `apps/web/src/app`                |
+| Feature UI, hooks, view logic          | `apps/web/src/features/<feature>` |
+| Shared UI primitives                   | `apps/web/src/components/ui`      |
+| HTTP feature modules                   | `apps/api/src/modules/<feature>`  |
+| Worker processors                      | `apps/worker/src/processors`      |
+| Domain/request/job schemas             | `packages/shared/src`             |
+| Database schema and migrations         | `packages/database/prisma`        |
+| Provider publishing contracts/adapters | `packages/publishing/src`         |
+
+Keep pages thin. Separate request handling, validation, business rules, and persistence as
+those responsibilities appear. Use public package exports, not another app's internals.
+Keep authored files small; ESLint enforces 250 nonblank source lines and 80 per function.
+Generated clients, migrations, and the lockfile are handled by their tools.
+
+Use Tailwind utilities and shared tokens, shadcn/ui primitives, and local Roboto.
+Read frontend-design before UI changes; use web-design-guidelines for review.
+Keep accessibility, mobile layout, loading/error states, and URL-based filters intact.
+
+## Database changes
+
+Prisma loads multiple schema files in `packages/database/prisma`.
+The application domain lives in `schema.prisma`; auth models live in `auth.prisma`.
+
+```sh
+npm run db:validate
+npm run db:migrate -- --name descriptive_change
+npm run db:generate
+npm run test:integration
+```
+
+Inspect the generated SQL. Include schema and migration together in the commit.
+Verify the migration against an isolated test database. Production/staging apply
+committed migrations with `npm run db:deploy`; they do not create new migrations.
+
+PostgreSQL is the publication source of truth. Store scheduling instants in UTC and retain
+display timezones. Enforce ownership across posts, accounts, and media in services.
+
+## Testing
+
+`npm run check` checks formatting, ESLint, strict types (including tooling/integration tests),
+and unit tests. `npm run build` verifies all production builds.
+
+Integration tests use a real PostgreSQL database and Redis. Provision isolated test services,
+set their test variables, migrate that database using `DATABASE_URL`, and run:
+
+```sh
+npm run test:integration
+```
+
+Tests cover auth origins, password hashing, session persistence/revocation, invalid credentials,
+and expiry. They create and clean up test users. CI provisions fresh services and runs migrations,
+unit/integration tests, and builds. Add worker recovery and publishing tests as those features arrive.
+
+## Verify running applications
+
+```sh
+curl http://localhost:4000/health/live
+curl http://localhost:4000/health/ready
+npm run queue:check
+```
+
+Readiness returns 503 when PostgreSQL or Redis fails. Watch the worker for
+`Infrastructure check completed`. This is an infrastructure job, not a social publish.
+
+Auth requests pass through Next.js to Express. Sessions are checked on the server.
+Protected API routes must perform their own authentication and ownership checks.
+Never weaken origin checks or expose credentials while adding a feature.
+
+## Troubleshooting
+
+- Missing auth secret: run `npm run setup:env`.
+- Database/Redis unavailable: check `npm run infra:logs` and root environment URLs.
+- API cannot bind its port: stop the conflicting service or change `API_PORT` and web `API_BASE_URL`.
+- Workspace imports missing: run `npm run build:packages` before starting an individual app.
+- Auth returns 403: ensure the browser origin exactly matches API `WEB_ORIGIN`.
+- Login throttled: wait a minute before retrying. Configure trusted proxy/client-IP handling when
+  choosing production hosting; current fallback buckets are conservative and shared.
+- Dependency updates: review the lockfile and audit. Current upstream lint-tool advisories and
+  tested overrides are recorded in [implementation status](project-status.md).
+
+## Update log
+
+### 2026-10-09 — initial foundation and authentication
+
+Created the npm monorepo, Next.js/Tailwind/shadcn/Roboto frontend, Express API, worker,
+PostgreSQL/Prisma domain/auth models, Redis infrastructure, and Better Auth login/signup/logout.
+Added ESLint, Prettier, Husky/lint-staged, CI, project context, and this living guide.
+
+Verification: formatting/lint/types/build pass; 12 unit and 3 PostgreSQL integration tests pass.
+Runtime checks verify auth proxy cookies, protected planner, filters, session revocation,
+throttling, migrations, and worker delivery. Desktop/mobile login screenshots reviewed.
+Implementation commit: `0acc647`. Docker startup requires a sudo password on this machine.
+
+### Future entries
+
+For each completed update, append its date, changed behavior, affected setup/architecture,
+and validation results. Update instructions above whenever commands or conventions change.

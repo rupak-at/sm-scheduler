@@ -2,6 +2,8 @@
 
 An Instagram-first social media scheduler for creators and small teams.
 Read [AGENTS.md](AGENTS.md) for product context, module boundaries, and development rules.
+Follow [the development guide](docs/development.md) for setup, feature work, migrations, testing,
+and commits. The guide and implementation status must be updated with every completed change.
 The original `idea.md` is a local planning document excluded by the workspace's gitignore.
 
 The project includes email/password signup, login, logout, and a protected planner.

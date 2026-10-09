@@ -2,6 +2,7 @@
 
 Read this file before making changes. Read `idea.md` for the full product plan and
 `docs/project-status.md` for what is actually implemented.
+Follow `docs/development.md` for setup and the development workflow.
 
 ## What we are building
 
@@ -104,7 +105,9 @@ unsupported provider formats, or inert actions that look available.
 2. Implement one focused feature or fix, keeping apps/modules independently understandable.
 3. Add meaningful tests for business rules, failure paths, authorization, migrations,
    and worker behavior when those change. Do not test trivial markup just to increase counts.
-4. Update README and `docs/project-status.md` for changed setup or capabilities.
+4. **On every completed feature or fix, update `docs/development.md` and
+   `docs/project-status.md`.** Keep guide instructions current and append a concise update-log
+   entry with changed behavior and verification. Update README for changed setup or capabilities.
    Update this file when enduring architecture, commands, or conventions change.
 5. Run `npm run format`, then `npm run check`. Run `npm run build` for application,
    dependency, configuration, or public-contract changes. For schema changes run

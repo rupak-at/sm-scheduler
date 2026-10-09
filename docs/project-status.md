@@ -17,6 +17,7 @@
 - Prisma domain/authentication models and two reviewed SQL migrations.
 - Docker Compose with persistent local PostgreSQL and Redis.
 - Requested frontend-design and web-design-guidelines skills installed and applied.
+- Living development guide with a required update log for every completed feature or fix.
 
 ## Not implemented
 
