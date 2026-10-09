@@ -14,15 +14,16 @@ Phase 1 supports Instagram only. Facebook and TikTok are future providers. Their
 values and shared contracts are architectural preparation, not implemented integrations.
 Use official APIs and authorization flows. Verify account eligibility, permissions,
 formats, limits, and app-review requirements against official documentation before
-promising support. A successful authorized test publish is still a prerequisite.
+promising support. A successful authorized test publish is required before claiming real provider feasibility; the user authorized implementation before their own live test.
 
 ## Current scope
 
-This repository includes npm workspaces, a public landing page, a protected Next.js planner, email/password
-authentication through Better Auth, an Express health API, an infrastructure-check worker,
-shared contracts, Prisma models/migrations, and local PostgreSQL/Redis configuration.
+This repository includes npm workspaces, a public landing page, a protected Next.js planner,
+email/password and Instagram sign-in, Instagram account connection, encrypted tokens,
+JPEG uploads, draft editing/deletion, durable scheduling, and a BullMQ publishing/recovery worker.
+The real Meta authorization/publishing test is pending; automated provider tests use fixtures.
+Read `docs/instagram-setup.md` before changing the integration or running a live test.
 
-Instagram OAuth, uploads, draft CRUD, scheduling, actual publishing, and recovery are future work.
 Email verification and password-reset delivery require a mail provider and remain unimplemented.
 Do not present empty scaffolding as a completed product feature.
 
@@ -33,11 +34,11 @@ Do not present empty scaffolding as a completed product feature.
 - `apps/api`: Express HTTP interface. `app.ts` assembles middleware/routes;
   `server.ts` starts the process. Group business features under `src/modules`.
 - `apps/worker`: always-on BullMQ process, deployed separately from web/API. Currently
-  consumes `system-checks` only. Add publishing only after durable job handling exists.
+  consumes infrastructure and Instagram publication jobs, with PostgreSQL reconciliation.
 - `packages/shared`: browser-safe validation schemas, domain types, and job contracts.
 - `packages/config`: server-only environment loading, validation, logging, Redis options.
 - `packages/database`: Prisma schema, migrations, generated client, connection factory.
-- `packages/publishing`: platform-neutral publisher contracts; future provider adapters.
+- `packages/publishing`: Instagram HTTP client, encrypted token lifecycle, signed media storage, and provider contracts.
 - `infra`: local service configuration. Development credentials are never production credentials.
 - `docs`: architecture, setup decisions, feasibility results, and implementation status.
 
@@ -77,7 +78,7 @@ abstractions, fake success responses, and unused dependencies.
 - Check ownership of posts, accounts, and media together in services; foreign keys alone
   do not enforce matching owners across these relations.
 - Encrypt provider tokens at rest, retain key-version metadata, and never return them
-  to the browser. The ciphertext field is a storage boundary, not an encryption implementation.
+  to the browser. Use TokenVault; raw credentials must not be saved in Better Auth Account fields.
 - Never log raw tokens, credentials, authorization headers, provider response bodies, or
   sensitive personal data. Log safe event codes and identifiers.
 - Add authenticated authorization, upload validation, rate limiting, secure sessions,
@@ -103,6 +104,21 @@ The public landing page is `/`; the authenticated workspace is `/planner`.
 Successful login/signup returns to `/planner`. Keep the landing page independent of API availability.
 Use the neutral visual system in `docs/frontend-design.md` throughout. For substantial UI changes,
 review phone/tablet/laptop/desktop layouts at 320, 390, 768, 820, 1024, 1280, 1440, and 1920px.
+
+## Instagram workflow
+
+- Use Instagram Login for Business/Creator accounts, with profile/publishing scopes only.
+- OAuth attempts are browser-bound, expire after ten minutes, and are consumed atomically.
+- Instagram sign-in uses immutable provider identity, never email matching. The internal
+  `instagram.users.invalid` email is an unverified compatibility identifier, not a mailbox.
+  Block email signup on this reserved domain; do not expose it as a verified contact address.
+- Tokens use AES-256-GCM, independent 32-byte key, account-bound authenticated data, and key version.
+- Refresh only unexpired long-lived tokens at least 24 hours old; expiry comes from provider responses.
+- JPEG photos only. Decode/validate/re-encode uploads; ownership is checked when saving and publishing.
+- Persist container ID and publish-request marker before sending. Uncertain sends must never be blindly retried.
+- `.data/media` is local persistent storage, ignored by git. Public URLs are signed and expire.
+- The user is applying their database migrations. Create/test migrations against isolated services,
+  but do not migrate the configured creator database without a new instruction.
 
 ## Development flow
 
@@ -145,7 +161,7 @@ Use Node 24 LTS (`.nvmrc`) and npm. From the repository root:
 - `npm run queue:check`: enqueue an infrastructure check; inspect worker completion logs.
 - `npm run check`: formatting, linting, type checking, and tests.
 - `npm run test:integration`: authentication integration checks against isolated services.
-  Set `TEST_DATABASE_URL` and `TEST_REDIS_URL`; migrate that test database first.
+  Set `TEST_DATABASE_URL` and `TEST_REDIS_URL`; migrate that test database first. Tests reset throttling counters and remove their fixtures, so never use a creator database.
 - `npm run build`: compile packages, API, worker, and Next.js.
 - `npm run infra:down`: stop services while retaining local volumes.
 

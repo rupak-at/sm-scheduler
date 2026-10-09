@@ -2,10 +2,10 @@ import { Layers2 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-export function Brand({ className }: { className?: string }) {
+export function Brand({ className, href = '/' }: { className?: string; href?: string }) {
   return (
     <Link
-      href="/"
+      href={href}
       aria-label="Social Scheduler home"
       className={cn('flex w-fit items-center gap-2.5 rounded-sm hover:opacity-80', className)}
     >

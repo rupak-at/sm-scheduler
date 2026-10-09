@@ -9,6 +9,10 @@ if (!/^BETTER_AUTH_SECRET=.+$/m.test(configuration)) {
   configuration = configuration.replace(/^BETTER_AUTH_SECRET=.*\n?/m, '');
   configuration += `\nBETTER_AUTH_SECRET=${randomBytes(32).toString('base64')}\n`;
 }
+if (!/^TOKEN_ENCRYPTION_KEY=.+$/m.test(configuration)) {
+  configuration = configuration.replace(/^TOKEN_ENCRYPTION_KEY=.*\n?/m, '');
+  configuration += `\nTOKEN_ENCRYPTION_KEY=${randomBytes(32).toString('base64')}\n`;
+}
 writeFileSync(rootEnv, configuration, { mode: 0o600 });
 chmodSync(rootEnv, 0o600);
 

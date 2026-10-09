@@ -207,6 +207,26 @@ Never weaken origin checks or expose credentials while adding a feature.
 - Dependency updates: review the lockfile and audit. Current upstream lint-tool advisories and
   tested overrides are recorded in [implementation status](project-status.md).
 
+## Instagram feature development
+
+Follow [Instagram setup](instagram-setup.md) for account/app credentials, HTTPS callback,
+token renewal, media URLs, and the real-account test. Run `npm run setup:env` to create
+an independent token encryption key without replacing existing credentials. Restart all
+processes after environment/schema changes. The user applies the new migration to their
+configured database; automated checks use a temporary isolated database only.
+
+The backend owns provider tokens and publishing. Next.js proxies same-origin workspace/media
+requests and forwards cookies; keep API authorization/origin validation even when adding UI.
+Workspace writes use per-user database throttles. Tests reset throttling counters; never use
+`TEST_DATABASE_URL` for a creator's database. Integration fixtures simulate Meta, without
+network authorization or publishing to a real Instagram account.
+
+Use `packages/publishing` for the HTTP adapter, AES token storage, validation/renewal, and
+signed media links. Keep uploads, posts, channels, and OAuth separate API modules. Worker
+claims use database row locks/leases and store container/send markers before remote effects.
+Queues carry publication IDs only. Do not clear an uncertain send marker to force a retry.
+Media storage is persistent local disk in this iteration; S3/production retention remain future work.
+
 ## Update log
 
 ### 2026-10-09 — initial foundation and authentication
@@ -251,6 +271,25 @@ checks cover eight widths from 320 to 1920px, labelled forms, focus, dark/reduce
 preferences, filters, expanded guidance, and long names. Public landing has no auth API
 dependency. Planner UI review uses an isolated session fixture, without database changes.
 See [design](frontend-design.md) and [review](frontend-review.md) for scope and limitations.
+
+### 2026-10-09 — Instagram workflow and functional planner
+
+Added Instagram OAuth sign-in/account linking with one-use browser state, immutable identity,
+encrypted credentials, permission checks, expiry handling, and automatic long-lived-token renewal.
+Added authenticated JPEG upload/validation, draft create/edit/delete, scheduling/cancellation,
+retry rules, and live status filters. Fixed the workspace logo returning to the public landing.
+
+A separate BullMQ processor scans durable PostgreSQL scheduling state, claims with leases,
+saves container/send markers, records attempts, and reconciles crashes/uncertain sends without
+blind duplicate publishing. Setup now generates a separate encryption key; new migration fields
+are documented. The user applies migrations to their own database. Added the real-account setup
+and test guide, preserving the existing neutral Roboto/Tailwind/shadcn design.
+
+Verification: schema validation and isolated deployment of all three migrations passed.
+21 PostgreSQL/Redis/provider-fixture integration checks passed, including
+secure auth/linking, real queue recovery, ownership, upload validation, draft races, token lifecycle, duplicate jobs,
+and ambiguous outcomes. Real Meta authorization/publishing is still pending user setup/testing.
+Final quality/build/browser results are recorded in [implementation status](project-status.md).
 
 ### Future entries
 

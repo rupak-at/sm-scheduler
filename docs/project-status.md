@@ -1,69 +1,78 @@
 # Implementation status
 
-## Completed
+## Implemented
 
-- npm workspaces for web, API, worker, shared contracts, configuration, database, and publishing.
-- Strict TypeScript, package exports, and dependency-ordered builds.
-- ESLint, Prettier with Tailwind class sorting, EditorConfig, and source-size limits.
-- Husky/lint-staged pre-commit formatting and linting.
-- CI with migrations, formatting, linting, types, unit/integration tests, and production builds.
-- Environment validation, random local secret setup, and safe event logging.
-- Next.js App Router frontend using Tailwind CSS, shadcn/ui, and local Roboto.
-- Public static landing page at `/`, with original studio imagery, workspace preview, and availability roadmap.
-- Consistent white/graphite theme, Roboto throughout, and responsive landing/auth/planner layouts.
-- Better Auth email/password signup, login, logout, and PostgreSQL-backed sessions.
-- Protected planner, URL-based status filters, and honest empty states.
-- Protected planner at `/planner`, with setup guidance and matching login/signup redirects.
-- Same-origin auth proxy with cookie forwarding and server-side session checks.
-- Protected account endpoint, strict auth write origins, and database-backed auth throttling.
-- Express liveness/readiness routes and separate BullMQ infrastructure-check worker.
-- Prisma domain/authentication models and two reviewed SQL migrations.
-- Docker Compose with persistent local PostgreSQL and Redis.
-- Requested frontend-design and web-design-guidelines skills installed and applied.
-- Living development guide with a required update log for every completed feature or fix.
-- Read-only `db:check` command for PostgreSQL connectivity, migration history, and IPv6-only DNS guidance.
+- Modular npm workspaces: Next.js web, Express API, BullMQ worker, shared contracts,
+  server configuration, PostgreSQL/Prisma, and provider publishing package.
+- Strict TypeScript, ESLint source/function limits, Prettier/Tailwind sorting,
+  Husky/lint-staged, CI, living development docs, and explicit feature commits.
+- Responsive public landing, protected `/planner`, Tailwind/shadcn primitives, neutral
+  white/graphite design, and locally hosted Roboto across text and controls.
+- Better Auth email/password signup/login/logout and database-backed sessions.
+- Instagram OAuth sign-in and explicit linking to an existing email workspace.
+  Immutable provider identity, browser-bound signed state cookies, ten-minute one-use
+  database records, same-session linking, and reserved unverified internal email IDs.
+- Professional account/profile and scope validation. Provider credentials remain encrypted
+  with AES-256-GCM and account-bound authenticated data; raw tokens never reach the browser
+  or Better Auth Account storage. Independent local key setup and stored key version.
+- Token expiry/revocation states, pre-publish validation, and automatic eligible long-lived
+  token renewal. Renewal uses the existing credential; no generic refresh token is stored.
+- Authenticated, origin-checked and throttled workspace actions. Validated JPEG uploads,
+  metadata stripping/orientation/resize, private previews, and expiring signed public URLs.
+- Draft creation/editing/deletion, optimistic concurrency, ownership checks, local-timezone
+  scheduling, cancellation, editing safe failures, and guarded retries. Post history is retained.
+- URL status filters/pagination, photo editor, channel actions, inline errors, automatic
+  status refresh, and workspace logo/navigation that remain inside the application.
+- Durable PostgreSQL scheduling plus real Redis ID-only delivery. Database claims/leases,
+  attempt history, saved containers/send markers, stale-claim recovery, readiness polling,
+  and uncertain-outcome reconciliation without automatic duplicate sends.
+- Environment validation, safe logging, health/readiness routes, database diagnostics,
+  three reviewed migrations, and persistent local PostgreSQL/Redis configuration.
+- Requested frontend skills applied; setup and real-account guide in `instagram-setup.md`.
 
-## Not implemented
+## Limits and pending work
 
-Instagram feasibility/OAuth, encrypted provider credentials, media uploads/storage, draft CRUD,
-scheduling, real publishing, reconciliation, publishing retries, and production deployments.
-Email verification and password-reset delivery need a mail provider; social sign-in is not enabled.
+The implementation is ready for a **private real-account integration test**, not a claim
+of verified live Instagram publishing. The user supplies a Business/Creator account, a Meta
+Instagram Login app, accepted app/tester access, correct scopes, credentials, supported Graph
+version, HTTPS callback/media origin, and applies the new migration to their database.
+No real Meta authorization or post has been made by the agent. Meta documentation pages were
+login/rate-limit restricted during research; professional support/scope names were verified
+through Meta's official Postman collection, with linked references for the live setup review.
 
-Future provider enums do not enable Facebook or TikTok. Supported Instagram formats are unverified.
-Production proxy trust and per-client IP handling depend on the chosen hosting topology.
-Authentication currently applies conservative shared buckets when no trusted client IP is available.
+The current vertical slice supports one JPEG photo per post. Reels, video, carousels,
+Stories, analytics, teams, Facebook, and TikTok are not implemented. Future provider enum
+values do not enable those providers.
+
+Media uses a persistent local API filesystem, not S3. Production storage/retention/quotas,
+verified hosting/proxy IP configuration, provider deauthorization/data-deletion callbacks,
+account erasure, deployments, and multi-key token rotation remain. Email verification and
+password-reset delivery require a mail provider. Internal Instagram identity emails are not
+verified contact addresses. Confirmed container recovery may not recover an external post ID.
+An unconfirmed send remains UNCERTAIN and cannot be blindly retried.
+
+Authentication applies conservative shared rate-limit buckets without trusted client IPs.
+Workspace writes have separate per-user limits. Tests reset throttling counters and remove
+their fixtures: never use a creator database for integration tests.
 
 ## Verification
 
-- Full formatting, linting, strict type checks, and 12 unit tests pass.
-- Prisma schema validation and full package/API/worker/Next.js production builds pass.
-- Both migrations applied successfully to an isolated PostgreSQL database.
-- Three real authentication integration tests pass: hostile origin rejection, password hashing,
-  session persistence/revocation, invalid credentials, and session expiration.
-- Browser-proxy runtime checks pass: signup, login, forwarded cookies, protected planner,
-  status filters, logout, and throttling.
-- Redis-delivered infrastructure checks complete in the separate worker.
-- Desktop (1440px) and mobile (390px) login screenshots reviewed.
-- Landing, login, signup, and planner checked for viewport overflow at 320, 390, 768, 820,
-  1024, 1280, 1440, and 1920px. Desktop/mobile/tablet screenshots reviewed.
-- UI checks cover keyboard focus, labels/autocomplete, URL filters, long names, expanded
-  guidance, dark system preference, and reduced motion. Planner preview uses an isolated
-  session fixture; real Safari/iPad testing is not performed.
+- Formatting, lint, strict workspace/tools types, and 22 unit tests.
+- Prisma schema validation; all three migrations applied to isolated PostgreSQL.
+- 21 integration tests against real isolated PostgreSQL/Redis and simulated Meta responses:
+  session security, OAuth browser/state protection, explicit email linking, ownership,
+  upload validation/private and signed media, draft concurrency, scheduling/cancellation,
+  duplicate delivery, container polling, token expiry/renewal/revocation, and uncertain sends.
+- Real BullMQ/Redis delivery verifies PostgreSQL reconciliation repairs missed enqueue
+  and queues publication identifiers without captions or credentials.
+- Full package/API/worker/Next.js production build; production dependency audit reports zero vulnerabilities.
+- Chromium fixture checks: upload → draft save and upload → schedule, session redirects,
+  workspace logo destination, status URLs, form labels/focus, long names, light controls under
+  dark system preference, reduced motion, and viewport overflow from 320 through 1920px.
+  Desktop/mobile/tablet editor screenshots inspected. Physical Safari/iPad testing is pending.
 
-Docker Compose configuration validates. Starting Docker on this machine requires a sudo password;
-temporary user-owned PostgreSQL/Redis instances are used for isolated runtime checks.
-
-The signup failure investigation identified `ENETUNREACH` with an IPv6-only Supabase direct
-hostname. A subsequent read-only check after local configuration changed reached PostgreSQL
-and reported pending migrations. The user is handling database configuration and migrations.
-Use `npm run db:check` to verify the latest state; signup requires a reachable, migrated database.
-
-## Dependency maintenance
-
-Production dependency auditing reports zero vulnerabilities.
-The full audit reports four high-severity entries in the Next.js ESLint plugin's
-fast-glob/micromatch/braces development dependency chain. The registry currently offers no
-compatible patched braces release; do not force-downgrade the Next.js lint plugin.
-
-Overrides pin patched MySQL tooling and deepmerge-ts releases. Prisma generation, schema validation,
-migration deployment, and application builds must continue to pass when updating these overrides.
+Quality/build checks require local test/compilation sockets; restrictive sandbox failures
+were rerun with approved local access. A cached failed Turbopack compilation was moved aside
+before the successful production build. No configured creator database was migrated.
+Docker startup on this machine needs administrator access; temporary user-owned services
+were used for verification. Real Instagram authorization/publishing is the user's next test.

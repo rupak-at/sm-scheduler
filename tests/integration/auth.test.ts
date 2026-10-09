@@ -29,6 +29,7 @@ const password = 'A-long-test-passphrase-42';
 
 beforeAll(async () => {
   await resources.checks.database();
+  await database.rateLimit.deleteMany();
 });
 afterAll(async () => {
   const user = await database.user.findUnique({ where: { email } });

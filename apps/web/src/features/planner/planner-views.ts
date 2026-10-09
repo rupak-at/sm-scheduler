@@ -11,14 +11,13 @@ export const plannerViews = [
     label: 'Drafts',
     heading: 'No drafts yet',
     description:
-      'A place for work in progress. Your unfinished posts will appear here when content creation is available.',
+      'A place for work in progress. Your unfinished posts will appear here as you work on them.',
   },
   {
     id: 'scheduled',
     label: 'Scheduled',
     heading: 'Nothing scheduled yet',
-    description:
-      'Your upcoming posts will appear here once Instagram connection and scheduling are available.',
+    description: 'Your upcoming posts will appear here when you schedule them.',
   },
   {
     id: 'published',
@@ -26,6 +25,12 @@ export const plannerViews = [
     heading: 'No published posts yet',
     description:
       'Your publishing history will appear here once you begin sharing posts through Social Scheduler.',
+  },
+  {
+    id: 'attention',
+    label: 'Needs attention',
+    heading: 'All caught up',
+    description: 'Failed posts and unconfirmed publishing outcomes appear here.',
   },
 ] as const;
 

@@ -8,6 +8,7 @@ const app = createApp({
   webOrigin: environment.WEB_ORIGIN,
   checks: resources.checks,
   auth: resources.auth,
+  workspace: resources.workspace,
 });
 
 const server = app.listen(environment.API_PORT, () => {

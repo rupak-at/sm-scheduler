@@ -50,3 +50,17 @@ login/signup redirects are checked against the temporary auth fixture.
 The running app's public pages were inspected directly. Protected planner review uses a
 separate production preview with a temporary session fixture, avoiding writes to the user's
 database. Layout checks do not replace real Safari/iPad or assistive-technology testing.
+
+## Instagram workspace update — 2026-10-09
+
+Reviewed the functional photo editor, channel actions, content rows, URL filters, and auth
+Instagram controls against the current Web Interface Guidelines. Controls have native semantics,
+labels, focus states, disabled/pending states, and inline live errors. Caption length and image
+constraints are visible; dates use Intl and recorded timezone. Edits keep their original revision
+so background polling cannot silently overwrite another editor's changes. Dirty forms guard
+navigation; cancel/delete/disconnect/retry ask for confirmation. Token/secrets stay on the backend.
+
+Chromium fixture checks passed the browser photo upload → draft save and photo upload → schedule
+flows, URL filters, workspace logo destination, session redirects, long names, keyboard focus,
+and 320/390/768/820/1024/1280/1440/1920px overflow checks. Desktop/mobile/tablet editor screenshots
+were inspected. Meta was not contacted; physical Safari/iPad and live Instagram tests remain pending.

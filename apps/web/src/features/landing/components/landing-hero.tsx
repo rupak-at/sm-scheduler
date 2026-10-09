@@ -31,7 +31,7 @@ export function LandingHero() {
           </Link>
         </div>
         <p className="mt-5 text-xs leading-5 text-muted">
-          Accounts and planner available now. Publishing tools are in development.
+          Photo drafts and scheduling are ready. Connect your professional Instagram account.
         </p>
       </div>
       <div className="mt-14 overflow-hidden rounded-[24px] bg-ink sm:mt-16 sm:rounded-[32px]">

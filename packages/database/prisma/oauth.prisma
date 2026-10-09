@@ -1,0 +1,11 @@
+// One-use, browser-bound authorization attempts. No codes or provider tokens.
+model OAuthAttempt {
+  stateHash   String   @id
+  browserHash String
+  mode        String
+  userId      String?  @db.Uuid
+  sessionId   String?  @db.Uuid
+  expiresAt   DateTime @db.Timestamptz(3)
+
+  @@index([expiresAt])
+}

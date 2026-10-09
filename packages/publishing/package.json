@@ -18,6 +18,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@social-scheduler/shared": "*"
+    "@social-scheduler/shared": "*",
+    "zod": "^4.1.12",
+    "@social-scheduler/database": "*"
   }
 }

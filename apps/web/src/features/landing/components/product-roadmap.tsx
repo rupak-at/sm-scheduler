@@ -8,18 +8,18 @@ const stages = [
   },
   {
     title: 'Your first channel',
-    description: 'Connect an eligible Instagram account through official authorization.',
-    available: false,
+    description: 'Connect your Business or Creator account after Instagram app setup.',
+    available: true,
   },
   {
     title: 'Your content',
-    description: 'Bring media and captions together, with a place for drafts.',
-    available: false,
+    description: 'Upload a JPEG photo, write your caption, and save a draft.',
+    available: true,
   },
   {
     title: 'Your own rhythm',
     description: 'Schedule posts and follow their publishing progress.',
-    available: false,
+    available: true,
   },
 ];
 

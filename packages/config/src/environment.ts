@@ -1,3 +1,4 @@
+import { instagramEnvironmentSchema, instagramConfigured } from './instagram.js';
 import { z } from 'zod';
 
 const baseSchema = z.object({
@@ -8,6 +9,7 @@ const baseSchema = z.object({
 });
 
 const apiSchema = baseSchema
+  .extend(instagramEnvironmentSchema.shape)
   .extend({
     BETTER_AUTH_SECRET: z.string().min(32),
     API_PORT: z.coerce.number().int().min(1).max(65535).default(4000),
@@ -17,7 +19,13 @@ const apiSchema = baseSchema
     path: ['WEB_ORIGIN'],
     message: 'Production authentication requires HTTPS',
   });
-const workerSchema = baseSchema.extend({
+const validatedApiSchema = apiSchema.refine(
+  (input) =>
+    !instagramConfigured(input) ||
+    input.INSTAGRAM_REDIRECT_URI === `${input.WEB_ORIGIN}/api/auth/instagram/callback`,
+  { path: ['INSTAGRAM_REDIRECT_URI'], message: 'Callback must use the web origin' },
+);
+const workerSchema = baseSchema.extend(instagramEnvironmentSchema.shape).extend({
   WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(20).default(2),
 });
 
@@ -29,6 +37,7 @@ function parseEnvironment<T>(schema: z.ZodType<T>, input: NodeJS.ProcessEnv): T 
   throw new Error(`Invalid environment configuration: ${[...new Set(fields)].join(', ')}`);
 }
 
-export const parseApiEnvironment = (input: NodeJS.ProcessEnv) => parseEnvironment(apiSchema, input);
+export const parseApiEnvironment = (input: NodeJS.ProcessEnv) =>
+  parseEnvironment(validatedApiSchema, input);
 export const parseWorkerEnvironment = (input: NodeJS.ProcessEnv) =>
   parseEnvironment(workerSchema, input);

@@ -2,17 +2,16 @@
 
 ## Runtime boundaries
 
-Next.js renders the creator workspace. Express owns authenticated HTTP operations once
-implemented. BullMQ runs in a separate always-on Node process. Applications consume shared
+Next.js renders the creator workspace. Express owns authenticated account/media/post operations. BullMQ runs in a separate always-on Node process. Applications consume shared
 packages through public exports; database and runtime configuration are server-only.
 
 Next.js serves a static public landing page at `/` without requiring the API or database.
 The authenticated planner lives at `/planner`; content filters use `/planner?view=…`.
 Login/signup redirects and navigation consistently target this protected route.
 
-The initial worker processes `system-checks` to exercise Redis delivery and PostgreSQL
-connectivity. It does not register a publishing processor. The publisher contract deliberately
-has no fake provider implementation.
+The worker consumes infrastructure checks and ID-only `instagram-publishing` jobs. A ten-second
+PostgreSQL scan repairs missed delivery; an overlap-safe maintenance loop checks credentials.
+The Instagram adapter uses official endpoints; automated tests inject provider fixtures.
 
 ## Authentication boundary
 
@@ -34,19 +33,19 @@ PublishAttempt. Provider names are extensible while Phase 1 remains Instagram-on
 Post content and account-specific publication outcomes are separate.
 
 Timestamps use PostgreSQL `timestamptz`. Users and publications preserve a timezone.
-Account credentials have a ciphertext storage field; encryption and key management still
-need implementation. Attempts carry safe error codes, provider identifiers, and outcome history.
+Account credentials use account-bound AES-256-GCM with an independent key and stored key version. Attempts carry safe error codes, provider identifiers, and outcome history.
 
 Foreign keys preserve references, but they do not enforce matching ownership across a post,
-media asset, and social account. Future services must enforce ownership atomically.
+media asset, and social account. Post services enforce ownership transactionally; the worker rechecks it at execution.
 Restrictive deletions protect publication history until retention/deletion policy is designed.
 
-## Publishing behavior to implement
+## Publishing and recovery
 
-PostgreSQL is authoritative. Persist scheduling intent before job delivery, reconcile missed
-jobs, and claim publications atomically with state/lease guards. Fetch current state for every
-job. Duplicate deliveries, cancellation, rescheduling, rate limits, and expired credentials need
-explicit handling.
+PostgreSQL is authoritative. Saving a schedule does not require Redis. The scanner delivers due
+IDs, and processors lock/claim current rows with three-minute leases. Pending edits/cancellations
+and ownership are checked before publishing. Container IDs and send markers are saved durably.
+Stale claims resume container polling; once a send was marked, reconciliation never resends it.
+Unconfirmed outcomes remain UNCERTAIN with safe attempt codes; explicit safe failures can retry.
 
 Adapters return published, processing, failed, or uncertain outcomes. Provider timeouts after a
 remote side effect require reconciliation rather than blind retries. The contract will evolve

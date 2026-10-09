@@ -19,7 +19,9 @@ async function proxyAuth(request: NextRequest, context: { params: Promise<{ path
       ...(request.method === 'POST' ? { body: await request.text() } : {}),
       redirect: 'manual',
       cache: 'no-store',
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(
+        path[0] === 'instagram' && path[1] === 'callback' ? 90000 : 10000,
+      ),
     });
     const responseHeaders = new Headers({
       'Content-Type': upstream.headers.get('content-type') ?? 'application/json',

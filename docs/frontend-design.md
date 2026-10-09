@@ -50,12 +50,17 @@ Mobile prioritizes form fields and hides the companion panel. Controls have expl
 comfortable touch targets, autocomplete, visible focus, and readable error/pending states.
 
 `/planner` is authenticated. Desktop uses a 232px sidebar, compact workspace bar, and a
-content canvas with a setup guide alongside it. Tablets/mobile stack the guide beneath content.
+content canvas with a channel panel alongside it. Tablets/mobile stack channels beneath content.
 The account footer truncates long names; mobile exposes a labelled logout action.
-Filters remain URL links at `/planner?view=…`. Setup guidance uses native expandable details.
+Filters remain URL links at `/planner?view=…`; the editor is deep-linked through `compose`.
+The neutral channel panel shows actual account status and offers connect/reconnect, validation,
+and disconnect. The photo editor pairs a compact preview/upload column with labelled caption,
+account, and local scheduling fields; it becomes one column on phones. Content rows use the
+uploaded photo and real status/attempt information. Failed/uncertain items have an attention tab.
 
-Instagram connection, drafts, uploads, scheduling, and publishing remain upcoming.
-The UI explains these states instead of presenting working-looking controls for absent features.
+Instagram sign-in, JPEG drafts/uploads, scheduling, and worker outcomes are implemented;
+provider eligibility and a real publish still require the user's live account/app test.
+No sample creator posts are seeded into authenticated workspaces.
 
 ## References and review
 

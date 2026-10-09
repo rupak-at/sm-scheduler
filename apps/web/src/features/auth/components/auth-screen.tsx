@@ -1,9 +1,17 @@
+import { InstagramButton } from './instagram-button';
+import { ConnectionNotice } from '@/features/planner/components/connection-notice';
 import Link from 'next/link';
 import { Brand } from '@/components/brand';
 import { AuthForm } from './auth-form';
 import { AuthCompanion } from './auth-companion';
 
-export function AuthScreen({ mode }: { mode: 'login' | 'signup' }) {
+export function AuthScreen({
+  mode,
+  connection,
+}: {
+  connection?: string;
+  mode: 'login' | 'signup';
+}) {
   const signup = mode === 'signup';
   return (
     <div className="flex min-h-svh flex-col bg-paper">
@@ -30,6 +38,14 @@ export function AuthScreen({ mode }: { mode: 'login' | 'signup' }) {
                 ? 'A little more clarity for your content plans.'
                 : 'Log in to pick up where you left off.'}
             </p>
+            <div className="mt-7">
+              <ConnectionNotice code={connection} />
+              <InstagramButton mode="login" />
+              <p className="mt-3 text-center text-xs text-muted">
+                For Instagram Business and Creator accounts.
+              </p>
+            </div>
+            <p className="mt-6 text-center text-xs text-muted">Or continue with email</p>
             <AuthForm mode={mode} />
           </div>
           <p className="mt-12 text-xs text-muted">Your content. Your pace.</p>

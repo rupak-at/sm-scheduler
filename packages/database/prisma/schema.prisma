@@ -68,38 +68,42 @@ model User {
 }
 
 model SocialAccount {
-  id                  String           @id @default(uuid()) @db.Uuid
-  userId              String           @db.Uuid
-  provider            Platform
-  providerAccountId   String
-  displayName         String?
-  status              ConnectionStatus @default(DISCONNECTED)
-  tokenCiphertext     Bytes?
-  tokenExpiresAt      DateTime?        @db.Timestamptz(3)
-  scopes              String[]         @default([])
-  providerMetadata    Json?
-  createdAt           DateTime         @default(now()) @db.Timestamptz(3)
-  updatedAt           DateTime         @updatedAt @db.Timestamptz(3)
-  user                User             @relation(fields: [userId], references: [id], onDelete: Restrict)
-  publications        Publication[]
+  id                String           @id @default(uuid()) @db.Uuid
+  userId            String           @db.Uuid
+  provider          Platform
+  providerAccountId String
+  displayName       String?
+  status            ConnectionStatus @default(DISCONNECTED)
+  tokenCiphertext   Bytes?
+  tokenExpiresAt    DateTime?        @db.Timestamptz(3)
+  tokenKeyVersion   Int              @default(1)
+  tokenRefreshedAt  DateTime?        @db.Timestamptz(3)
+  tokenCheckedAt    DateTime?        @db.Timestamptz(3)
+  scopes            String[]         @default([])
+  providerMetadata  Json?
+  createdAt         DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime         @updatedAt @db.Timestamptz(3)
+  user              User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  publications      Publication[]
 
   @@unique([userId, provider, providerAccountId])
+  @@unique([provider, providerAccountId])
 }
 
 model MediaAsset {
-  id           String      @id @default(uuid()) @db.Uuid
-  userId       String      @db.Uuid
-  storageKey   String      @unique
-  mimeType     String
-  type         MediaType
-  status       MediaStatus @default(UPLOADED)
-  sizeBytes    BigInt
-  width        Int?
-  height       Int?
-  createdAt    DateTime    @default(now()) @db.Timestamptz(3)
-  updatedAt    DateTime    @updatedAt @db.Timestamptz(3)
-  user         User        @relation(fields: [userId], references: [id], onDelete: Restrict)
-  posts        PostMedia[]
+  id         String      @id @default(uuid()) @db.Uuid
+  userId     String      @db.Uuid
+  storageKey String      @unique
+  mimeType   String
+  type       MediaType
+  status     MediaStatus @default(UPLOADED)
+  sizeBytes  BigInt
+  width      Int?
+  height     Int?
+  createdAt  DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime    @updatedAt @db.Timestamptz(3)
+  user       User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  posts      PostMedia[]
 
   @@index([userId, createdAt])
 }
@@ -129,23 +133,25 @@ model PostMedia {
 }
 
 model Publication {
-  id               String            @id @default(uuid()) @db.Uuid
-  postId           String            @db.Uuid
-  socialAccountId  String            @db.Uuid
-  captionOverride  String?
-  status           PublicationStatus @default(DRAFT)
-  scheduledAt      DateTime?         @db.Timestamptz(3)
-  timezone         String            @default("UTC")
-  publishedAt      DateTime?         @db.Timestamptz(3)
-  externalPostId   String?
-  providerMetadata Json?
-  leaseToken       String?           @db.Uuid
-  leaseExpiresAt   DateTime?         @db.Timestamptz(3)
-  createdAt        DateTime          @default(now()) @db.Timestamptz(3)
-  updatedAt        DateTime          @updatedAt @db.Timestamptz(3)
-  post             Post              @relation(fields: [postId], references: [id], onDelete: Restrict)
-  socialAccount    SocialAccount     @relation(fields: [socialAccountId], references: [id], onDelete: Restrict)
-  attempts         PublishAttempt[]
+  id                  String            @id @default(uuid()) @db.Uuid
+  postId              String            @db.Uuid
+  socialAccountId     String            @db.Uuid
+  captionOverride     String?
+  status              PublicationStatus @default(DRAFT)
+  scheduledAt         DateTime?         @db.Timestamptz(3)
+  timezone            String            @default("UTC")
+  publishedAt         DateTime?         @db.Timestamptz(3)
+  externalPostId      String?
+  externalContainerId String?
+  publishRequestedAt  DateTime?         @db.Timestamptz(3)
+  providerMetadata    Json?
+  leaseToken          String?           @db.Uuid
+  leaseExpiresAt      DateTime?         @db.Timestamptz(3)
+  createdAt           DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime          @updatedAt @db.Timestamptz(3)
+  post                Post              @relation(fields: [postId], references: [id], onDelete: Restrict)
+  socialAccount       SocialAccount     @relation(fields: [socialAccountId], references: [id], onDelete: Restrict)
+  attempts            PublishAttempt[]
 
   @@index([status, scheduledAt])
   @@index([status, leaseExpiresAt])

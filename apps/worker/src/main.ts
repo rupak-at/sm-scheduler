@@ -1,3 +1,4 @@
+import { createPublishingRuntime } from './publishing/runtime.js';
 import { createLogger, redisConnectionOptions } from '@social-scheduler/config';
 import { createDatabase } from '@social-scheduler/database';
 import { SYSTEM_CHECK_QUEUE } from '@social-scheduler/shared';
@@ -9,7 +10,7 @@ const environment = getEnvironment();
 const logger = createLogger('worker', environment.LOG_LEVEL);
 const database = createDatabase(environment.DATABASE_URL);
 
-// Only infrastructure-check jobs are consumed until durable publishing is implemented.
+const publishing = createPublishingRuntime(environment, database, logger);
 const worker = new Worker(
   SYSTEM_CHECK_QUEUE,
   createSystemCheckProcessor(() => database.$queryRaw`SELECT 1`),
@@ -32,6 +33,7 @@ async function shutdown() {
   const deadline = setTimeout(() => process.exit(1), 10000).unref();
   logger.info('Stopping worker');
   try {
+    await publishing?.close();
     await worker.close();
     await database.$disconnect();
     clearTimeout(deadline);
@@ -44,6 +46,7 @@ process.once('SIGTERM', () => void shutdown());
 
 try {
   await worker.waitUntilReady();
+  await publishing?.ready();
   await database.$queryRaw`SELECT 1`;
   logger.info({ queue: SYSTEM_CHECK_QUEUE }, 'Worker ready');
 } catch {

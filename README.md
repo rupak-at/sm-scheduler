@@ -6,8 +6,9 @@ Follow [the development guide](docs/development.md) for setup, feature work, mig
 and commits. The guide and implementation status must be updated with every completed change.
 The original `idea.md` is a local planning document excluded by the workspace's gitignore.
 
-The project includes a public landing page, email/password signup, login, logout, and a protected planner.
-Instagram connection, uploads, drafts, scheduling, and actual publishing remain future work.
+The project includes email/password and Instagram sign-in, Instagram connection, JPEG uploads,
+drafts, scheduling, and a separate publishing worker. The real Meta authorization/publish test
+is pending. Follow [Instagram setup](docs/instagram-setup.md) to test with your own account.
 
 ## Quick start
 
@@ -29,7 +30,7 @@ The API runs at [localhost:4000](http://localhost:4000); the worker is a separat
 On Linux, Docker requires Docker-group or administrator access. If needed, use
 `sudo docker compose -f infra/docker-compose.yml up -d --wait`.
 
-Setup preserves existing environment values and generates an untracked random auth secret.
+Setup preserves existing environment values and generates independent untracked auth and token encryption secrets.
 The root `.env` configures API, worker, and Prisma. The web workspace's `.env.local` contains
 the server-only `API_BASE_URL`. Browser auth requests go through a same-origin Next.js proxy.
 Production uses hosting-injected secrets and an HTTPS `WEB_ORIGIN`.
@@ -40,11 +41,11 @@ Production uses hosting-injected secrets and an HTTPS `WEB_ORIGIN`.
 | --------------------- | --------------------------------------------------------- |
 | `apps/web`            | Next.js App Router, Tailwind CSS, shadcn/ui, local Roboto |
 | `apps/api`            | Express health/auth endpoints and feature modules         |
-| `apps/worker`         | BullMQ infrastructure-check worker                        |
+| `apps/worker`         | BullMQ publishing and recovery worker                     |
 | `packages/shared`     | Browser-safe validation and domain/job contracts          |
 | `packages/config`     | Server-only configuration and logging                     |
 | `packages/database`   | Prisma models, migrations, PostgreSQL client              |
-| `packages/publishing` | Platform-neutral publishing contracts                     |
+| `packages/publishing` | Instagram adapter, token encryption and media links       |
 | `infra`               | Persistent local PostgreSQL and Redis                     |
 | `docs`                | Architecture, design, and implementation status           |
 
@@ -89,9 +90,10 @@ npm run queue:check
 Readiness returns 503 if PostgreSQL or Redis is unavailable. The queued check verifies database
 access from the worker; it does not publish social posts.
 
-Authentication integration tests require **isolated test services**, not a creator's database.
+Authentication, workspace, and publishing integration tests require **isolated test services**, not a creator's database.
 Set `TEST_DATABASE_URL` and `TEST_REDIS_URL`, apply migrations to that test database
 by setting `DATABASE_URL` to it, then run `npm run test:integration`.
+Tests reset rate limits and clean up fixtures; never point them at a creator database.
 CI provisions isolated PostgreSQL/Redis and runs these checks automatically.
 
 ## Authentication and remaining work
@@ -102,11 +104,12 @@ The planner checks sessions on the server, and `GET /api/me` rejects unauthentic
 Authentication writes enforce the configured origin. Database-backed throttling protects
 signup/login; production proxy configuration must establish trustworthy per-client IP information.
 
-Email verification, password-reset delivery, and social sign-in require further integration.
-Application login is separate from connecting an Instagram account.
+Instagram Login connects professional accounts and can authenticate the workspace. Tokens remain
+encrypted on the backend; the browser receives ordinary application session cookies.
+Email verification and password-reset delivery still require a mail provider.
 
-Prove an authorized Instagram publish before choosing supported media formats and building the
-connection/upload/scheduling flows. Hosting, object storage, token encryption, and recovery
-decisions remain open. Web can run on Vercel; API and worker need separate backend hosting.
+Real Meta testing, production deployment/storage, additional media formats, and account/provider
+lifecycle callbacks remain. Current media storage requires a persistent API filesystem.
+Next.js can run on Vercel; API and worker need separate always-on backend hosting.
 
 See [implementation status](docs/project-status.md) and [architecture](docs/architecture.md).

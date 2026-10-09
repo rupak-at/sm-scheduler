@@ -24,6 +24,28 @@ describe('runtime configuration', () => {
     );
   });
 
+  it('requires exact callback origin and a valid independent token key', () => {
+    const configured = {
+      ...valid,
+      WEB_ORIGIN: 'https://scheduler.example',
+      INSTAGRAM_APP_ID: '123',
+      INSTAGRAM_APP_SECRET: 'not-a-real-app-secret',
+      INSTAGRAM_GRAPH_VERSION: 'v25.0',
+      INSTAGRAM_REDIRECT_URI: 'https://scheduler.example/api/auth/instagram/callback',
+      TOKEN_ENCRYPTION_KEY: Buffer.alloc(32, 8).toString('base64'),
+    };
+    expect(parseApiEnvironment(configured).INSTAGRAM_APP_ID).toBe('123');
+    expect(() =>
+      parseApiEnvironment({
+        ...configured,
+        INSTAGRAM_REDIRECT_URI: 'https://other.example/api/auth/instagram/callback',
+      }),
+    ).toThrow('INSTAGRAM_REDIRECT_URI');
+    expect(() =>
+      parseApiEnvironment({ ...configured, TOKEN_ENCRYPTION_KEY: 'private-invalid-secret' }),
+    ).toThrow('TOKEN_ENCRYPTION_KEY');
+  });
+
   it('preserves Redis TLS, credentials, and database selection', () => {
     expect(redisConnectionOptions('rediss://user:p%40ss@cache.example:6380/2')).toEqual({
       host: 'cache.example',

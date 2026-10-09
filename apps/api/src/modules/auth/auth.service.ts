@@ -1,3 +1,7 @@
+import { APIError } from 'better-auth/api';
+import { instagramPlugin } from '../instagram/instagram.plugin.js';
+import type { InstagramPluginOptions } from '../instagram/instagram.plugin.js';
+import { INSTAGRAM_EMAIL_DOMAIN } from '../instagram/identity.js';
 import type { PrismaClient } from '@social-scheduler/database';
 import { betterAuth } from 'better-auth/minimal';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
@@ -9,6 +13,7 @@ interface AuthOptions {
   secret: string;
   webOrigin: string;
   production: boolean;
+  instagram?: InstagramPluginOptions;
 }
 
 export function createAuthentication(options: AuthOptions): AuthGateway {
@@ -18,6 +23,19 @@ export function createAuthentication(options: AuthOptions): AuthGateway {
     secret: options.secret,
     database: prismaAdapter(options.database, { provider: 'postgresql' }),
     trustedOrigins: [options.webOrigin],
+    plugins: options.instagram ? [instagramPlugin(options.instagram)] : [],
+    account: { accountLinking: { enabled: false } },
+    databaseHooks: {
+      user: {
+        create: {
+          before: async (user) => {
+            if (user.email.toLowerCase().endsWith(`@${INSTAGRAM_EMAIL_DOMAIN}`))
+              throw new APIError('BAD_REQUEST', { message: 'This email domain is reserved.' });
+            return { data: user };
+          },
+        },
+      },
+    },
     emailAndPassword: { enabled: true, minPasswordLength: 12, maxPasswordLength: 128 },
     session: { expiresIn: 60 * 60 * 24 * 7, updateAge: 60 * 60 * 24 },
     advanced: {

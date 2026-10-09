@@ -1,0 +1,84 @@
+import { describe, expect, it, vi } from 'vitest';
+import { InstagramClient, INSTAGRAM_SCOPES } from './client.js';
+import { instagramRequest } from './http.js';
+import { z } from 'zod';
+const options = {
+  appId: '123',
+  appSecret: 'not-a-real-app-secret',
+  redirectUri: 'https://test.example/api/auth/instagram/callback',
+  version: 'v25.0',
+};
+describe('Instagram protocol boundaries', () => {
+  it('requests only profile and publishing scopes with the caller state', () => {
+    const url = new URL(new InstagramClient(options).authorizationUrl('one-use-state'));
+    expect(url.origin).toBe('https://www.instagram.com');
+    expect(url.searchParams.get('state')).toBe('one-use-state');
+    expect(url.searchParams.get('scope')).toBe(INSTAGRAM_SCOPES.join(','));
+    expect(url.searchParams.has('client_secret')).toBe(false);
+  });
+  it('uses validated string identity even when numeric OAuth identifiers exceed safe integers', async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        Response.json({ data: [{ access_token: 'short-token', user_id: 17841405793187218 }] }),
+      )
+      .mockResolvedValueOnce(Response.json({ access_token: 'long-token', expires_in: 5184000 }))
+      .mockResolvedValueOnce(
+        Response.json({
+          id: '17841405793187218',
+          user_id: '17841405793187218',
+          username: 'creator',
+          account_type: 'BUSINESS',
+        }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({
+          data: INSTAGRAM_SCOPES.map((permission) => ({ permission, status: 'granted' })),
+        }),
+      );
+    const result = await new InstagramClient(options, fetcher).exchange('one-use-code');
+    expect(result.profile.id).toBe('17841405793187218');
+    expect(result.token).toBe('long-token');
+  });
+
+  it('rejects personal accounts, missing scopes, and identity changes', async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        Response.json({ id: '1', username: 'creator', account_type: 'PERSONAL' }),
+      );
+    const client = new InstagramClient(options, fetcher);
+    await expect(client.validate('private-token')).rejects.toThrow('INVALID_PROVIDER_RESPONSE');
+    fetcher
+      .mockResolvedValueOnce(
+        Response.json({ id: '1', username: 'creator', account_type: 'BUSINESS' }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({ data: [{ permission: INSTAGRAM_SCOPES[0], status: 'granted' }] }),
+      );
+    await expect(client.validate('private-token')).rejects.toThrow('PERMISSION_REQUIRED');
+    fetcher.mockResolvedValueOnce(
+      Response.json({ id: '2', username: 'creator', account_type: 'BUSINESS' }),
+    );
+    await expect(client.validate('private-token', '1')).rejects.toThrow('ACCOUNT_MISMATCH');
+  });
+  it('never includes provider bodies or tokens in errors and treats lost writes as uncertain', async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        Response.json({ error: { code: 190, message: 'private-token' } }, { status: 400 }),
+      );
+    await expect(
+      instagramRequest(fetcher, 'https://graph.instagram.com/me', {}, z.object({ id: z.string() })),
+    ).rejects.toMatchObject({ message: 'TOKEN_REVOKED', uncertain: false });
+    fetcher.mockRejectedValueOnce(new Error('private-network-details'));
+    await expect(
+      instagramRequest(
+        fetcher,
+        'https://graph.instagram.com/media_publish',
+        { method: 'POST' },
+        z.object({ id: z.string() }),
+      ),
+    ).rejects.toMatchObject({ message: 'PROVIDER_UNAVAILABLE', uncertain: true });
+  });
+});
