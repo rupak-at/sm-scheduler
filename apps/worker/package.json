@@ -1,0 +1,20 @@
+{
+  "name": "@social-scheduler/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "queue:check": "tsx src/scripts/enqueue-check.ts"
+  },
+  "dependencies": {
+    "@social-scheduler/config": "*",
+    "@social-scheduler/database": "*",
+    "@social-scheduler/shared": "*",
+    "@social-scheduler/publishing": "*",
+    "bullmq": "^5.61.2"
+  }
+}

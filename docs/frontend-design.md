@@ -39,5 +39,13 @@ Use native navigation, visible keyboard focus, a skip link, accessible names, se
 responsive grids, and descriptive empty states. Query parameters preserve filter state.
 Next.js optimizes the vendored Roboto font with `next/font/local`; builds do not fetch fonts.
 
-The starter does not load protected data. Authentication, account connection, media upload, and
-scheduling must be implemented before this becomes a creator's actual dashboard.
+Account connection, media upload, and scheduling remain planned work before creators can
+manage real publications from this planner.
+
+## Authentication addition
+
+Login and signup use the same Roboto family, blue tokens, and shared shadcn/ui form primitives.
+On desktop, a single ink-blue brand panel balances the form; mobile collapses it to a compact
+brand header so fields remain immediately accessible. Submission state and errors are explicit.
+The planner now loads the authenticated profile through server-side session verification.
+Instagram connection and content creation remain future work.

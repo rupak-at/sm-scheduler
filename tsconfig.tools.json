@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.node.json",
+  "compilerOptions": { "noEmit": true },
+  "include": ["vitest*.ts", "tests/**/*.ts", "packages/database/prisma.config.ts"]
+}

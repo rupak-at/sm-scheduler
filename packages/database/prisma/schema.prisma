@@ -1,0 +1,170 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Platform {
+  INSTAGRAM
+  FACEBOOK
+  TIKTOK
+}
+
+enum ConnectionStatus {
+  CONNECTED
+  EXPIRED
+  REVOKED
+  DISCONNECTED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum MediaStatus {
+  UPLOADED
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum PublicationStatus {
+  DRAFT
+  SCHEDULED
+  PROCESSING
+  PUBLISHED
+  FAILED
+  CANCELLED
+  UNCERTAIN
+}
+
+enum AttemptStatus {
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  UNCERTAIN
+}
+
+model User {
+  id             String          @id @default(uuid()) @db.Uuid
+  email          String          @unique
+  name           String
+  emailVerified  Boolean         @default(false)
+  image          String?
+  timezone       String          @default("UTC")
+  createdAt      DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime        @updatedAt @db.Timestamptz(3)
+  socialAccounts SocialAccount[]
+  mediaAssets    MediaAsset[]
+  posts          Post[]
+  sessions       Session[]
+  accounts       Account[]
+}
+
+model SocialAccount {
+  id                  String           @id @default(uuid()) @db.Uuid
+  userId              String           @db.Uuid
+  provider            Platform
+  providerAccountId   String
+  displayName         String?
+  status              ConnectionStatus @default(DISCONNECTED)
+  tokenCiphertext     Bytes?
+  tokenExpiresAt      DateTime?        @db.Timestamptz(3)
+  scopes              String[]         @default([])
+  providerMetadata    Json?
+  createdAt           DateTime         @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime         @updatedAt @db.Timestamptz(3)
+  user                User             @relation(fields: [userId], references: [id], onDelete: Restrict)
+  publications        Publication[]
+
+  @@unique([userId, provider, providerAccountId])
+}
+
+model MediaAsset {
+  id           String      @id @default(uuid()) @db.Uuid
+  userId       String      @db.Uuid
+  storageKey   String      @unique
+  mimeType     String
+  type         MediaType
+  status       MediaStatus @default(UPLOADED)
+  sizeBytes    BigInt
+  width        Int?
+  height       Int?
+  createdAt    DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime    @updatedAt @db.Timestamptz(3)
+  user         User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  posts        PostMedia[]
+
+  @@index([userId, createdAt])
+}
+
+model Post {
+  id           String        @id @default(uuid()) @db.Uuid
+  userId       String        @db.Uuid
+  caption      String        @default("")
+  createdAt    DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime      @updatedAt @db.Timestamptz(3)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  media        PostMedia[]
+  publications Publication[]
+
+  @@index([userId, createdAt])
+}
+
+model PostMedia {
+  postId       String     @db.Uuid
+  mediaAssetId String     @db.Uuid
+  position     Int
+  post         Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  mediaAsset   MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Restrict)
+
+  @@id([postId, mediaAssetId])
+  @@unique([postId, position])
+}
+
+model Publication {
+  id               String            @id @default(uuid()) @db.Uuid
+  postId           String            @db.Uuid
+  socialAccountId  String            @db.Uuid
+  captionOverride  String?
+  status           PublicationStatus @default(DRAFT)
+  scheduledAt      DateTime?         @db.Timestamptz(3)
+  timezone         String            @default("UTC")
+  publishedAt      DateTime?         @db.Timestamptz(3)
+  externalPostId   String?
+  providerMetadata Json?
+  leaseToken       String?           @db.Uuid
+  leaseExpiresAt   DateTime?         @db.Timestamptz(3)
+  createdAt        DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime          @updatedAt @db.Timestamptz(3)
+  post             Post              @relation(fields: [postId], references: [id], onDelete: Restrict)
+  socialAccount    SocialAccount     @relation(fields: [socialAccountId], references: [id], onDelete: Restrict)
+  attempts         PublishAttempt[]
+
+  @@index([status, scheduledAt])
+  @@index([status, leaseExpiresAt])
+  @@index([postId])
+  @@index([socialAccountId])
+}
+
+model PublishAttempt {
+  id               String        @id @default(uuid()) @db.Uuid
+  publicationId    String        @db.Uuid
+  attemptNumber    Int
+  status           AttemptStatus @default(PROCESSING)
+  externalPostId   String?
+  providerMetadata Json?
+  errorCode        String?
+  errorMessage     String?
+  startedAt        DateTime      @default(now()) @db.Timestamptz(3)
+  finishedAt       DateTime?     @db.Timestamptz(3)
+  publication      Publication   @relation(fields: [publicationId], references: [id], onDelete: Restrict)
+
+  @@unique([publicationId, attemptNumber])
+}

@@ -1,0 +1,67 @@
+{
+  "name": "social-scheduler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.12.0",
+    "npm": ">=10"
+  },
+  "packageManager": "npm@11.19.1",
+  "scripts": {
+    "prepare": "husky",
+    "setup:env": "node scripts/setup-env.mjs",
+    "dev": "npm run build:packages && concurrently --kill-others -n packages,web,api,worker \"npm run dev:packages\" \"npm run dev:web\" \"npm run dev:api\" \"npm run dev:worker\"",
+    "dev:packages": "concurrently --kill-others \"npm run dev -w @social-scheduler/shared\" \"npm run dev -w @social-scheduler/config\" \"npm run dev -w @social-scheduler/database\" \"npm run dev -w @social-scheduler/publishing\"",
+    "dev:web": "npm run dev -w @social-scheduler/web",
+    "dev:api": "npm run dev -w @social-scheduler/api",
+    "dev:worker": "npm run dev -w @social-scheduler/worker",
+    "build:packages": "npm run db:generate && npm run build -w @social-scheduler/shared -w @social-scheduler/config -w @social-scheduler/database -w @social-scheduler/publishing",
+    "build": "npm run build:packages && npm run build -w @social-scheduler/api -w @social-scheduler/worker -w @social-scheduler/web",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "npm run lint -- --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "npm run build:packages && npm run typecheck --workspaces --if-present && tsc -p tsconfig.tools.json",
+    "test": "npm run build:packages && vitest run",
+    "test:watch": "vitest",
+    "test:integration": "npm run build:packages && vitest run --config vitest.integration.config.ts",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run test",
+    "db:generate": "npm run generate -w @social-scheduler/database",
+    "db:validate": "npm run validate -w @social-scheduler/database",
+    "db:migrate": "npm exec -w @social-scheduler/database -- prisma migrate dev",
+    "db:deploy": "npm run deploy -w @social-scheduler/database",
+    "db:studio": "npm run studio -w @social-scheduler/database",
+    "infra:up": "docker compose -f infra/docker-compose.yml up -d --wait",
+    "infra:down": "docker compose -f infra/docker-compose.yml down",
+    "infra:logs": "docker compose -f infra/docker-compose.yml logs -f",
+    "queue:check": "npm run queue:check -w @social-scheduler/worker"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@next/eslint-plugin-next": "16.4.0",
+    "@types/node": "^24.0.0",
+    "@types/supertest": "^6.0.3",
+    "concurrently": "^9.2.1",
+    "eslint": "^10.12.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "supertest": "^7.1.4",
+    "tsx": "^4.20.6",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.1",
+    "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.2",
+    "mysql2": "^3.24.5"
+  }
+}

@@ -10,7 +10,20 @@ The initial worker processes `system-checks` to exercise Redis delivery and Post
 connectivity. It does not register a publishing processor. The publisher contract deliberately
 has no fake provider implementation.
 
-## Data foundation
+## Authentication boundary
+
+Express hosts Better Auth before JSON body parsing and stores accounts, hashed passwords,
+and sessions in PostgreSQL. Next.js forwards same-origin auth requests and Set-Cookie headers
+to the browser. Server-rendered pages verify sessions against the API and redirect guests
+to login. `/api/me` independently enforces authentication.
+
+State-changing authentication requests require the configured web origin. Sessions expire
+after seven days, refresh daily, and are revoked on logout. Production requires HTTPS and secure
+cookies. Rate-limit counters live in PostgreSQL; deployment-specific trusted client IP handling
+still needs configuration when hosting is chosen. Verification and recovery email are not enabled.
+See [Better Auth Express integration](https://better-auth.com/docs/integrations/express).
+
+## Domain data
 
 Prisma models User, SocialAccount, MediaAsset, Post, ordered PostMedia, Publication, and
 PublishAttempt. Provider names are extensible while Phase 1 remains Instagram-only.

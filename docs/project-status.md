@@ -1,28 +1,54 @@
 # Implementation status
 
-## Completed foundation
+## Completed
 
-- npm workspaces for web, API, worker, configuration, database, shared contracts, and publishing.
-- Strict TypeScript with deliberate package exports and build order.
-- ESLint, Prettier, EditorConfig, source-size limits, and GitHub Actions quality checks.
-- Validated server environment configuration and safe logging.
-- Next.js planner starter with URL-based status filters, honest empty states, Tailwind CSS,
-  and local Roboto font.
-- Express liveness/readiness routes with database and Redis checks.
-- Separate BullMQ infrastructure-check worker and a command to enqueue checks.
-- Prisma domain schema, generated-client factory, and initial SQL migration.
-- Docker Compose for persistent local PostgreSQL and Redis.
-- Development context, architecture, and instructions to commit each completed feature.
+- npm workspaces for web, API, worker, shared contracts, configuration, database, and publishing.
+- Strict TypeScript, package exports, and dependency-ordered builds.
+- ESLint, Prettier with Tailwind class sorting, EditorConfig, and source-size limits.
+- Husky/lint-staged pre-commit formatting and linting.
+- CI with migrations, formatting, linting, types, unit/integration tests, and production builds.
+- Environment validation, random local secret setup, and safe event logging.
+- Next.js App Router frontend using Tailwind CSS, shadcn/ui, and local Roboto.
+- Better Auth email/password signup, login, logout, and PostgreSQL-backed sessions.
+- Protected planner, URL-based status filters, and honest empty states.
+- Same-origin auth proxy with cookie forwarding and server-side session checks.
+- Protected account endpoint, strict auth write origins, and database-backed auth throttling.
+- Express liveness/readiness routes and separate BullMQ infrastructure-check worker.
+- Prisma domain/authentication models and two reviewed SQL migrations.
+- Docker Compose with persistent local PostgreSQL and Redis.
+- Requested frontend-design and web-design-guidelines skills installed and applied.
 
 ## Not implemented
 
-Instagram API feasibility, authentication, OAuth, token encryption, media storage/upload,
-draft APIs, scheduling APIs, real publishing, reconciliation, retries, and production deployments.
+Instagram feasibility/OAuth, encrypted provider credentials, media uploads/storage, draft CRUD,
+scheduling, real publishing, reconciliation, publishing retries, and production deployments.
+Email verification and password-reset delivery need a mail provider; social sign-in is not enabled.
 
-Future enum values do not enable Facebook or TikTok. Provider-supported formats remain
-unverified until the authorized feasibility spike succeeds.
+Future provider enums do not enable Facebook or TikTok. Supported Instagram formats are unverified.
+Production proxy trust and per-client IP handling depend on the chosen hosting topology.
+Authentication currently applies conservative shared buckets when no trusted client IP is available.
 
 ## Verification
 
-Verification results and any dependency/runtime limitations are recorded after the initial
-quality checks complete. Docker startup on this machine requires administrator access.
+- Full formatting, linting, strict type checks, and 12 unit tests pass.
+- Prisma schema validation and full package/API/worker/Next.js production builds pass.
+- Both migrations applied successfully to an isolated PostgreSQL database.
+- Three real authentication integration tests pass: hostile origin rejection, password hashing,
+  session persistence/revocation, invalid credentials, and session expiration.
+- Browser-proxy runtime checks pass: signup, login, forwarded cookies, protected planner,
+  status filters, logout, and throttling.
+- Redis-delivered infrastructure checks complete in the separate worker.
+- Desktop (1440px) and mobile (390px) login screenshots reviewed.
+
+Docker Compose configuration validates. Starting Docker on this machine requires a sudo password;
+temporary user-owned PostgreSQL/Redis instances are used for isolated runtime checks.
+
+## Dependency maintenance
+
+Production dependency auditing reports zero vulnerabilities.
+The full audit reports four high-severity entries in the Next.js ESLint plugin's
+fast-glob/micromatch/braces development dependency chain. The registry currently offers no
+compatible patched braces release; do not force-downgrade the Next.js lint plugin.
+
+Overrides pin patched MySQL tooling and deepmerge-ts releases. Prisma generation, schema validation,
+migration deployment, and application builds must continue to pass when updating these overrides.

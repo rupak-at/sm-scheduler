@@ -17,12 +17,13 @@ promising support. A successful authorized test publish is still a prerequisite.
 
 ## Current scope
 
-This repository starts with a development foundation: npm workspaces, a starter Next.js
-planner, an Express health API, an infrastructure-check worker, shared contracts,
-Prisma models and migration, and local PostgreSQL/Redis configuration.
+This repository includes npm workspaces, a protected Next.js planner, email/password
+authentication through Better Auth, an Express health API, an infrastructure-check worker,
+shared contracts, Prisma models/migrations, and local PostgreSQL/Redis configuration.
 
-Authentication, OAuth, uploads, draft CRUD, scheduling, actual publishing, and recovery
-are future work. Do not present empty scaffolding as a completed product feature.
+Instagram OAuth, uploads, draft CRUD, scheduling, actual publishing, and recovery are future work.
+Email verification and password-reset delivery require a mail provider and remain unimplemented.
+Do not present empty scaffolding as a completed product feature.
 
 ## Architecture and module ownership
 
@@ -91,6 +92,7 @@ guidelines when reviewing. See `docs/frontend-design.md` for this project's desi
 Use **Tailwind CSS** for frontend styling and **Roboto**, locally hosted through
 `next/font/local`. Keep its font license. Define shared design tokens in the root stylesheet
 and use utility classes in feature components. Prettier sorts Tailwind classes.
+Use shadcn/ui primitives from `apps/web/src/components/ui`; add only needed components.
 Use semantic elements, labels, visible focus, keyboard navigation, accessible empty and
 error states, mobile layouts, and reduced-motion support when introducing motion.
 Keep filter/navigation state in URLs. Do not render fake posts, connected accounts,
@@ -113,6 +115,8 @@ unsupported provider formats, or inert actions that look available.
    such as `feat(posts): add draft validation` or `fix(worker): guard duplicate jobs`.
    Stage explicit paths, include related tests/docs and lockfile changes, and preserve
    unrelated user changes. Never commit secrets, .env files, build output, or generated clients.
+   Husky runs lint-staged before commits: format supported staged files and lint staged JS/TS.
+   Do not bypass hooks. Format all relevant files and run lint before staging as well.
 8. Report what changed, which checks passed, any actual limitation, and the commit hash.
 
 Do not push, deploy, or contact third parties without user authorization.
@@ -123,7 +127,7 @@ Never skip a required check silently or claim unrun checks passed.
 Use Node 24 LTS (`.nvmrc`) and npm. From the repository root:
 
 - `npm ci`: install the lockfile.
-- `cp .env.example .env`: first-time local server configuration.
+- `npm run setup:env`: create local environment files and a random untracked auth secret.
 - `npm run infra:up`: start local PostgreSQL and Redis.
 - `npm run db:generate`: generate the client without a running database.
 - `npm run db:migrate -- --name feature_name`: create/apply a development migration.
@@ -131,6 +135,8 @@ Use Node 24 LTS (`.nvmrc`) and npm. From the repository root:
 - `npm run dev`: build shared packages, then watch packages and all three applications.
 - `npm run queue:check`: enqueue an infrastructure check; inspect worker completion logs.
 - `npm run check`: formatting, linting, type checking, and tests.
+- `npm run test:integration`: authentication integration checks against isolated services.
+  Set `TEST_DATABASE_URL` and `TEST_REDIS_URL`; migrate that test database first.
 - `npm run build`: compile packages, API, worker, and Next.js.
 - `npm run infra:down`: stop services while retaining local volumes.
 

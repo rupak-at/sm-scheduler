@@ -1,0 +1,57 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --color-canvas: #eef3fa;
+  --color-ink: #19304a;
+  --color-muted: #53677f;
+  --color-denim: #235cd6;
+  --color-paper: #ffffff;
+  --color-line: #d4dfea;
+  --color-honey: #ebba59;
+  --font-sans: var(--font-roboto), sans-serif;
+  --color-background: #eef3fa;
+  --color-foreground: #19304a;
+  --color-primary: #235cd6;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #dde8fb;
+  --color-secondary-foreground: #19304a;
+  --color-muted-foreground: #53677f;
+  --color-accent: #dde8fb;
+  --color-accent-foreground: #19304a;
+  --color-destructive: #b91c1c;
+  --color-border: #d4dfea;
+  --color-input: #a4b6cf;
+  --color-ring: #235cd6;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-tap-highlight-color: #235cd630;
+  }
+  body {
+    @apply m-0 bg-canvas font-sans text-base leading-relaxed text-ink;
+  }
+  a,
+  button,
+  summary {
+    touch-action: manipulation;
+  }
+  :focus-visible {
+    @apply outline-3 outline-offset-4 outline-denim;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+}
+
+@media (pointer: fine) {
+  html {
+    overscroll-behavior: none;
+  }
+}
