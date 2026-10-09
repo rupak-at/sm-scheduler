@@ -49,10 +49,15 @@ export function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
           </p>
         )}
       </div>
-      <p id="auth-error" className="text-sm text-destructive" role="alert" aria-live="polite">
+      <p
+        id="auth-error"
+        className="text-sm text-destructive empty:hidden"
+        role="alert"
+        aria-live="polite"
+      >
         {error}
       </p>
-      <Button type="submit" disabled={pending} className="w-full">
+      <Button type="submit" disabled={pending} className="h-11 w-full rounded-lg">
         {pending && <LoaderCircle className="motion-safe:animate-spin" aria-hidden="true" />}
         {pending
           ? signup
@@ -65,7 +70,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'signup' }) {
       <p className="text-center text-sm text-muted">
         {signup ? 'Already have an account? ' : 'New to Social Scheduler? '}
         <Link
-          className="font-semibold text-denim underline-offset-4 hover:underline"
+          className="font-medium text-ink underline underline-offset-4 hover:text-muted"
           href={signup ? '/login' : '/signup'}
         >
           {signup ? 'Log in' : 'Create an account'}

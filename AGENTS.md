@@ -18,7 +18,7 @@ promising support. A successful authorized test publish is still a prerequisite.
 
 ## Current scope
 
-This repository includes npm workspaces, a protected Next.js planner, email/password
+This repository includes npm workspaces, a public landing page, a protected Next.js planner, email/password
 authentication through Better Auth, an Express health API, an infrastructure-check worker,
 shared contracts, Prisma models/migrations, and local PostgreSQL/Redis configuration.
 
@@ -98,6 +98,11 @@ Use semantic elements, labels, visible focus, keyboard navigation, accessible em
 error states, mobile layouts, and reduced-motion support when introducing motion.
 Keep filter/navigation state in URLs. Do not render fake posts, connected accounts,
 unsupported provider formats, or inert actions that look available.
+
+The public landing page is `/`; the authenticated workspace is `/planner`.
+Successful login/signup returns to `/planner`. Keep the landing page independent of API availability.
+Use the neutral visual system in `docs/frontend-design.md` throughout. For substantial UI changes,
+review phone/tablet/laptop/desktop layouts at 320, 390, 768, 820, 1024, 1280, 1440, and 1920px.
 
 ## Development flow
 

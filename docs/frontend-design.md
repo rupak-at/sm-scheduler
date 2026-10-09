@@ -1,51 +1,69 @@
-# Starter frontend design
+# Frontend design
 
-The workspace serves solo creators planning Instagram content, including creators in Nepal.
-The first screen is an honest empty planner: no sample posts, simulated account connection,
-or implied publishing capabilities.
+Social Scheduler is a workspace for independent creators preparing Instagram content.
+Use a precise, quiet interface with expressive typography and original studio photography.
+The public site introduces the product; the authenticated app prioritizes everyday clarity.
 
-## Design plan
+## Shared visual system
 
-- Paper blue `#eef3fa`: workspace background.
-- Ink blue `#19304a`: text and navigation.
-- Denim `#235cd6`: active navigation and focus.
-- White `#ffffff`: the content canvas.
-- Honey `#ebba59`: a small decorative marker in the empty timeline.
-- Mist `#d4dfea`: separators and empty schedule slots.
-- Roboto: one locally hosted variable family for body and headings, using deliberate weight
-  and size rather than extra typefaces.
-- Layout: left-aligned navigation beside a spacious planner; the content panel is the central
-  visual element, with a three-stage empty timeline that reflects the creator's actual workflow.
+- White `#ffffff`: content, forms, and public page background.
+- Porcelain `#fafafa`: workspace background and quiet secondary sections.
+- Soft gray `#f4f4f5`: secondary controls and illustration surfaces.
+- Graphite `#27272a`: body text, selected navigation, primary controls, and editorial panels.
+- Slate `#71717a`: supporting text.
+- Silver `#e4e4e7`: structural separators; input boundaries use stronger `#8a8a93`.
+- Roboto: locally hosted variable font for **all** text, headings, labels, inputs, and buttons.
+  Body 14–16px; supporting copy 12px; page headings 28–32px; public hero 44–88px with fluid sizing.
+  Use weight 400 for body, 500 for display copy/controls, and 600 for compact app headings.
+
+Use hierarchy, alignment, and whitespace instead of bright accent colors. Public actions use
+rounded pills; form fields use 8px corners; larger editorial surfaces use 24–32px corners.
+No gradients, autoplay animation, fake performance metrics, or invented creator testimonials.
+Keep shadcn/ui primitives and Tailwind utilities consistent with the root theme tokens.
+System dark preference must not partially darken controls in this explicitly light theme.
+
+## Public landing page
+
+`/` is a static page that does not call the authentication API. It has a strong centered
+headline, a studio photograph beside editorial copy, a labelled workspace preview, an
+availability roadmap, and a closing invitation. Navigation links go to real routes or sections.
+The product preview shows an empty workspace rather than simulated creator data.
 
 ```text
-Desktop                            Mobile
-[Brand | Planner header]           [Brand / Planner]
-[Nav   | Status filters]           [Planner header]
-[      | Empty workflow canvas]     [Scrollable status filters]
-[Acct  | Next-step guidance]        [Empty workflow / Guidance]
+[Brand / Workspace / Roadmap / Log in / Get started]
+[Fluid heading / short product context / primary action]
+[Editorial copy | Original creator-studio photograph]
+[Product story  | Labelled workspace preview]
+[Available now / upcoming development roadmap]
+[Closing invitation / footer]
 ```
 
-## Review before implementation
+Photography comes from an original imagegen asset, converted to a 200KB WebP and delivered
+through Next.js Image. See `apps/web/public/images/README.md` for provenance.
+Mobile places the photograph before its companion copy; tablet uses a two-column composition.
+The layout reflows naturally rather than scaling a desktop canvas down to a phone.
 
-A metrics grid and a calendar filled with demonstration posts would imply functionality and data
-we do not have. Use a single empty workflow canvas instead, with functional URL-based filters.
-Keep the rest quiet: no gradients, repeated card shadows, artificial counters, or animated reveals.
+## Authentication and planner
 
-## Implementation and review
+Login/signup share a compact brand header, a focused form, and an inset photographic panel.
+Mobile prioritizes form fields and hides the companion panel. Controls have explicit labels,
+comfortable touch targets, autocomplete, visible focus, and readable error/pending states.
 
-Use the installed frontend-design skill for visual decisions and web-design-guidelines for review.
-Use Tailwind CSS utilities with shared theme tokens and Prettier class sorting.
-Use native navigation, visible keyboard focus, a skip link, accessible names, semantic headings,
-responsive grids, and descriptive empty states. Query parameters preserve filter state.
-Next.js optimizes the vendored Roboto font with `next/font/local`; builds do not fetch fonts.
+`/planner` is authenticated. Desktop uses a 232px sidebar, compact workspace bar, and a
+content canvas with a setup guide alongside it. Tablets/mobile stack the guide beneath content.
+The account footer truncates long names; mobile exposes a labelled logout action.
+Filters remain URL links at `/planner?view=…`. Setup guidance uses native expandable details.
 
-Account connection, media upload, and scheduling remain planned work before creators can
-manage real publications from this planner.
+Instagram connection, drafts, uploads, scheduling, and publishing remain upcoming.
+The UI explains these states instead of presenting working-looking controls for absent features.
 
-## Authentication addition
+## References and review
 
-Login and signup use the same Roboto family, blue tokens, and shared shadcn/ui form primitives.
-On desktop, a single ink-blue brand panel balances the form; mobile collapses it to a compact
-brand header so fields remain immediately accessible. Submission state and errors are explicit.
-The planner now loads the authenticated profile through server-side session verification.
-Instagram connection and content creation remain future work.
+- [Linear UI redesign](https://linear.app/now/how-we-redesigned-the-linear-ui): alignment,
+  quiet app chrome, and information hierarchy.
+- [Buffer Publish](https://buffer.com/publish): content status and channel organization.
+
+Reference principles inform the design; no brand artwork, product screenshots, or page layouts
+are copied. Use frontend-design for design planning and web-design-guidelines for final review.
+Review 320, 390, 768, 820, 1024, 1280, 1440, and 1920px viewports, including long names,
+keyboard focus, expanded setup guidance, system dark preference, and reduced motion.

@@ -1,13 +1,20 @@
-import { Planner } from '@/features/planner/components/planner';
-import { parsePlannerView } from '@/features/planner/planner-views';
-import { requireUser } from '@/features/auth/lib/session';
+import { SiteHeader } from '@/features/landing/components/site-header';
+import { LandingHero } from '@/features/landing/components/landing-hero';
+import { WorkspaceStory } from '@/features/landing/components/workspace-story';
+import { ProductRoadmap } from '@/features/landing/components/product-roadmap';
+import { ClosingInvite, LandingFooter } from '@/features/landing/components/landing-footer';
 
-interface PageProps {
-  searchParams: Promise<{ view?: string | string[] }>;
-}
-
-export default async function Home({ searchParams }: PageProps) {
-  const user = await requireUser();
-  const { view } = await searchParams;
-  return <Planner view={parsePlannerView(view)} userName={user.name} />;
+export default function LandingPage() {
+  return (
+    <div className="bg-paper">
+      <SiteHeader />
+      <main id="main-content">
+        <LandingHero />
+        <WorkspaceStory />
+        <ProductRoadmap />
+        <ClosingInvite />
+      </main>
+      <LandingFooter />
+    </div>
+  );
 }

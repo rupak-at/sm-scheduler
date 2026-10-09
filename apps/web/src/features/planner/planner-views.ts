@@ -1,8 +1,32 @@
 export const plannerViews = [
-  { id: 'all', label: 'All content', heading: 'Make room for your next idea.' },
-  { id: 'drafts', label: 'Drafts', heading: 'Your ideas start here.' },
-  { id: 'scheduled', label: 'Scheduled', heading: 'A little planning goes a long way.' },
-  { id: 'published', label: 'Published', heading: 'Your published story starts here.' },
+  {
+    id: 'all',
+    label: 'All content',
+    heading: 'Your next idea starts here',
+    description:
+      'Your drafts, scheduled posts, and published content will have a home here. Start with a little space to create.',
+  },
+  {
+    id: 'drafts',
+    label: 'Drafts',
+    heading: 'No drafts yet',
+    description:
+      'A place for work in progress. Your unfinished posts will appear here when content creation is available.',
+  },
+  {
+    id: 'scheduled',
+    label: 'Scheduled',
+    heading: 'Nothing scheduled yet',
+    description:
+      'Your upcoming posts will appear here once Instagram connection and scheduling are available.',
+  },
+  {
+    id: 'published',
+    label: 'Published',
+    heading: 'No published posts yet',
+    description:
+      'Your publishing history will appear here once you begin sharing posts through Social Scheduler.',
+  },
 ] as const;
 
 export type PlannerView = (typeof plannerViews)[number]['id'];

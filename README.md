@@ -6,7 +6,7 @@ Follow [the development guide](docs/development.md) for setup, feature work, mig
 and commits. The guide and implementation status must be updated with every completed change.
 The original `idea.md` is a local planning document excluded by the workspace's gitignore.
 
-The project includes email/password signup, login, logout, and a protected planner.
+The project includes a public landing page, email/password signup, login, logout, and a protected planner.
 Instagram connection, uploads, drafts, scheduling, and actual publishing remain future work.
 
 ## Quick start
@@ -23,6 +23,7 @@ npm run dev
 ```
 
 Open [localhost:3000](http://localhost:3000) and create an account.
+The public landing page is `/`; login/signup opens the protected workspace at `/planner`.
 The API runs at [localhost:4000](http://localhost:4000); the worker is a separate process.
 
 On Linux, Docker requires Docker-group or administrator access. If needed, use
@@ -73,6 +74,7 @@ Full checks run separately and in CI. Commit each completed feature with its rel
 ESLint limits authored source files to 250 nonblank lines and functions to 80.
 
 The frontend uses the requested frontend-design and web-design-guidelines skills.
+Landing, login/signup, and planner share a neutral theme and local Roboto typography.
 See [the design plan](docs/frontend-design.md). Roboto is vendored with its font license
 and loaded with `next/font/local`; font downloads are not required during builds.
 

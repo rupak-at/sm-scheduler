@@ -9,8 +9,11 @@
 - CI with migrations, formatting, linting, types, unit/integration tests, and production builds.
 - Environment validation, random local secret setup, and safe event logging.
 - Next.js App Router frontend using Tailwind CSS, shadcn/ui, and local Roboto.
+- Public static landing page at `/`, with original studio imagery, workspace preview, and availability roadmap.
+- Consistent white/graphite theme, Roboto throughout, and responsive landing/auth/planner layouts.
 - Better Auth email/password signup, login, logout, and PostgreSQL-backed sessions.
 - Protected planner, URL-based status filters, and honest empty states.
+- Protected planner at `/planner`, with setup guidance and matching login/signup redirects.
 - Same-origin auth proxy with cookie forwarding and server-side session checks.
 - Protected account endpoint, strict auth write origins, and database-backed auth throttling.
 - Express liveness/readiness routes and separate BullMQ infrastructure-check worker.
@@ -41,6 +44,11 @@ Authentication currently applies conservative shared buckets when no trusted cli
   status filters, logout, and throttling.
 - Redis-delivered infrastructure checks complete in the separate worker.
 - Desktop (1440px) and mobile (390px) login screenshots reviewed.
+- Landing, login, signup, and planner checked for viewport overflow at 320, 390, 768, 820,
+  1024, 1280, 1440, and 1920px. Desktop/mobile/tablet screenshots reviewed.
+- UI checks cover keyboard focus, labels/autocomplete, URL filters, long names, expanded
+  guidance, dark system preference, and reduced motion. Planner preview uses an isolated
+  session fixture; real Safari/iPad testing is not performed.
 
 Docker Compose configuration validates. Starting Docker on this machine requires a sudo password;
 temporary user-owned PostgreSQL/Redis instances are used for isolated runtime checks.

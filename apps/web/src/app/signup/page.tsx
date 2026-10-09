@@ -5,6 +5,6 @@ import { getSession } from '@/features/auth/lib/session';
 export const metadata = { title: 'Create account | Social Scheduler' };
 
 export default async function SignupPage() {
-  if (await getSession()) redirect('/');
+  if (await getSession()) redirect('/planner');
   return <AuthScreen mode="signup" />;
 }

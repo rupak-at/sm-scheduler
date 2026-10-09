@@ -6,6 +6,10 @@ Next.js renders the creator workspace. Express owns authenticated HTTP operation
 implemented. BullMQ runs in a separate always-on Node process. Applications consume shared
 packages through public exports; database and runtime configuration are server-only.
 
+Next.js serves a static public landing page at `/` without requiring the API or database.
+The authenticated planner lives at `/planner`; content filters use `/planner?view=…`.
+Login/signup redirects and navigation consistently target this protected route.
+
 The initial worker processes `system-checks` to exercise Redis delivery and PostgreSQL
 connectivity. It does not register a publishing processor. The publisher contract deliberately
 has no fake provider implementation.

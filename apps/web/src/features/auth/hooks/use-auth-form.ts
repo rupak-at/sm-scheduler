@@ -41,7 +41,7 @@ export function useAuthForm(mode: 'login' | 'signup') {
         form.querySelector<HTMLInputElement>('input[name="email"]')?.focus();
         return;
       }
-      router.replace('/');
+      router.replace('/planner');
       router.refresh();
     } catch {
       setError('Could not reach sign-in. Check your connection and try again.');

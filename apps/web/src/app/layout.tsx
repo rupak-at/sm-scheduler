@@ -11,18 +11,18 @@ const roboto = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'Publishing planner | Social Scheduler',
+  title: 'Social Scheduler — a considered space for your content',
   description: 'Plan your Instagram content in one calm workspace.',
   robots: { index: false, follow: false },
 };
-export const viewport: Viewport = { themeColor: '#eef3fa' };
+export const viewport: Viewport = { themeColor: '#fafafa' };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={roboto.variable}>
       <body>
         <a
-          className="fixed top-4 left-4 z-10 -translate-y-[200%] bg-paper px-4 py-2 focus:translate-y-0"
+          className="fixed top-4 left-4 z-50 -translate-y-[200%] rounded-md border border-line bg-paper px-4 py-2 text-sm focus:translate-y-0"
           href="#main-content"
         >
           Skip to content

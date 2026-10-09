@@ -1,22 +1,52 @@
-# Frontend review
+# Frontend review — 2026-10-09
 
-Reviewed against the current
+Reviewed the landing page, auth screens, and protected planner against the current
 [Vercel Web Interface Guidelines](https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md)
-using the requested web-design-guidelines skill. Desktop and mobile login screenshots reviewed.
+using web-design-guidelines. Applied frontend-design and original imagegen artwork.
 
-`apps/web/src/app/layout.tsx:24` — pass: skip link, local font, language and viewport metadata.
+## Findings addressed
 
-`apps/web/src/features/auth/components/auth-form.tsx:14` — pass: labelled fields, autocomplete,
-native validation, accessible feedback, pending state, reduced-motion-aware spinner.
+`apps/web/src/app/globals.css:3` — fixed: system dark preference previously recolored shadcn
+controls within a light page; dark styling now requires an explicit `.dark` ancestor.
 
-`apps/web/src/features/auth/components/auth-screen.tsx:7` — pass: responsive form placement
-at 1440px and 390px; decorative icons excluded from accessibility.
+`apps/web/src/app/globals.css:24` — fixed: stronger input boundaries distinguish fields from white surfaces.
 
-`apps/web/src/features/planner/components/content-filters.tsx:6` — pass: semantic navigation,
-URL-based filter state, current-page indication, visible focus.
+`apps/web/src/features/landing/components/landing-footer.tsx:25` — fixed: footer sits outside
+main so the public page has a proper content-information landmark.
 
-`apps/web/src/components/ui/button.tsx:7` — fixed: replaced transition-all with explicit
-color/background/border/shadow transitions; retained visible focus.
+`apps/web/src/features/landing/components/landing-hero.tsx:38` — fixed: tablet imagery uses
+side-by-side layout; mobile places photography first rather than a tall text-only panel.
 
-No remaining issues identified in the reviewed scope. This is a code and screenshot review,
-not a substitute for a full assistive-technology audit of future features.
+## Reviewed implementation
+
+`apps/web/src/app/layout.tsx:26` — pass: visible-on-focus skip link, local font, matching light theme metadata.
+
+`apps/web/src/features/landing/components/landing-hero.tsx:10` — pass: fluid headings, functional
+links, honest availability copy, explicit responsive image containers and sizes.
+
+`apps/web/src/features/auth/components/auth-form.tsx:14` — pass: labels, autocomplete,
+native validation, live feedback, pending state, and reduced-motion-aware spinner.
+
+`apps/web/src/features/auth/hooks/use-auth-form.ts:44` — pass: successful auth opens `/planner`.
+
+`apps/web/src/features/planner/components/content-filters.tsx:13` — pass: URL filters,
+current-page indication, keyboard focus, and intentional horizontal scrolling on narrow screens.
+
+`apps/web/src/features/planner/components/sidebar.tsx:41` — pass: long profile names truncate;
+logout retains an accessible name when its desktop text is visually hidden.
+
+`apps/web/src/features/planner/components/connection-guide.tsx:6` — pass: native keyboard-operable
+expandable guidance; upcoming features are explanatory content.
+
+## Browser validation
+
+Chromium review covers 320, 390, 768, 820, 1024, 1280, 1440, and 1920px viewports across
+landing, login, signup, and planner. Checked horizontal page overflow, labels/autocomplete,
+keyboard focus, dark system preference, reduced motion, expanded guidance, URL filters,
+and long profile names. Roboto is verified in computed styles across headings, body text,
+and form controls. Desktop/mobile/tablet screenshots reviewed. Login submission and signed-in
+login/signup redirects are checked against the temporary auth fixture.
+
+The running app's public pages were inspected directly. Protected planner review uses a
+separate production preview with a temporary session fixture, avoiding writes to the user's
+database. Layout checks do not replace real Safari/iPad or assistive-technology testing.

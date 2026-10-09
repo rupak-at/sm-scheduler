@@ -30,6 +30,8 @@ npm run dev
 ```
 
 Open [localhost:3000](http://localhost:3000) and create an account.
+`/` is the public landing page. `/login` and `/signup` return authenticated users to `/planner`.
+The planner and its content filters live at `/planner` and `/planner?view=…`.
 PostgreSQL listens on port 5432, Redis on 6379, and the Express API on 4000.
 
 If your Linux user cannot access Docker, start infrastructure with:
@@ -118,6 +120,18 @@ Generated clients, migrations, and the lockfile are handled by their tools.
 Use Tailwind utilities and shared tokens, shadcn/ui primitives, and local Roboto.
 Read frontend-design before UI changes; use web-design-guidelines for review.
 Keep accessibility, mobile layout, loading/error states, and URL-based filters intact.
+
+The current design uses white/graphite surfaces, subtle gray dividers, and Roboto throughout.
+Theme colors are defined in `apps/web/src/app/globals.css`; avoid one-off feature palettes.
+Public page components live in `src/features/landing`. Keep `/` independent of API availability.
+Original website imagery lives in `apps/web/public/images` with provenance notes. Use Next.js
+Image and responsive sizes; preserve explicit aspect containers to avoid layout shifts.
+
+For substantial visual updates, inspect landing, login, signup, and planner at 320, 390, 768,
+820, 1024, 1280, 1440, and 1920px. Check both viewport overflow and intentionally scrollable
+filters, long names, labelled controls, keyboard focus, expanded guidance, dark system preference,
+and reduced motion. Chromium viewport checks cover layout; physical-device/Safari behavior
+needs its own review when those browser targets are added to the validation environment.
 
 ## Database changes
 
@@ -220,6 +234,23 @@ migrations. The user is handling configuration and migrations; no remote migrati
 Verification: formatting, lint, strict types, package compilation, and 12 unit tests passed.
 Temporary PostgreSQL checks verified the diagnostic's missing, applied, and unfinished
 migration paths, including exit codes and credential-safe output.
+
+### 2026-10-09 — public landing and consistent responsive design
+
+Added a static public landing page at `/` and moved the protected workspace to `/planner`.
+Updated login/signup destinations and filter URLs. Introduced shared white/graphite tokens,
+consistent Roboto typography, original studio photography, focused auth forms, and clearer
+planner/setup layouts. Fixed system dark preference partially recoloring light-theme controls.
+
+Public and protected page modules remain separate. Marketing distinguishes available accounts
+and planner screens from upcoming Instagram connection, drafts, uploads, and publishing.
+The original studio image is a locally hosted 200KB WebP delivered through Next.js Image.
+
+Verification: formatting, lint, types, 12 unit tests, and full production build pass. Browser
+checks cover eight widths from 320 to 1920px, labelled forms, focus, dark/reduced-motion
+preferences, filters, expanded guidance, and long names. Public landing has no auth API
+dependency. Planner UI review uses an isolated session fixture, without database changes.
+See [design](frontend-design.md) and [review](frontend-review.md) for scope and limitations.
 
 ### Future entries
 
