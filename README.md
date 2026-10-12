@@ -7,8 +7,8 @@ and commits. The guide and implementation status must be updated with every comp
 The original `idea.md` is a local planning document excluded by the workspace's gitignore.
 
 The project includes email/password and Instagram sign-in, Instagram connection, JPEG uploads,
-drafts, scheduling, and a separate publishing worker. The real Meta authorization/publish test
-is pending. Follow [Instagram setup](docs/instagram-setup.md) to test with your own account.
+drafts, scheduling, and a separate publishing worker. The user verified real Instagram sign-in;
+the first real publish is pending. Follow [Instagram setup](docs/instagram-setup.md) to test with your own account.
 
 ## Quick start
 

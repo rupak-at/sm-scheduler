@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@social-scheduler/database';
-import { INSTAGRAM_SCOPES, InstagramError } from '@social-scheduler/publishing';
+import { InstagramError } from '@social-scheduler/publishing';
 import type { InstagramClient, TokenVault } from '@social-scheduler/publishing';
 
 export const INSTAGRAM_EMAIL_DOMAIN = 'instagram.users.invalid';
@@ -9,7 +9,7 @@ export async function saveInstagramIdentity(
   authorization: Awaited<ReturnType<InstagramClient['exchange']>>,
   linkUserId?: string,
 ) {
-  const { profile, token, expiresAt } = authorization;
+  const { profile, token, expiresAt, scopes } = authorization;
   return db.$transaction(
     async (tx) => {
       const identity = await tx.account.findUnique({
@@ -55,7 +55,7 @@ export async function saveInstagramIdentity(
         tokenExpiresAt: expiresAt,
         tokenRefreshedAt: new Date(),
         tokenCheckedAt: new Date(),
-        scopes: INSTAGRAM_SCOPES,
+        scopes,
       };
       await tx.socialAccount.upsert({
         where: {

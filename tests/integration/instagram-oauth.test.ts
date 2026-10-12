@@ -62,6 +62,15 @@ describe('Instagram sign-in security with real sessions and PostgreSQL', () => {
     expect(new TokenVault(testKey).open(channel.tokenCiphertext!, channel.providerAccountId)).toBe(
       'long-secret',
     );
+    expect(channel.scopes).toEqual([
+      'instagram_business_basic',
+      'instagram_business_content_publish',
+    ]);
+    expect(
+      fixture.fetcher.mock.calls.some(([input]) =>
+        new URL(String(input)).pathname.endsWith('/permissions'),
+      ),
+    ).toBe(false);
     expect(
       await db.account.findFirstOrThrow({ where: { userId: session.body.user.id } }),
     ).toMatchObject({ accessToken: null, refreshToken: null });

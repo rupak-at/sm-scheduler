@@ -1,8 +1,8 @@
 # Test Instagram with your own account
 
 The application now has Instagram sign-in, account connection, JPEG drafts/scheduling,
-and an always-on publishing worker. Real authorization and a real publish still need
-verification with your account and Meta app. Automated tests simulate Meta responses;
+and an always-on publishing worker. The user verified real Instagram sign-in on 2026-10-12;
+the first real publish still needs verification with their account and Meta app. Automated tests simulate Meta responses;
 they never authorize or publish to a real account.
 
 ## Account and app settings
@@ -72,7 +72,7 @@ not a Meta access token or webhook verify token.
 
 If login returns `connection=PROVIDER_REJECTED`, Meta rejected a backend request; that code
 alone does not identify an account eligibility problem. Failed callback redirects now include
-`step` (`code_exchange`, `token_exchange`, `profile`, or `permissions`), `http_status`, and,
+`step` (`code_exchange`, `token_exchange`, `profile`, `permissions`, or `publishing_access`), `http_status`, and,
 when Meta supplies them, numeric `provider_code` / `provider_subcode`. These fields identify
 the failing request without exposing credentials or provider messages. Restart the API after
 updating the code, start a fresh login, and share only the final `/login?connection=…` or
@@ -130,6 +130,14 @@ The callback exchanges the authorization code on the API, exchanges the short-li
 for a long-lived access token, checks professional identity and granted scopes, then encrypts it
 with AES-256-GCM. The browser receives session cookies and channel metadata, never provider tokens.
 
+Grants come from the code-exchange response's `permissions` value, not the requested scope list.
+Both required grants must be present before tokens/accounts are saved. Instagram Login does
+not use a Facebook-style `/{id}/permissions` lookup. Subsequent checks read the professional
+profile and `/{user_id}/content_publishing_limit?fields=quota_usage` to check publishing access
+without creating or publishing media. This uses the professional ID even when `/me.id` differs.
+Provider permission/revocation errors still require reconnection; quota usage does not enumerate
+the complete current grants list. Stored grants reflect the last successful authorization.
+
 Instagram Login renewal uses the existing long-lived token with `ig_refresh_token`;
 there is no separate generic refresh-token credential to store for this flow.
 Expiry is always derived from Meta's `expires_in` response, not a hard-coded date.
@@ -149,4 +157,5 @@ and uncertain outcomes. They do not prove Meta app approval or live publishing e
 Production deployment, verified hosting/proxy IP settings, S3 storage, media retention/quotas,
 provider deauthorization/data-deletion callbacks, and account erasure are not implemented.
 Keep this as a private development test until those hosting/Meta lifecycle requirements are addressed.
-No live Instagram authorization, post, push, or deployment was performed during implementation.
+The user completed a live Instagram sign-in after the permission-check fix. No live Instagram
+post, push, or deployment was performed; the agent did not perform a live authorization flow.

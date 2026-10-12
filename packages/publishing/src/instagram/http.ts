@@ -5,7 +5,8 @@ const errorDetailsSchema = z.object({
   error_subcode: z.number().int().optional(),
 });
 const errorSchema = z.union([z.object({ error: errorDetailsSchema }), errorDetailsSchema]);
-export type InstagramOperation = 'code_exchange' | 'token_exchange' | 'profile' | 'permissions';
+export type InstagramOperation =
+  'code_exchange' | 'token_exchange' | 'profile' | 'permissions' | 'publishing_access';
 export interface InstagramErrorDetails {
   operation?: InstagramOperation | undefined;
   httpStatus?: number | undefined;

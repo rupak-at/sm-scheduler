@@ -18,7 +18,11 @@ export function instagramFixture() {
   const fetcher = vi.fn<typeof fetch>(async (input) => {
     const url = new URL(String(input));
     if (url.pathname === '/oauth/access_token')
-      return Response.json({ access_token: 'short-secret', user_id: state.accountId });
+      return Response.json({
+        access_token: 'short-secret',
+        user_id: state.accountId,
+        permissions: (state.scopes ? INSTAGRAM_SCOPES : [INSTAGRAM_SCOPES[0]]).join(','),
+      });
     if (url.pathname === '/access_token')
       return Response.json({ access_token: 'long-secret', expires_in: 5184000 });
     if (url.pathname === '/refresh_access_token') {
@@ -38,12 +42,11 @@ export function instagramFixture() {
         account_type: 'BUSINESS',
       });
     if (url.pathname.endsWith('/permissions'))
-      return Response.json({
-        data: INSTAGRAM_SCOPES.map((permission) => ({
-          permission,
-          status: state.scopes ? 'granted' : 'declined',
-        })),
-      });
+      return Response.json({ error: { code: 100 } }, { status: 400 });
+    if (url.pathname.endsWith('/content_publishing_limit'))
+      return state.scopes
+        ? Response.json({ data: [{ quota_usage: 0 }] })
+        : Response.json({ error: { code: 200 } }, { status: 403 });
     if (url.pathname.endsWith('/media_publish')) {
       state.publishCalls++;
       if (state.publishTimeout) throw new Error('Simulated lost response');

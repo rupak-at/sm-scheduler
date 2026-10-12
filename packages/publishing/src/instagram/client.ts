@@ -1,29 +1,15 @@
 import { z } from 'zod';
 import { instagramRequest, InstagramError } from './http.js';
 import type { InstagramOperation } from './http.js';
+import {
+  tokenSchema,
+  shortTokenSchema,
+  profileSchema,
+  publishingLimitSchema,
+  idSchema,
+} from './schemas.js';
 
 export const INSTAGRAM_SCOPES = ['instagram_business_basic', 'instagram_business_content_publish'];
-const tokenSchema = z.object({
-  access_token: z.string().min(1),
-  expires_in: z.number().positive(),
-});
-const shortTokenItem = z.object({
-  access_token: z.string(),
-  user_id: z.union([z.string(), z.number()]),
-});
-const shortTokenSchema = z
-  .union([shortTokenItem, z.object({ data: z.tuple([shortTokenItem]) })])
-  .transform((value) => ('data' in value ? value.data[0] : value));
-const profileSchema = z.object({
-  id: z.string(),
-  user_id: z.string().optional(),
-  username: z.string(),
-  account_type: z.enum(['BUSINESS', 'MEDIA_CREATOR']),
-});
-const permissionsSchema = z.object({
-  data: z.array(z.object({ permission: z.string(), status: z.string() })),
-});
-const idSchema = z.object({ id: z.string() });
 export interface InstagramOptions {
   appId: string;
   appSecret: string;
@@ -63,6 +49,8 @@ export class InstagramClient {
       shortTokenSchema,
       'code_exchange',
     );
+    if (!INSTAGRAM_SCOPES.every((scope) => short.permissions.includes(scope)))
+      throw new InstagramError('PERMISSION_REQUIRED', false, { operation: 'permissions' });
     const url = new URL('https://graph.instagram.com/access_token');
     url.search = new URLSearchParams({
       grant_type: 'ig_exchange_token',
@@ -76,6 +64,7 @@ export class InstagramClient {
       token: token.access_token,
       expiresAt: new Date(Date.now() + token.expires_in * 1000),
       profile,
+      scopes: short.permissions,
     };
   }
   async validate(token: string, expectedId?: string) {
@@ -89,20 +78,16 @@ export class InstagramClient {
     );
     const id = profile.user_id ?? profile.id;
     if (expectedId && id !== expectedId) throw new InstagramError('ACCOUNT_MISMATCH');
-    const permissions = await this.graph(
-      `${id}/permissions`,
+    // Instagram Login has no documented grants-list endpoint. A read-only quota
+    // request checks publishing access again during maintenance and before writes.
+    await this.graph(
+      `${id}/content_publishing_limit`,
       token,
-      {},
-      permissionsSchema,
+      { fields: 'quota_usage' },
+      publishingLimitSchema,
       false,
-      'permissions',
+      'publishing_access',
     );
-    if (
-      !INSTAGRAM_SCOPES.every((scope) =>
-        permissions.data.some((item) => item.permission === scope && item.status === 'granted'),
-      )
-    )
-      throw new InstagramError('PERMISSION_REQUIRED');
     return { id, username: profile.username, accountType: profile.account_type };
   }
   async refresh(token: string) {

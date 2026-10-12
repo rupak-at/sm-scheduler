@@ -39,6 +39,8 @@ version, HTTPS callback/media origin, and applies the new migration to their dat
 No real Meta authorization or post has been made by the agent. Meta documentation pages were
 login/rate-limit restricted during research; professional support/scope names were verified
 through Meta's official Postman collection, with linked references for the live setup review.
+The user confirmed successful real Instagram sign-in on 2026-10-12 after the permission-check
+fix. This verifies their login/account connection, not a successful scheduled publication.
 
 The current vertical slice supports one JPEG photo per post. Reels, video, carousels,
 Stories, analytics, teams, Facebook, and TikTok are not implemented. Future provider enum
@@ -57,7 +59,7 @@ their fixtures: never use a creator database for integration tests.
 
 ## Verification
 
-- Formatting, lint, strict workspace/tools types, and 37 unit tests.
+- Formatting, lint, strict workspace/tools types, and 45 unit tests.
 - Prisma schema validation; all three migrations applied to isolated PostgreSQL.
 - 21 integration tests against real isolated PostgreSQL/Redis and simulated Meta responses:
   session security, OAuth browser/state protection, explicit email linking, ownership,
@@ -75,7 +77,7 @@ Quality/build checks require local test/compilation sockets; restrictive sandbox
 were rerun with approved local access. A cached failed Turbopack compilation was moved aside
 before the successful production build. No configured creator database was migrated.
 Docker startup on this machine needs administrator access; temporary user-owned services
-were used for verification. Real Instagram authorization/publishing is the user's next test.
+were used for verification. A real Instagram publication is the user's next test.
 
 ## Update log
 
@@ -106,3 +108,16 @@ secret exclusion, response envelopes, error mapping, and uncertain writes.
 Full formatting/lint/types checks, all 37 unit tests, and the package/API/worker/Next.js
 production build passed under Node 24. No real provider call or creator-database migration
 was performed by the agent; the user's fresh login attempt is needed to diagnose the rejection.
+
+### 2026-10-12 — fix rejected permissions lookup; user confirms live sign-in
+
+The diagnostic localized the user's rejection to `/{id}/permissions` (HTTP 400 / Meta 100).
+Instagram Login now checks grants returned in code exchange, persists those grants, and uses
+professional profile plus read-only publishing quota access for subsequent token checks.
+Missing/malformed grant information is rejected; requested scopes never become assumed grants.
+Fixtures reject the unsupported edge and exercise permission loss before any provider write.
+
+The user reported successful live Instagram sign-in after this fix. Real publishing remains pending.
+Verification: formatting/lint/types, all 45 unit tests, all 22 PostgreSQL/Redis/provider-fixture
+integration tests, and full production build passed under Node 24. Committed migrations were
+applied only to a new temporary local test database; the creator database was not migrated.

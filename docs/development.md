@@ -8,9 +8,9 @@ status at the same time. Record the change and its verification in the update lo
 Social Scheduler helps creators prepare and schedule Instagram content. Phase 1 is
 Instagram-first; future Facebook/TikTok providers share the domain model.
 
-The current application has email/password authentication, a protected empty planner,
-health checks, domain models/migrations, and an infrastructure-check worker.
-Instagram connection, upload, draft management, scheduling, and publishing are planned.
+The current application has email/password and Instagram authentication, a protected planner,
+JPEG uploads, drafts, durable scheduling, and a publishing/recovery worker. The user has
+verified real Instagram sign-in; a real publish still needs testing.
 Read [AGENTS.md](../AGENTS.md), [status](project-status.md), and [architecture](architecture.md)
 before choosing the next feature.
 
@@ -238,6 +238,9 @@ HTTP status, and numeric Meta error code/subcode. The provider adapter accepts n
 errors and top-level token-exchange error codes, discarding raw messages/bodies. Keep these
 diagnostics free of request URLs, authorization codes/state, identity details, and credentials.
 See [Instagram setup](instagram-setup.md) before diagnosing a failed live authorization.
+Instagram Login grants are parsed from the code exchange and stored as granted scopes.
+Token validation uses the profile and read-only publishing quota endpoint; do not add an
+unsupported `/{id}/permissions` grants lookup to this flow.
 
 ## Update log
 
@@ -327,6 +330,18 @@ Verification: focused adapter/client/redirect tests cover all four OAuth operati
 envelopes, error categories, missing/malformed diagnostics, and secret-safe failure URLs.
 Full check/build results are recorded in [implementation status](project-status.md).
 The user's live rejection still needs a fresh attempt to obtain the new diagnostic fields.
+
+### 2026-10-12 — repair Instagram Login permission validation
+
+The user's callback reached `permissions` and failed with HTTP 400 / Meta code 100 after
+token exchange/profile succeeded. Replaced the unsupported permissions edge with validation
+of code-exchange grants plus a read-only publishing-access request. Stores actual granted
+scopes and rejects missing/malformed grants rather than trusting requested scopes. Keeps
+professional identity, token encryption, ownership, expiry, and revocation checks intact.
+
+The user confirmed successful live Instagram sign-in after the change. Live publishing is
+still pending. Regression fixtures reject the old endpoint and exercise denied publishing
+access before any media write. Full validation results are in [implementation status](project-status.md).
 
 ### Future entries
 

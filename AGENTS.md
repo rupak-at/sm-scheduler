@@ -21,7 +21,8 @@ promising support. A successful authorized test publish is required before claim
 This repository includes npm workspaces, a public landing page, a protected Next.js planner,
 email/password and Instagram sign-in, Instagram account connection, encrypted tokens,
 JPEG uploads, draft editing/deletion, durable scheduling, and a BullMQ publishing/recovery worker.
-The real Meta authorization/publishing test is pending; automated provider tests use fixtures.
+The user verified real Instagram sign-in on 2026-10-12; the first real publishing test is pending.
+Automated provider tests use fixtures.
 Read `docs/instagram-setup.md` before changing the integration or running a live test.
 
 Email verification and password-reset delivery require a mail provider and remain unimplemented.
@@ -108,6 +109,9 @@ review phone/tablet/laptop/desktop layouts at 320, 390, 768, 820, 1024, 1280, 14
 ## Instagram workflow
 
 - Use Instagram Login for Business/Creator accounts, with profile/publishing scopes only.
+- Validate and store grants returned by the code exchange. Do not assume requested scopes
+  were granted or call a Facebook-style `/permissions` edge on Instagram Login accounts.
+  Later checks use professional identity and the read-only `content_publishing_limit` endpoint.
 - OAuth attempts are browser-bound, expire after ten minutes, and are consumed atomically.
 - Instagram sign-in uses immutable provider identity, never email matching. The internal
   `instagram.users.invalid` email is an unverified compatibility identifier, not a mailbox.

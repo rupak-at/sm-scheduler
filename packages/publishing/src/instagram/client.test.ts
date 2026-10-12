@@ -20,12 +20,20 @@ describe('Instagram protocol boundaries', () => {
     const fetcher = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(
-        Response.json({ data: [{ access_token: 'short-token', user_id: 17841405793187218 }] }),
+        Response.json({
+          data: [
+            {
+              access_token: 'short-token',
+              user_id: 17841405793187218,
+              permissions: INSTAGRAM_SCOPES.join(','),
+            },
+          ],
+        }),
       )
       .mockResolvedValueOnce(Response.json({ access_token: 'long-token', expires_in: 5184000 }))
       .mockResolvedValueOnce(
         Response.json({
-          id: '17841405793187218',
+          id: 'different-app-scoped-id',
           user_id: '17841405793187218',
           username: 'creator',
           account_type: 'BUSINESS',
@@ -33,15 +41,27 @@ describe('Instagram protocol boundaries', () => {
       )
       .mockResolvedValueOnce(
         Response.json({
-          data: INSTAGRAM_SCOPES.map((permission) => ({ permission, status: 'granted' })),
+          data: [{ quota_usage: 0 }],
         }),
       );
     const result = await new InstagramClient(options, fetcher).exchange('one-use-code');
     expect(result.profile.id).toBe('17841405793187218');
     expect(result.token).toBe('long-token');
+    expect(result.scopes).toEqual(INSTAGRAM_SCOPES);
+    expect(fetcher).toHaveBeenCalledTimes(4);
+    const probe = new URL(String(fetcher.mock.calls[3]![0]));
+    expect(probe.pathname).toBe('/v25.0/17841405793187218/content_publishing_limit');
+    expect(probe.searchParams.get('fields')).toBe('quota_usage');
+    expect(
+      fetcher.mock.calls.some(([input]) =>
+        new URL(String(input)).pathname.endsWith('/permissions'),
+      ),
+    ).toBe(false);
   });
+});
 
-  it('rejects personal accounts, missing scopes, and identity changes', async () => {
+describe('Instagram validation failures', () => {
+  it('rejects personal accounts, denied publishing access, and identity changes', async () => {
     const fetcher = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(
@@ -53,9 +73,7 @@ describe('Instagram protocol boundaries', () => {
       .mockResolvedValueOnce(
         Response.json({ id: '1', username: 'creator', account_type: 'BUSINESS' }),
       )
-      .mockResolvedValueOnce(
-        Response.json({ data: [{ permission: INSTAGRAM_SCOPES[0], status: 'granted' }] }),
-      );
+      .mockResolvedValueOnce(Response.json({ error: { code: 200 } }, { status: 403 }));
     await expect(client.validate('private-token')).rejects.toThrow('PERMISSION_REQUIRED');
     fetcher.mockResolvedValueOnce(
       Response.json({ id: '2', username: 'creator', account_type: 'BUSINESS' }),
@@ -84,15 +102,15 @@ describe('Instagram protocol boundaries', () => {
 });
 
 describe('Instagram OAuth request diagnostics', () => {
-  it.each(['code_exchange', 'token_exchange', 'profile', 'permissions'] as const)(
+  it.each(['code_exchange', 'token_exchange', 'profile', 'publishing_access'] as const)(
     'identifies a rejected %s request without retaining secrets',
     async (operation) => {
       const successful = [
-        { access_token: 'short-secret', user_id: '123' },
+        { access_token: 'short-secret', user_id: '123', permissions: INSTAGRAM_SCOPES },
         { access_token: 'long-secret', expires_in: 5184000 },
         { id: '123', user_id: '123', username: 'private-name', account_type: 'BUSINESS' },
       ];
-      const steps = ['code_exchange', 'token_exchange', 'profile', 'permissions'];
+      const steps = ['code_exchange', 'token_exchange', 'profile', 'publishing_access'];
       const fetcher = vi.fn<typeof fetch>();
       for (const body of successful.slice(0, steps.indexOf(operation)))
         fetcher.mockResolvedValueOnce(Response.json(body));
