@@ -79,6 +79,10 @@ Landing, login/signup, and planner share a neutral theme and local Roboto typogr
 See [the design plan](docs/frontend-design.md). Roboto is vendored with its font license
 and loaded with `next/font/local`; font downloads are not required during builds.
 
+For HTTPS development tunnels, allow the exact hostname in web `allowedDevOrigins` and
+restart Next.js. The current private test hostname is `no.rupakbasnet.com.np`.
+See [Instagram setup](docs/instagram-setup.md) for OAuth redirects and token configuration.
+
 ## Runtime and integration checks
 
 ```sh

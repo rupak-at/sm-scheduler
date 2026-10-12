@@ -202,6 +202,12 @@ Never weaken origin checks or expose credentials while adding a feature.
 - API cannot bind its port: stop the conflicting service or change `API_PORT` and web `API_BASE_URL`.
 - Workspace imports missing: run `npm run build:packages` before starting an individual app.
 - Auth returns 403: ensure the browser origin exactly matches API `WEB_ORIGIN`.
+- Tunnel login buttons do nothing and `/_next/hmr` returns 502: ensure the tunnel hostname
+  is listed in `allowedDevOrigins` in `apps/web/next.config.ts`. The current private test
+  hostname is `no.rupakbasnet.com.np`; replace it if your tunnel changes, restart Next.js,
+  and reload the browser. Next.js blocks unapproved development WebSocket origins, and the
+  blocked connection prevented React from attaching auth handlers in the observed dev session.
+  This development allowlist is separate from API `WEB_ORIGIN` and the Instagram callback.
 - Login throttled: wait a minute before retrying. Configure trusted proxy/client-IP handling when
   choosing production hosting; current fallback buckets are conservative and shared.
 - Dependency updates: review the lockfile and audit. Current upstream lint-tool advisories and
@@ -290,6 +296,18 @@ Verification: schema validation and isolated deployment of all three migrations 
 secure auth/linking, real queue recovery, ownership, upload validation, draft races, token lifecycle, duplicate jobs,
 and ambiguous outcomes. Real Meta authorization/publishing is still pending user setup/testing.
 Final quality/build/browser results are recorded in [implementation status](project-status.md).
+
+### 2026-10-12 — restore Instagram login through the HTTPS tunnel
+
+Allowed the exact private HTTPS test hostname in Next.js `allowedDevOrigins`. Before the
+change, the Instagram button rendered enabled but React did not attach its handler through
+the tunnel; the same page worked on localhost. After the config restart, HMR connected and
+the button invoked `POST /api/auth/instagram/start` through the tunnel. The browser diagnostic
+intercepted that request before any backend or Instagram authorization effect.
+
+Verification: Chromium checks reproduced the failure with cache disabled and confirmed
+working hydration/click handling after the change. Formatting, lint, strict types, unit tests,
+and production build results are recorded in [implementation status](project-status.md).
 
 ### Future entries
 

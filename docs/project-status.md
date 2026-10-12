@@ -76,3 +76,19 @@ were rerun with approved local access. A cached failed Turbopack compilation was
 before the successful production build. No configured creator database was migrated.
 Docker startup on this machine needs administrator access; temporary user-owned services
 were used for verification. Real Instagram authorization/publishing is the user's next test.
+
+## Update log
+
+### 2026-10-12 — HTTPS tunnel login fix
+
+Added `no.rupakbasnet.com.np` to Next.js's exact development-origin allowlist. Browser checks
+confirmed that the tunnel previously rendered an enabled Instagram button without React
+handlers, while localhost worked. After the configuration restart, tunnel HMR connected,
+React attached handlers, and clicking invoked the expected Instagram start POST. The diagnostic
+intercepted the POST before backend/provider effects; live Meta authorization remains pending.
+
+Verification: cache-disabled Chromium reproduction and successful localhost/tunnel click checks;
+formatting, lint, strict types, all 22 unit tests, and full production build passed under Node 24.
+HTTP tests and Turbopack compilation needed approved local socket access. A cached sandbox
+compiler failure was moved aside before the successful build. Setup docs distinguish OAuth
+redirects, webhook verification, automatically obtained provider tokens, and local encryption.
