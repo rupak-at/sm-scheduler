@@ -14,17 +14,28 @@ export function PostRow({
 }) {
   return (
     <li className="flex flex-col gap-4 p-5 sm:flex-row">
-      <Image
-        src={post.mediaUrl}
-        width={96}
-        height={96}
-        alt="Post photo"
-        unoptimized
-        className="size-24 rounded-lg object-cover"
-      />
+      {post.mediaMimeType === 'video/mp4' ? (
+        <video
+          src={post.mediaUrl}
+          preload="metadata"
+          muted
+          playsInline
+          aria-label="Reel thumbnail"
+          className="size-24 rounded-lg bg-ink object-cover"
+        />
+      ) : (
+        <Image
+          src={post.mediaUrl}
+          width={96}
+          height={96}
+          alt="Post photo"
+          unoptimized
+          className="size-24 rounded-lg object-cover"
+        />
+      )}
       <div className="min-w-0 flex-1">
         <p className="line-clamp-3 text-sm leading-relaxed break-words whitespace-pre-wrap">
-          {post.caption || 'Photo post'}
+          {post.caption || (post.mediaMimeType === 'video/mp4' ? 'Instagram Reel' : 'Photo post')}
         </p>
         <p className="mt-2 text-xs font-medium text-muted">
           {post.status.toLowerCase().replaceAll('_', ' ')}

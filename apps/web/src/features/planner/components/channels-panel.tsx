@@ -23,7 +23,7 @@ export function ChannelsPanel({
         Your Instagram
       </h2>
       <p className="mt-2 text-sm leading-relaxed text-muted">
-        Connect a Business or Creator account to publish your photos.
+        Connect a Business or Creator account to publish photos and Reels.
       </p>
       <div className="mt-5 space-y-5">
         {channels.map((channel) => (

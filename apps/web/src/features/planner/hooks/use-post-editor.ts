@@ -7,11 +7,13 @@ import { workspaceRequest } from '../lib/workspace-client';
 import { useMediaUpload } from './use-media-upload';
 import { useEditorSchedule } from './use-editor-schedule';
 import { useUnsavedChanges } from './use-unsaved-changes';
+import { useCaption } from './use-caption';
 
-export function usePostEditor(post?: PlannerPost) {
+export function usePostEditor(post: PlannerPost | undefined, initialChannelId: string) {
   const router = useRouter();
   const original = useRef(post);
-  const [caption, setCaption] = useState(post?.caption ?? '');
+  const caption = useCaption(post?.caption ?? '');
+  const [channelId, setChannelId] = useState(post?.socialAccountId ?? initialChannelId);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [error, setError] = useState('');
@@ -30,20 +32,22 @@ export function usePostEditor(post?: PlannerPost) {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
-    const form = new FormData(event.currentTarget);
+    if (saving || media.uploading) return;
     const submitter = (event.nativeEvent as SubmitEvent).submitter;
     const scheduling = submitter instanceof HTMLButtonElement && submitter.value === 'schedule';
     try {
-      if (!media.asset) throw new Error('Add a photo before saving.');
+      if (!media.asset) throw new Error('Add a photo or video before saving.');
+      if (caption.captionProblem) throw new Error(caption.captionProblem);
+      if (!channelId) throw new Error('Choose an Instagram account.');
       if (scheduling && !schedule.scheduled)
         throw new Error('Choose a date and time for this post.');
       if (scheduling && new Date(schedule.scheduled).getTime() < Date.now() + 60000)
         throw new Error('Choose a time at least one minute in the future.');
       setSaving(true);
       await workspaceRequest(post ? `/posts/${post.id}` : '/posts', post ? 'PUT' : 'POST', {
-        caption,
+        caption: caption.composedCaption,
         mediaAssetId: media.asset.id,
-        socialAccountId: form.get('channel'),
+        socialAccountId: channelId,
         timezone: schedule.timezone,
         scheduledAt: scheduling ? new Date(schedule.scheduled).toISOString() : null,
         ...(post ? { revision: original.current?.updatedAt } : {}),
@@ -60,9 +64,11 @@ export function usePostEditor(post?: PlannerPost) {
   return {
     ...media,
     ...schedule,
-    caption,
-    setCaption,
+    ...caption,
+    channelId,
+    setChannelId,
     pending: saving || media.uploading,
+    saving,
     dirty,
     setDirty,
     error,

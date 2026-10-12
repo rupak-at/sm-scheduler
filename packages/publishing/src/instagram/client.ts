@@ -101,6 +101,20 @@ export class InstagramClient {
   createContainer(account: string, token: string, imageUrl: string, caption: string) {
     return this.graph(`${account}/media`, token, { image_url: imageUrl, caption }, idSchema, true);
   }
+  createReelContainer(account: string, token: string, videoUrl: string, caption: string) {
+    return this.graph(
+      `${account}/media`,
+      token,
+      {
+        media_type: 'REELS',
+        video_url: videoUrl,
+        caption,
+        share_to_feed: 'true',
+      },
+      idSchema,
+      true,
+    );
+  }
   containerStatus(container: string, token: string) {
     return this.graph(
       container,

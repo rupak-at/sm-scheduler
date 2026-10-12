@@ -17,11 +17,13 @@
   or Better Auth Account storage. Independent local key setup and stored key version.
 - Token expiry/revocation states, pre-publish validation, and automatic eligible long-lived
   token renewal. Renewal uses the existing credential; no generic refresh token is stored.
-- Authenticated, origin-checked and throttled workspace actions. Validated JPEG uploads,
-  metadata stripping/orientation/resize, private previews, and expiring signed public URLs.
+- Authenticated, origin-checked and throttled workspace actions. Validated JPEG/PNG/WebP/AVIF photo inputs
+  converted to JPEG with metadata removal/orientation/resize/padding, bounded MP4 Reel processing,
+  private previews, expiring signed public URLs, and byte-range video playback.
 - Draft creation/editing/deletion, optimistic concurrency, ownership checks, local-timezone
   scheduling, cancellation, editing safe failures, and guarded retries. Post history is retained.
-- URL status filters/pagination, photo editor, channel actions, inline errors, automatic
+- URL status filters/pagination, caption/hashtag editor, live photo/playable-video preview,
+  file-picker/drag-drop media upload, channel actions, inline errors, automatic
   status refresh, and workspace logo/navigation that remain inside the application.
 - Durable PostgreSQL scheduling plus real Redis ID-only delivery. Database claims/leases,
   attempt history, saved containers/send markers, stale-claim recovery, readiness polling,
@@ -42,11 +44,15 @@ through Meta's official Postman collection, with linked references for the live 
 The user confirmed successful real Instagram sign-in on 2026-10-12 after the permission-check
 fix. This verifies their login/account connection, not a successful scheduled publication.
 
-The current vertical slice supports one JPEG photo per post. Reels, video, carousels,
-Stories, analytics, teams, Facebook, and TikTok are not implemented. Future provider enum
-values do not enable those providers.
+The current vertical slice supports one photo or MP4 Reel per post. JPEG/PNG/WebP/AVIF
+photos up to 8 MB become JPEGs. H.264/H.265 MP4s up to 64 MB, 3 seconds–15 minutes, are
+normalized for Reels; the API requires FFmpeg/FFprobe. HEIC, animated images, carousels,
+Stories, analytics, teams, Facebook, and TikTok remain unsupported. Live photo and Reel
+publishing remain unverified; future provider enum values do not enable those providers.
 
-Media uses a persistent local API filesystem, not S3. Production storage/retention/quotas,
+Media uses a persistent local API filesystem, not S3. Uploads currently pass through Next.js;
+production body/time limits must accommodate them. Larger Vercel function uploads require
+a future upload-path change. Production storage/retention/quotas,
 verified hosting/proxy IP configuration, provider deauthorization/data-deletion callbacks,
 account erasure, deployments, and multi-key token rotation remain. Email verification and
 password-reset delivery require a mail provider. Internal Instagram identity emails are not
@@ -59,16 +65,18 @@ their fixtures: never use a creator database for integration tests.
 
 ## Verification
 
-- Formatting, lint, strict workspace/tools types, and 45 unit tests.
+- Formatting, lint, strict workspace/tools types, and 78 unit tests.
 - Prisma schema validation; all three migrations applied to isolated PostgreSQL.
-- 21 integration tests against real isolated PostgreSQL/Redis and simulated Meta responses:
+- 26 integration tests against real isolated PostgreSQL/Redis and simulated Meta responses:
   session security, OAuth browser/state protection, explicit email linking, ownership,
   upload validation/private and signed media, draft concurrency, scheduling/cancellation,
-  duplicate delivery, container polling, token expiry/renewal/revocation, and uncertain sends.
+  duplicate delivery, photo/Reel container polling, real video decoding/normalization, byte ranges,
+  token expiry/renewal/revocation, and uncertain sends.
 - Real BullMQ/Redis delivery verifies PostgreSQL reconciliation repairs missed enqueue
   and queues publication identifiers without captions or credentials.
 - Full package/API/worker/Next.js production build; production dependency audit reports zero vulnerabilities.
-- Chromium fixture checks: upload → draft save and upload → schedule, session redirects,
+- Chromium fixture checks: photo upload → draft save/edit, MP4 playback → schedule, real drag/drop,
+  preview/save caption+hashtag equality, session redirects,
   workspace logo destination, status URLs, form labels/focus, long names, light controls under
   dark system preference, reduced motion, and viewport overflow from 320 through 1920px.
   Desktop/mobile/tablet editor screenshots inspected. Physical Safari/iPad testing is pending.
@@ -121,3 +129,19 @@ The user reported successful live Instagram sign-in after this fix. Real publish
 Verification: formatting/lint/types, all 45 unit tests, all 22 PostgreSQL/Redis/provider-fixture
 integration tests, and full production build passed under Node 24. Committed migrations were
 applied only to a new temporary local test database; the creator database was not migrated.
+
+### 2026-10-12 — complete media composer and live preview
+
+Implemented separate captions/hashtags and a responsive preview of actual selected Instagram
+account, photo/playable MP4, and exact saved text. Added real drag/drop/file selection, processing
+feedback, cancellation/removal, and combined 2,200-character validation. Still JPEG/PNG/WebP/AVIF
+inputs become normalized JPEGs; eligible MP4s become H.264/AAC Reels. Private/signed URLs support
+byte ranges. Worker guards, saved containers, polling recovery, and uncertain-send behavior also
+cover videos. API/CI require FFmpeg/FFprobe; existing schema/storage stay compatible.
+
+Verification: formatting/lint/types, all 78 unit tests, all 26 isolated integration tests, and full
+production build passed under Node 24. Chromium passed eight-width layout/labels checks, error
+focus, matching preview/save text, editing hashtag separation, PNG drag/drop, real video playback,
+byte-range requests, Reel scheduling, light controls under dark preference, and reduced motion.
+Desktop/mobile/tablet screenshots were inspected. Creator data was not migrated and no real Meta
+publish, push, or deployment occurred. First live photo/Reel publishing remains the user's test.

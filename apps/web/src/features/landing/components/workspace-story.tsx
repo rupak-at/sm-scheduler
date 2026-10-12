@@ -58,7 +58,7 @@ function WorkspacePreview() {
       </div>
       <figcaption className="flex items-center gap-3 bg-canvas px-5 py-4 text-xs text-muted">
         <Instagram size={16} aria-hidden="true" />
-        Connect Instagram to start planning your photos.
+        Connect Instagram to start planning photos and Reels.
       </figcaption>
     </figure>
   );

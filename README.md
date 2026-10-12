@@ -6,13 +6,16 @@ Follow [the development guide](docs/development.md) for setup, feature work, mig
 and commits. The guide and implementation status must be updated with every completed change.
 The original `idea.md` is a local planning document excluded by the workspace's gitignore.
 
-The project includes email/password and Instagram sign-in, Instagram connection, JPEG uploads,
-drafts, scheduling, and a separate publishing worker. The user verified real Instagram sign-in;
+The project includes email/password and Instagram sign-in, Instagram connection, photo/MP4 uploads,
+caption and hashtag fields, live previews, drafts, scheduling, and a separate publishing worker.
+The user verified real Instagram sign-in;
 the first real publish is pending. Follow [Instagram setup](docs/instagram-setup.md) to test with your own account.
 
 ## Quick start
 
 Use Node 24 LTS and npm. Docker Compose provides the local infrastructure.
+Install FFmpeg and FFprobe on the API host's PATH, with the `libx264` and AAC encoders,
+for MP4 processing. For example, Debian/Ubuntu packages both tools in `ffmpeg`.
 
 ```sh
 nvm use
@@ -26,6 +29,12 @@ npm run dev
 Open [localhost:3000](http://localhost:3000) and create an account.
 The public landing page is `/`; login/signup opens the protected workspace at `/planner`.
 The API runs at [localhost:4000](http://localhost:4000); the worker is a separate process.
+
+In **New post**, drop or choose one photo or MP4, write a caption and hashtags, and review
+the live photo/playable-video preview before saving or scheduling. Still JPEG, PNG, WebP,
+and AVIF photos up to 8 MB become JPEGs. H.264/H.265 MP4s up to 64 MB, 3 seconds–15 minutes,
+are prepared as Reels. Caption plus hashtags may contain at most 2,200 characters.
+HEIC, animated images, carousels, and Stories are not supported.
 
 On Linux, Docker requires Docker-group or administrator access. If needed, use
 `sudo docker compose -f infra/docker-compose.yml up -d --wait`.
@@ -112,8 +121,11 @@ Instagram Login connects professional accounts and can authenticate the workspac
 encrypted on the backend; the browser receives ordinary application session cookies.
 Email verification and password-reset delivery still require a mail provider.
 
-Real Meta testing, production deployment/storage, additional media formats, and account/provider
+Real publishing tests, production deployment/storage, additional media formats, and account/provider
 lifecycle callbacks remain. Current media storage requires a persistent API filesystem.
 Next.js can run on Vercel; API and worker need separate always-on backend hosting.
+The current upload path passes through Next.js; production hosts must accommodate the
+configured body sizes and processing time. [Vercel’s function request-size limit](https://vercel.com/docs/functions/limitations#request-body-size) requires
+a different upload path for larger files before deploying these upload limits there.
 
 See [implementation status](docs/project-status.md) and [architecture](docs/architecture.md).

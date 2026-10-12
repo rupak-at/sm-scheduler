@@ -13,7 +13,7 @@ const stages = [
   },
   {
     title: 'Your content',
-    description: 'Upload a JPEG photo, write your caption, and save a draft.',
+    description: 'Upload a photo or MP4, write your caption and hashtags, and preview your draft.',
     available: true,
   },
   {

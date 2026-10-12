@@ -20,7 +20,8 @@ promising support. A successful authorized test publish is required before claim
 
 This repository includes npm workspaces, a public landing page, a protected Next.js planner,
 email/password and Instagram sign-in, Instagram account connection, encrypted tokens,
-JPEG uploads, draft editing/deletion, durable scheduling, and a BullMQ publishing/recovery worker.
+photo/MP4 uploads, caption/hashtag editing and live previews, draft editing/deletion,
+durable scheduling, and a BullMQ publishing/recovery worker.
 The user verified real Instagram sign-in on 2026-10-12; the first real publishing test is pending.
 Automated provider tests use fixtures.
 Read `docs/instagram-setup.md` before changing the integration or running a live test.
@@ -118,7 +119,11 @@ review phone/tablet/laptop/desktop layouts at 320, 390, 768, 820, 1024, 1280, 14
   Block email signup on this reserved domain; do not expose it as a verified contact address.
 - Tokens use AES-256-GCM, independent 32-byte key, account-bound authenticated data, and key version.
 - Refresh only unexpired long-lived tokens at least 24 hours old; expiry comes from provider responses.
-- JPEG photos only. Decode/validate/re-encode uploads; ownership is checked when saving and publishing.
+- Accept still JPEG/PNG/WebP/AVIF photos up to 8 MB; decode/validate/auto-orient and convert
+  to JPEG. Pad unsupported photo aspect ratios to preserve the full image.
+- Accept H.264/H.265 MP4 Reels up to 64 MB, 3 seconds–15 minutes. API requires FFmpeg/FFprobe
+  on PATH and normalizes to H.264/AAC with bounded concurrency, time, and output size.
+  Ownership and matching media type/MIME are checked when saving and publishing.
 - Persist container ID and publish-request marker before sending. Uncertain sends must never be blindly retried.
 - `.data/media` is local persistent storage, ignored by git. Public URLs are signed and expire.
 - The user is applying their database migrations. Create/test migrations against isolated services,

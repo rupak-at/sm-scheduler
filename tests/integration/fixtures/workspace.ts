@@ -19,11 +19,14 @@ interface WorkspaceFixture extends ReturnType<typeof instagramFixture> {
   tokens: AccountTokens;
   close: () => Promise<void>;
 }
-export async function createWorkspaceFixture(): Promise<WorkspaceFixture> {
+export async function createWorkspaceFixture(
+  options: { accountId?: string } = {},
+): Promise<WorkspaceFixture> {
   const db = integrationDatabase();
   await db.rateLimit.deleteMany();
   const directory = await mkdtemp('/tmp/social-scheduler-test-media-');
   const fixture = instagramFixture();
+  if (options.accountId) fixture.state.accountId = options.accountId;
   const vault = new TokenVault(testKey);
   const storage = new MediaStorage(directory, testKey, 'https://test.example');
   const tokens = new AccountTokens(db, fixture.client, vault);

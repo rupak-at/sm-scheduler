@@ -17,7 +17,7 @@ export function PostList({
       <div className="px-6 py-16 text-center">
         <h2 className="text-lg font-medium">A place for your next post</h2>
         <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted">
-          Connect Instagram, add a photo, and save a draft or choose when to share it.
+          Connect Instagram, add a photo or video, and save a draft or choose when to share it.
         </p>
       </div>
     );

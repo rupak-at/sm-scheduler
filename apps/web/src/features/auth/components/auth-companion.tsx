@@ -18,7 +18,7 @@ export function AuthCompanion() {
           A place for the ideas worth sharing.
         </h2>
         <p className="mt-4 max-w-[40ch] text-sm leading-6 text-zinc-300">
-          Start with your workspace. Instagram connection and publishing tools are coming next.
+          Connect Instagram, prepare a photo or Reel, and choose when to share it.
         </p>
       </div>
     </aside>

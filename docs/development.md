@@ -9,7 +9,8 @@ Social Scheduler helps creators prepare and schedule Instagram content. Phase 1 
 Instagram-first; future Facebook/TikTok providers share the domain model.
 
 The current application has email/password and Instagram authentication, a protected planner,
-JPEG uploads, drafts, durable scheduling, and a publishing/recovery worker. The user has
+photo/MP4 uploads, caption and hashtag editing with live previews, drafts, durable scheduling,
+and a publishing/recovery worker. The user has
 verified real Instagram sign-in; a real publish still needs testing.
 Read [AGENTS.md](../AGENTS.md), [status](project-status.md), and [architecture](architecture.md)
 before choosing the next feature.
@@ -17,7 +18,9 @@ before choosing the next feature.
 ## First-time setup
 
 Install Node 24 LTS, npm, and Docker with Compose. Use the version in `.nvmrc`
-with your preferred Node version manager.
+with your preferred Node version manager. Install FFmpeg/FFprobe on the API host’s PATH
+with `libx264` and AAC support for MP4 processing (`ffmpeg` package on Debian/Ubuntu).
+CI installs these tools before running the real-video integration tests.
 
 From the repository root:
 
@@ -242,6 +245,35 @@ Instagram Login grants are parsed from the code exchange and stored as granted s
 Token validation uses the profile and read-only publishing quota endpoint; do not add an
 unsupported `/{id}/permissions` grants lookup to this flow.
 
+## Media and composer development
+
+The composer uses separate caption/hashtag fields and a live preview of the selected account,
+media, and exact combined saved text (2,200 characters maximum). Tags accept spaces/commas,
+optional `#`, and Unicode letters/marks/numbers/underscores. A trailing hashtag block round-trips
+into the hashtag field on editing; ordinary paragraphs remain unchanged. File-picker and real
+one-file drag/drop flows share validation. Upload cancellation/replacement cannot apply stale
+results; saving waits for prepared media, while caption entry remains available during upload.
+
+Photo inputs are still JPEG, PNG, WebP, or AVIF, at most 8 MB and 40 megapixels, at least
+320 px wide after orientation. Signature and decoded format must agree. Sharp strips metadata,
+flattens transparency onto white, fits inside 1,440 × 1,800 without enlargement, and pads to
+4:5–1.91:1 when needed to retain the whole photo. Stored/published photos remain JPEG.
+
+MP4 inputs are H.264/H.265, at most 64 MB, 3 seconds–15 minutes. FFprobe validates streams and
+duration; FFmpeg prepares H.264/yuv420p at 30 fps, fits inside 1,920 × 1,920 without enlargement,
+and prepares optional AAC stereo audio at 48 kHz/128 kbps. Input metadata is stripped.
+There are at most two transcodes per API process, a 120-second transcode timeout, and a 64 MB
+output cap; truncated outputs are rejected. The Next.js/browser upload timeout is 180 seconds.
+Upload bodies are bounded while reading. API and production proxy/body/time limits must support
+these values; larger Vercel function uploads need a future direct-upload design.
+
+Existing JPEG storage stays compatible. Video storage uses `.mp4`; private/signed media routes
+validate ownership or signatures and serve byte ranges, which the web proxy forwards for playback.
+The worker chooses photo or `REELS` containers from persisted media type/MIME, saves the
+container before polling, and keeps existing send-marker/uncertain-outcome protections.
+No schema migration is needed. HEIC/GIF, multiple attachments/carousels, and Stories remain unsupported.
+The preview describes composition; Instagram cover cropping/text display can differ.
+
 ## Update log
 
 ### 2026-10-09 — initial foundation and authentication
@@ -342,6 +374,22 @@ professional identity, token encryption, ownership, expiry, and revocation check
 The user confirmed successful live Instagram sign-in after the change. Live publishing is
 still pending. Regression fixtures reject the old endpoint and exercise denied publishing
 access before any media write. Full validation results are in [implementation status](project-status.md).
+
+### 2026-10-12 — media composer with live photo/video previews
+
+Added distinct caption/hashtag fields, a combined character counter, actual account/media/text
+previews, playable videos, keyboard file selection, and drag/drop. Photo inputs now include
+PNG/WebP/AVIF, converted to validated JPEGs with metadata removal and aspect-ratio padding.
+Implemented bounded MP4 normalization, private/signed byte-range playback, and durable Reel
+container creation/polling through the existing worker. API/CI now require FFmpeg/FFprobe;
+no database migration was added or applied to the creator database.
+
+Verification: 78 unit tests, 26 isolated PostgreSQL/Redis/provider-fixture integration tests,
+formatting/lint/types, and full production build passed under Node 24. Chromium checked all
+eight required widths, error focus, caption/hashtag draft round-trip, actual PNG drag/drop,
+MP4 playback/range responses and scheduling, dark preference, and reduced motion.
+Desktop/mobile/tablet screenshots were inspected. No real provider publish was performed;
+first live photo/Reel publishing and physical Safari/iPad testing remain pending.
 
 ### Future entries
 

@@ -42,7 +42,12 @@ export function Planner({
         {error}
       </p>
       {compose && canCompose && (compose === 'new' || post) && (
-        <PostEditor key={post?.id ?? 'new'} channels={data.channels} {...(post ? { post } : {})} />
+        <PostEditor
+          key={post?.id ?? 'new'}
+          channels={data.channels}
+          closeHref={`/planner?${query}`}
+          {...(post ? { post } : {})}
+        />
       )}
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
         <section

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { storedMediaTypeSchema } from './media.js';
 
 export const postInputSchema = z.object({
   caption: z.string().max(2200),
@@ -32,6 +33,7 @@ export const postSchema = z.object({
   updatedAt: z.string(),
   mediaAssetId: z.uuid(),
   mediaUrl: z.string(),
+  mediaMimeType: storedMediaTypeSchema.default('image/jpeg'),
   publicationId: z.uuid(),
   socialAccountId: z.uuid(),
   status: z.enum([

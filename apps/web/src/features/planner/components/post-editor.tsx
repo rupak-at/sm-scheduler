@@ -1,57 +1,74 @@
 'use client';
-import Link from 'next/link';
-import { PhotoField } from './photo-field';
+import { EditorHeader } from './editor-header';
+import { MediaField } from './media-field';
+import { CaptionFields } from './caption-fields';
+import { PostPreview } from './post-preview';
 import { PostFields } from './post-fields';
 import type { Channel, PlannerPost } from '@social-scheduler/shared';
 import { Button } from '@/components/ui/button';
 import { usePostEditor } from '../hooks/use-post-editor';
 
-export function PostEditor({ channels, post }: { channels: Channel[]; post?: PlannerPost }) {
-  const editor = usePostEditor(post);
+export function PostEditor({
+  channels,
+  post,
+  closeHref,
+}: {
+  channels: Channel[];
+  post?: PlannerPost;
+  closeHref: string;
+}) {
+  const editor = usePostEditor(post, channels[0]?.id ?? '');
   return (
     <section
       className="mb-6 rounded-xl border border-line bg-paper p-5 sm:p-6"
       aria-labelledby="editor-heading"
     >
-      <div className="mb-6 flex items-center justify-between gap-3">
-        <h2 id="editor-heading" className="text-lg font-medium">
-          {post ? 'Edit your post' : 'Create a photo post'}
-        </h2>
-        <Link href="/planner" className="rounded-md px-3 py-2 text-sm text-muted hover:bg-surface">
-          Close editor
-        </Link>
-      </div>
+      <EditorHeader editing={Boolean(post)} closeHref={closeHref} />
       <form
         onSubmit={editor.submit}
         onChange={() => editor.setDirty(true)}
-        className="grid gap-6 lg:grid-cols-[200px_minmax(0,1fr)]"
+        className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]"
         aria-busy={editor.pending}
       >
-        <PhotoField editor={editor} />
-        <div className="min-w-0 space-y-4">
-          <PostFields editor={editor} channels={channels} {...(post ? { post } : {})} />
+        <fieldset disabled={editor.saving} className="min-w-0 space-y-6">
+          <legend className="sr-only">Post details</legend>
+          <MediaField editor={editor} />
+          <CaptionFields editor={editor} />
+          <PostFields editor={editor} channels={channels} />
           <p
             ref={editor.errorRef}
+            id="post-editor-error"
             tabIndex={-1}
             role="alert"
             className="text-sm text-destructive empty:hidden"
           >
             {editor.error}
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Button
-              type="submit"
-              name="intent"
-              value="draft"
-              variant="outline"
-              disabled={editor.pending}
-            >
-              {editor.pending ? 'Saving…' : 'Save draft'}
-            </Button>
-            <Button type="submit" name="intent" value="schedule" disabled={editor.pending}>
-              {editor.pending ? 'Saving…' : 'Schedule post'}
-            </Button>
-          </div>
+        </fieldset>
+        <PostPreview
+          editor={editor}
+          channel={channels.find((channel) => channel.id === editor.channelId)}
+        />
+        <div className="flex flex-wrap gap-3 border-t border-line pt-5 xl:col-span-2">
+          <Button
+            type="submit"
+            name="intent"
+            value="draft"
+            variant="outline"
+            disabled={editor.pending}
+            className="h-11 w-full sm:h-9 sm:w-auto"
+          >
+            {editor.uploading ? 'Preparing media…' : editor.saving ? 'Saving…' : 'Save draft'}
+          </Button>
+          <Button
+            type="submit"
+            name="intent"
+            value="schedule"
+            disabled={editor.pending}
+            className="h-11 w-full sm:h-9 sm:w-auto"
+          >
+            {editor.uploading ? 'Preparing media…' : editor.saving ? 'Saving…' : 'Schedule post'}
+          </Button>
         </div>
       </form>
     </section>

@@ -1,14 +1,17 @@
 import type { PrismaClient } from '@social-scheduler/database';
 
 export const postInclude = {
-  media: { orderBy: { position: 'asc' as const } },
+  media: {
+    orderBy: { position: 'asc' as const },
+    include: { mediaAsset: { select: { mimeType: true } } },
+  },
   publications: {
     include: { attempts: { orderBy: { attemptNumber: 'desc' as const }, take: 5 } },
   },
 };
 type StoredPost = Awaited<ReturnType<PrismaClient['post']['findMany']>>[number];
 type PostDetails = StoredPost & {
-  media: { mediaAssetId: string }[];
+  media: { mediaAssetId: string; mediaAsset: { mimeType: string } }[];
   publications: {
     id: string;
     socialAccountId: string;
@@ -30,6 +33,7 @@ export function postView(post: PostDetails) {
     updatedAt: post.updatedAt.toISOString(),
     mediaAssetId: media.mediaAssetId,
     mediaUrl: `/api/workspace/media/${media.mediaAssetId}`,
+    mediaMimeType: media.mediaAsset.mimeType,
     publicationId: publication.id,
     socialAccountId: publication.socialAccountId,
     status: publication.status,

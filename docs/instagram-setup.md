@@ -1,6 +1,6 @@
 # Test Instagram with your own account
 
-The application now has Instagram sign-in, account connection, JPEG drafts/scheduling,
+The application now has Instagram sign-in, account connection, photo/Reel drafts and scheduling, live previews,
 and an always-on publishing worker. The user verified real Instagram sign-in on 2026-10-12;
 the first real publish still needs verification with their account and Meta app. Automated tests simulate Meta responses;
 they never authorize or publish to a real account.
@@ -32,7 +32,7 @@ current requirements in your developer account before the first live test.
 
 ## Local HTTPS and environment
 
-Meta needs a publicly reachable HTTPS callback and photo URL. Expose the Next.js app
+Meta needs a publicly reachable HTTPS callback and media URL. Expose the Next.js app
 (port 3000) through your chosen HTTPS development tunnel. Visit the **tunnel URL** for
 the entire login/connection flow: cookies created at `localhost` will not be available
 on a different tunnel hostname.
@@ -110,10 +110,20 @@ Fresh isolated databases pass all three migrations.
 - If you already have an email workspace, sign in there first and choose **Connect Instagram**.
   Later Instagram sign-in opens that same workspace. Connecting while signed out is rejected.
 - Accounts already owned by another workspace cannot be silently transferred or email-merged.
-- Use **New post**, upload a JPEG, select the account, and write a caption (maximum 2,200 characters).
-  Uploads are decoded, auto-oriented, re-encoded without original metadata, and resized to
-  at most 1,440 px wide. They must be at least 320 px wide and have a 4:5–1.91:1 aspect ratio.
-  Maximum upload size is 8 MB. Videos, carousels, and Stories are not implemented.
+- Use **New post**, drop or choose one photo or MP4, select the account, and write your
+  caption and hashtags in their separate fields (2,200 characters combined). The live preview
+  shows your selected account, actual photo/playable video, and the text that will be saved.
+  On desktop it sits beside the controls; on phones/tablets it follows the fields.
+- Still JPEG/PNG/WebP/AVIF photos may be up to 8 MB, at least 320 px wide after orientation.
+  They are validated, auto-oriented, flattened onto white, stripped of input metadata, resized
+  inside 1,440 × 1,800 without enlargement, and converted to JPEG. Narrow/wide photos are padded
+  to the supported aspect ratio to preserve the whole photo; the prepared image is previewed.
+- H.264/H.265 MP4 Reels may be up to 64 MB, from 3 seconds to 15 minutes. The API needs
+  FFmpeg/FFprobe on PATH. Videos become H.264/yuv420p at 30 fps, inside 1,920 × 1,920 without
+  enlargement, with optional AAC stereo audio at 48 kHz/128 kbps and metadata stripped.
+  Prepared outputs over 64 MB or incomplete outputs are rejected. Processing can take longer
+  than a photo upload; saving waits until it is ready. HEIC, animated images, carousels,
+  and Stories are not supported.
 - **Save draft** persists without publishing. **Schedule post** uses your browser's IANA timezone
   and saves a UTC instant at least one minute ahead. The worker must remain running.
 - Edit/reschedule unpublished content, cancel pending posts, or delete unused drafts. Publishing
@@ -123,6 +133,13 @@ Fresh isolated databases pass all three migrations.
 - If a post is `UNCERTAIN`, inspect Instagram before making another copy. A lost publish response
   may still mean success. The worker checks the saved container and never automatically resends
   after the durable send marker. A confirmed published container can have no recovered post ID.
+
+Meta’s [official Reels publishing collection](https://www.postman.com/meta/instagram/folder/y6xustx/reels-publishing)
+provides the provider’s video/codec/audio constraints. This app intentionally supports a smaller
+MP4-only, 64 MB subset and validates/prepares media before scheduling. Provider fixtures verify
+Reel request parameters and recovery, but the first real photo and Reel publications still need
+your authorized account test. Existing signed media URLs work for both photos and videos;
+video routes and the Next.js proxy support byte-range requests for playback.
 
 ## Token behavior
 
@@ -150,12 +167,15 @@ updates cannot resurrect a disconnected account because token writes compare the
 ## Verification and deployment limits
 
 Automated integration checks use isolated PostgreSQL/Redis and simulated provider responses.
-They cover browser-bound one-use state, real sessions, ownership, image validation, draft
-concurrency, cancellation, duplicate delivery, container recovery, token renewal/revocation,
+They cover browser-bound one-use state, real sessions, ownership, photo/video validation, byte-range playback, draft
+concurrency, cancellation, duplicate delivery, photo/Reel container recovery, token renewal/revocation,
 and uncertain outcomes. They do not prove Meta app approval or live publishing eligibility.
 
 Production deployment, verified hosting/proxy IP settings, S3 storage, media retention/quotas,
 provider deauthorization/data-deletion callbacks, and account erasure are not implemented.
+The upload path currently runs through Next.js; production request/response/time limits must
+support the advertised media sizes. [Vercel Functions](https://vercel.com/docs/functions/limitations#request-body-size)
+limit payloads to 4.5 MB, so larger uploads there need a future direct-upload path.
 Keep this as a private development test until those hosting/Meta lifecycle requirements are addressed.
 The user completed a live Instagram sign-in after the permission-check fix. No live Instagram
 post, push, or deployment was performed; the agent did not perform a live authorization flow.

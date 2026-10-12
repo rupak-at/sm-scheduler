@@ -18,12 +18,20 @@ export class PostsService {
           where: { id: input.socialAccountId, userId, provider: 'INSTAGRAM' },
         });
         const media = await tx.mediaAsset.findFirst({
-          where: { id: input.mediaAssetId, userId, status: 'READY', type: 'IMAGE' },
+          where: {
+            id: input.mediaAssetId,
+            userId,
+            status: 'READY',
+            OR: [
+              { type: 'IMAGE', mimeType: 'image/jpeg' },
+              { type: 'VIDEO', mimeType: 'video/mp4' },
+            ],
+          },
         });
         if (!account || !media)
           throw new WorkspaceError(
             404,
-            'Choose an account and uploaded photo from your workspace.',
+            'Choose an account and uploaded media from your workspace.',
           );
         if (
           input.scheduledAt &&

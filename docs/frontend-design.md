@@ -54,13 +54,39 @@ content canvas with a channel panel alongside it. Tablets/mobile stack channels 
 The account footer truncates long names; mobile exposes a labelled logout action.
 Filters remain URL links at `/planner?view=…`; the editor is deep-linked through `compose`.
 The neutral channel panel shows actual account status and offers connect/reconnect, validation,
-and disconnect. The photo editor pairs a compact preview/upload column with labelled caption,
-account, and local scheduling fields; it becomes one column on phones. Content rows use the
-uploaded photo and real status/attempt information. Failed/uncertain items have an attention tab.
+and disconnect. The media composer pairs labelled upload/caption/hashtag/account/scheduling
+controls with a live Instagram composition preview; it becomes one column on phones/tablets.
+Content rows use the uploaded photo/video and real status/attempt information. Failed/uncertain items have an attention tab.
 
-Instagram sign-in, JPEG drafts/uploads, scheduling, and worker outcomes are implemented;
+Instagram sign-in, photo/MP4 drafts/uploads, live previews, scheduling, and worker outcomes are implemented;
 provider eligibility and a real publish still require the user's live account/app test.
 No sample creator posts are seeded into authenticated workspaces.
+
+## Media composer — 2026-10-12
+
+Use the existing white `#ffffff`, porcelain `#fafafa`, graphite `#27272a`, slate `#71717a`,
+and silver `#e4e4e7` tokens and local Roboto. The creator's selected media is the visual focus.
+Keep controls left aligned, with a live preview beside them at roomy desktop widths and below
+them on phones/tablets. The preview uses the actual selected account and authored text;
+it has no invented engagement counts or inactive Instagram controls.
+
+```text
+[Create a post                                      Close]
+[Drop / browse photo or MP4]   [Live preview / account]
+[Caption                  ]   [Selected photo/video ]
+[Hashtags                 ]   [Caption + hashtags   ]
+[Account / publish time   ]   [Preview guidance     ]
+[Save draft / Schedule post]
+```
+
+The brief requires practical composition, not new branding. Preserve the established palette
+and typography instead of introducing a different visual theme. Separate caption and hashtags
+while showing their combined character limit, and preview the same text that will be saved.
+Uploads provide keyboard/file-picker access, real drag/drop, visible processing/errors, and
+photo/playable-video previews. JPEG/PNG/WebP/AVIF photo inputs are normalized to JPEG and
+MP4s are prepared for Reels through API/worker. Caption typing stays available during upload;
+saving waits for prepared media. The preview shows that prepared asset and exact saved text.
+Existing unsaved-navigation protection covers the close link without duplicate confirmations.
 
 ## References and review
 

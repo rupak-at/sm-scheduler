@@ -4,6 +4,7 @@ import type { InstagramClient, AccountTokens, MediaStorage } from '@social-sched
 import { claimPublication } from './claim.js';
 import type { ClaimedPublication } from './claim.js';
 import { finishPublication, deferPublication } from './outcomes.js';
+import { preparePublicationContainer } from './container.js';
 
 export interface PublishingServices {
   db: PrismaClient;
@@ -41,35 +42,23 @@ export function createPublicationProcessor(services: PublishingServices) {
     }
   };
 }
-async function publishClaimed(
-  { db, client, tokens, storage }: PublishingServices,
-  record: ClaimedPublication,
-) {
+async function publishClaimed(services: PublishingServices, record: ClaimedPublication) {
+  const { db, client, tokens } = services;
   const media = record.post.media[0]?.mediaAsset;
   if (
     record.socialAccount.userId !== record.post.userId ||
     !media ||
     media.userId !== record.post.userId ||
     media.status !== 'READY' ||
-    media.type !== 'IMAGE'
+    !(
+      (media.type === 'IMAGE' && media.mimeType === 'image/jpeg') ||
+      (media.type === 'VIDEO' && media.mimeType === 'video/mp4')
+    )
   )
     throw new InstagramError('INVALID_PUBLICATION_OWNERSHIP');
   const token = await tokens.validToken(record.socialAccountId);
-  let container = record.externalContainerId;
-  if (!container) {
-    const result = await client.createContainer(
-      record.socialAccount.providerAccountId,
-      token,
-      storage.publicMediaUrl(media.id),
-      record.captionOverride ?? record.post.caption,
-    );
-    const saved = await db.publication.updateMany({
-      where: { id: record.id, leaseToken: record.leaseToken, leaseExpiresAt: { gt: new Date() } },
-      data: { externalContainerId: result.id },
-    });
-    if (!saved.count) return;
-    container = result.id;
-  }
+  const container = await preparePublicationContainer(services, record, media, token);
+  if (!container) return;
   const { status_code: status } = await client.containerStatus(container, token);
   if (status === 'PUBLISHED') {
     await finishPublication(db, record, 'PUBLISHED');
