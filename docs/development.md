@@ -233,6 +233,12 @@ claims use database row locks/leases and store container/send markers before rem
 Queues carry publication IDs only. Do not clear an uncertain send marker to force a retry.
 Media storage is persistent local disk in this iteration; S3/production retention remain future work.
 
+OAuth failure redirects expose only the application error category, a fixed operation name,
+HTTP status, and numeric Meta error code/subcode. The provider adapter accepts nested Graph
+errors and top-level token-exchange error codes, discarding raw messages/bodies. Keep these
+diagnostics free of request URLs, authorization codes/state, identity details, and credentials.
+See [Instagram setup](instagram-setup.md) before diagnosing a failed live authorization.
+
 ## Update log
 
 ### 2026-10-09 — initial foundation and authentication
@@ -308,6 +314,19 @@ intercepted that request before any backend or Instagram authorization effect.
 Verification: Chromium checks reproduced the failure with cache disabled and confirmed
 working hydration/click handling after the change. Formatting, lint, strict types, unit tests,
 and production build results are recorded in [implementation status](project-status.md).
+
+### 2026-10-12 — diagnose rejected Instagram callback requests
+
+Preserved the OAuth operation and safe numeric provider diagnostics through the adapter and
+callback redirect. Previously all unrecognized Meta rejection responses became the same
+`PROVIDER_REJECTED` URL, hiding whether code exchange, long-lived-token exchange, profile,
+or permissions failed. The existing authorization, error categories, and uncertain-write
+handling remain; no raw provider message, response body, token, or authorization code is exposed.
+
+Verification: focused adapter/client/redirect tests cover all four OAuth operations, both error
+envelopes, error categories, missing/malformed diagnostics, and secret-safe failure URLs.
+Full check/build results are recorded in [implementation status](project-status.md).
+The user's live rejection still needs a fresh attempt to obtain the new diagnostic fields.
 
 ### Future entries
 

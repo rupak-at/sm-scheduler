@@ -4,6 +4,7 @@ import { setSessionCookie } from 'better-auth/cookies';
 import { InstagramError } from '@social-scheduler/publishing';
 import { consumeOAuthState } from './oauth-state.js';
 import { saveInstagramIdentity } from './identity.js';
+import { callbackFailureUrl } from './oauth-error.js';
 import type { InstagramPluginOptions } from './instagram.plugin.js';
 export interface CallbackQuery {
   state?: string | undefined;
@@ -24,7 +25,7 @@ export async function completeInstagramCallback(
     path: '/api/auth/instagram',
     maxAge: 0,
   };
-  let destination = '/login';
+  let destination: '/login' | '/planner' = '/login';
   try {
     const browser = await ctx.getSignedCookie(cookie, ctx.context.secret);
     ctx.setCookie(cookie, '', { ...cookieOptions, maxAge: 0 });
@@ -55,8 +56,7 @@ export async function completeInstagramCallback(
       await setSessionCookie(ctx, { user, session });
     }
   } catch (error) {
-    const code = error instanceof InstagramError ? error.code : 'CONNECTION_FAILED';
-    throw ctx.redirect(`${webOrigin}${destination}?connection=${encodeURIComponent(code)}`);
+    throw ctx.redirect(callbackFailureUrl(webOrigin, destination, error));
   }
   throw ctx.redirect(`${webOrigin}/planner?connection=connected`);
 }

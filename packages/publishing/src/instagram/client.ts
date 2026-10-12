@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { instagramRequest, InstagramError } from './http.js';
+import type { InstagramOperation } from './http.js';
 
 export const INSTAGRAM_SCOPES = ['instagram_business_basic', 'instagram_business_content_publish'];
 const tokenSchema = z.object({
@@ -60,6 +61,7 @@ export class InstagramClient {
       'https://api.instagram.com/oauth/access_token',
       { method: 'POST', body },
       shortTokenSchema,
+      'code_exchange',
     );
     const url = new URL('https://graph.instagram.com/access_token');
     url.search = new URLSearchParams({
@@ -67,7 +69,7 @@ export class InstagramClient {
       client_secret: this.options.appSecret,
       access_token: short.access_token,
     }).toString();
-    const token = await instagramRequest(this.fetcher, url, {}, tokenSchema);
+    const token = await instagramRequest(this.fetcher, url, {}, tokenSchema, 'token_exchange');
     const profile = await this.validate(token.access_token);
     // Profile identity is authoritative; numeric OAuth user_id values can exceed JS safe integers.
     return {
@@ -82,10 +84,19 @@ export class InstagramClient {
       token,
       { fields: 'id,user_id,username,account_type' },
       profileSchema,
+      false,
+      'profile',
     );
     const id = profile.user_id ?? profile.id;
     if (expectedId && id !== expectedId) throw new InstagramError('ACCOUNT_MISMATCH');
-    const permissions = await this.graph(`${id}/permissions`, token, {}, permissionsSchema);
+    const permissions = await this.graph(
+      `${id}/permissions`,
+      token,
+      {},
+      permissionsSchema,
+      false,
+      'permissions',
+    );
     if (
       !INSTAGRAM_SCOPES.every((scope) =>
         permissions.data.some((item) => item.permission === scope && item.status === 'granted'),
@@ -130,6 +141,7 @@ export class InstagramClient {
     params: Record<string, string>,
     schema: z.ZodType<T>,
     post = false,
+    operation?: InstagramOperation,
   ) {
     const url = new URL(`https://graph.instagram.com/${this.options.version}/${path}`);
     const body = new URLSearchParams(params);
@@ -143,6 +155,7 @@ export class InstagramClient {
         ...(post ? { body } : {}),
       },
       schema,
+      operation,
     );
   }
 }

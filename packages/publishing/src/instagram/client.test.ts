@@ -82,3 +82,35 @@ describe('Instagram protocol boundaries', () => {
     ).rejects.toMatchObject({ message: 'PROVIDER_UNAVAILABLE', uncertain: true });
   });
 });
+
+describe('Instagram OAuth request diagnostics', () => {
+  it.each(['code_exchange', 'token_exchange', 'profile', 'permissions'] as const)(
+    'identifies a rejected %s request without retaining secrets',
+    async (operation) => {
+      const successful = [
+        { access_token: 'short-secret', user_id: '123' },
+        { access_token: 'long-secret', expires_in: 5184000 },
+        { id: '123', user_id: '123', username: 'private-name', account_type: 'BUSINESS' },
+      ];
+      const steps = ['code_exchange', 'token_exchange', 'profile', 'permissions'];
+      const fetcher = vi.fn<typeof fetch>();
+      for (const body of successful.slice(0, steps.indexOf(operation)))
+        fetcher.mockResolvedValueOnce(Response.json(body));
+      fetcher.mockResolvedValueOnce(
+        Response.json(
+          { error: { code: 100, message: 'private-name long-secret' } },
+          { status: 400 },
+        ),
+      );
+      const error = await new InstagramClient(options, fetcher)
+        .exchange('private-code')
+        .catch((problem: unknown) => problem);
+      expect(error).toMatchObject({
+        code: 'PROVIDER_REJECTED',
+        details: { operation, httpStatus: 400, providerCode: 100 },
+      });
+      expect(JSON.stringify(error)).not.toMatch(/private-name|long-secret|private-code/);
+      expect(fetcher).toHaveBeenCalledTimes(steps.indexOf(operation) + 1);
+    },
+  );
+});

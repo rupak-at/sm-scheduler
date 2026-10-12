@@ -57,7 +57,7 @@ their fixtures: never use a creator database for integration tests.
 
 ## Verification
 
-- Formatting, lint, strict workspace/tools types, and 22 unit tests.
+- Formatting, lint, strict workspace/tools types, and 37 unit tests.
 - Prisma schema validation; all three migrations applied to isolated PostgreSQL.
 - 21 integration tests against real isolated PostgreSQL/Redis and simulated Meta responses:
   session security, OAuth browser/state protection, explicit email linking, ownership,
@@ -92,3 +92,17 @@ formatting, lint, strict types, all 22 unit tests, and full production build pas
 HTTP tests and Turbopack compilation needed approved local socket access. A cached sandbox
 compiler failure was moved aside before the successful build. Setup docs distinguish OAuth
 redirects, webhook verification, automatically obtained provider tokens, and local encryption.
+
+### 2026-10-12 — safe Instagram callback diagnostics
+
+Provider failures retain a fixed OAuth step, HTTP status, and numeric Meta error code/subcode
+in the final login/workspace redirect. Handles nested Graph and top-level OAuth error codes
+without retaining provider messages/bodies, request URLs, tokens, or authorization codes/state.
+This identifies the failed request behind the generic `PROVIDER_REJECTED` notice; it does not
+establish the cause of the user's current live rejection or verify live publishing.
+
+Verification: 19 focused adapter/client/redirect tests passed, covering all four request steps,
+secret exclusion, response envelopes, error mapping, and uncertain writes.
+Full formatting/lint/types checks, all 37 unit tests, and the package/API/worker/Next.js
+production build passed under Node 24. No real provider call or creator-database migration
+was performed by the agent; the user's fresh login attempt is needed to diagnose the rejection.
