@@ -173,3 +173,26 @@ no browser errors. Inspected mobile/tablet/desktop screenshots after waiting for
 media. Fresh anonymous localhost/tunnel pages also serve and apply the correct development CSS.
 Historical production-only checks did not catch the supplied development-style failure; both
 compiler source detection and browser layout assertions now cover that gap.
+
+## Planner action response — 2026-10-13
+
+Reviewed against freshly fetched Web Interface Guidelines. Reproduced the unresponsive-looking
+New post transition by delaying its server response, then verified the local URL-state flow.
+
+`apps/web/src/features/planner/components/composer-link.tsx:16` — fixed: editor links respond
+without waiting for a server render. They retain real hrefs and standard modified-click behavior;
+account hash links retain their normal navigation.
+
+`apps/web/src/features/planner/components/planner.tsx:29` — pass: live URL state drives the
+composer, including direct URLs and browser history. Authenticated workspace data still owns
+media/account/post visibility; server validation still controls save/schedule.
+
+`apps/web/src/features/planner/components/post-editor.tsx:20` — pass: local closing preserves
+view/cursor, checks unsaved changes, and restores focus to New post.
+
+Playwright passed all eight viewport checks and verified creation from All/Published/Scheduled,
+empty creation, direct URLs, back/forward, Ctrl-click new tabs, loaded scheduled editing,
+accepted/declined dirty close, focus restoration, missing-media validation, and actual fixture
+photo upload/scheduling. Final runs have no browser errors. The delayed-navigation check makes
+zero editor server requests after the change. Tests use isolated services; the exact failure in
+the user's open client was not reproduced. Physical Safari/iPad checks remain pending.

@@ -32,8 +32,8 @@ The API runs at [localhost:4000](http://localhost:4000); the worker is a separat
 
 The planner brings status tabs with workspace-wide counts, your next three scheduled posts,
 Instagram connection health, and a compact media list together beneath a single top bar.
-App scrollbars are thin throughout. New/edit posts open in a focused
-composer panel with mobile layouts and fixed save/schedule controls. See the
+App scrollbars are thin throughout. New post and Edit post open immediately in a
+URL-linked composer panel, with mobile layouts and fixed save/schedule controls. See the
 [planner research and design](docs/planner-research.md) for the decisions behind the interface.
 
 In **New post**, drop or choose one photo or MP4, write a caption and hashtags, and review

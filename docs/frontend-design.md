@@ -54,6 +54,8 @@ and labelled logout action. The centered canvas has a content list beside a 288p
 rail at laptop/desktop widths. Tablets place those panels side by side below the list; phones
 stack them. Long names truncate. Status tabs include actual workspace-wide counts.
 Filters remain URL links at `/planner?view=…`; the editor is deep-linked through `compose`.
+Opening/closing the loaded editor updates native History state immediately; it does not wait
+for a new workspace render. Keep the current view/cursor and retain normal new-tab links.
 The neutral channel panel shows actual account status and offers connect/reconnect, validation,
 and disconnect. The media composer pairs labelled upload/caption/hashtag/account/scheduling
 controls with a live Instagram composition preview; it becomes one column on phones/tablets.

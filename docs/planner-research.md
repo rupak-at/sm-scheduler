@@ -97,3 +97,13 @@ Pin detection to web source per [Tailwind's source detection guidance](https://t
 Playwright must assert grid columns, padding, media dimensions, and editor placement in addition
 to overflow, and capture both single-published-post and empty states at eight widths. Use isolated
 preview accounts; do not change creator records or provider state during UI verification.
+
+## Responding to editor actions — 2026-10-13
+
+Opening a composer is a change of interface state. New post and editing loaded rows should
+respond using the authenticated content already present rather than wait for another workspace
+render. Keep `compose` in the URL with the [native History API supported by Next.js](https://nextjs.org/docs/app/getting-started/linking-and-navigating#native-history-api)
+and read it with `useSearchParams`. Real links preserve deep links and modified-click new tabs.
+Closing keeps filter/cursor state and asks before discarding edits. Save/schedule continue to
+validate through the actual API. The delayed-response Playwright comparison verifies the action
+without treating a fast local network as evidence of behavior on a slow connection.

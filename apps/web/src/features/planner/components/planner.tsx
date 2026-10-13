@@ -1,4 +1,5 @@
 'use client';
+import { useSearchParams } from 'next/navigation';
 import type { z } from 'zod';
 import type { workspaceSchema } from '@social-scheduler/shared';
 import { WorkspaceLayout } from './workspace-layout';
@@ -16,17 +17,16 @@ export function Planner({
   userName,
   initial,
   query,
-  compose,
   connection,
 }: {
   view: PlannerView;
   userName: string;
   initial: z.infer<typeof workspaceSchema>;
   query: string;
-  compose?: string;
   connection?: string;
 }) {
   const { data, refresh, act, error, pending } = useWorkspace(initial, query);
+  const compose = useSearchParams().get('compose');
   const post = [...data.posts, ...data.upcoming].find((item) => item.id === compose);
   const canCompose = data.channels.length > 0;
   return (

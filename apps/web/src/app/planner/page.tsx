@@ -22,7 +22,6 @@ export default async function PlannerPage({ searchParams }: PageProps) {
       userName={user.name}
       initial={initial}
       query={query}
-      {...(params.compose ? { compose: params.compose } : {})}
       {...(params.connection ? { connection: params.connection } : {})}
     />
   );

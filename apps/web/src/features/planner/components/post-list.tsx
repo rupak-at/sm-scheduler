@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { ImagePlus, Plus } from 'lucide-react';
 import { PostRow } from './post-row';
+import { ComposerLink } from './composer-link';
 import { Button } from '@/components/ui/button';
 import { plannerViews, type PlannerView } from '../planner-views';
 import type { Channel, PlannerPost } from '@social-scheduler/shared';
@@ -37,13 +37,13 @@ export function PostList({
           className="mt-5 h-11 rounded-xl"
           variant={channels.length ? 'default' : 'outline'}
         >
-          <Link
+          <ComposerLink
             href={channels.length ? `/planner?${query}&compose=new` : '#channels'}
             scroll={false}
           >
             <Plus aria-hidden="true" />
             {channels.length ? 'Create a post' : 'Connect Instagram'}
-          </Link>
+          </ComposerLink>
         </Button>
       </div>
     );

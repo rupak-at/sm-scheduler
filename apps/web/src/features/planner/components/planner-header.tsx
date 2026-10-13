@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ComposerLink } from './composer-link';
 export function PlannerHeader({ canCompose, query }: { canCompose: boolean; query: string }) {
   return (
     <header className="mb-7 flex flex-wrap items-end justify-between gap-4 sm:mb-8">
@@ -15,10 +15,10 @@ export function PlannerHeader({ canCompose, query }: { canCompose: boolean; quer
       </div>
       {canCompose && (
         <Button asChild className="h-11 rounded-lg px-5">
-          <Link data-new-post href={`/planner?${query}&compose=new`} scroll={false}>
+          <ComposerLink data-new-post href={`/planner?${query}&compose=new`} scroll={false}>
             <Plus aria-hidden="true" />
             New post
-          </Link>
+          </ComposerLink>
         </Button>
       )}
     </header>

@@ -133,6 +133,11 @@ the workspace repository and check ownership independently of list filters/pagin
 derive totals from the loaded page. The web and API must use the same updated workspace contract.
 No migration is needed; rebuild shared packages and restart individual web/API processes when
 updating them outside `npm run dev`. The composer uses Radix/shadcn sheet and menu primitives.
+New post, empty-state creation, and loaded-row editing use `ComposerLink` and the native History
+API to change `compose` without a server navigation. `Planner` reads the live URL through
+`useSearchParams`; closing removes `compose` locally after checking unsaved changes. Keep these
+editor actions in the current view/cursor. Filters and save/schedule still load actual server data;
+opening a new browser tab or refreshing an editor URL still uses the authenticated page.
 Public page components live in `src/features/landing`. Keep `/` independent of API availability.
 The Tailwind import explicitly sets `source('../')` relative to `src/app/globals.css`, so utility
 detection covers `src` regardless of the compiler working directory. Keep this source anchor.
@@ -460,6 +465,21 @@ under Node 24. Playwright used an isolated development web/API/database with a s
 post like the supplied screenshots. All eight widths passed computed column/padding/media-size,
 page/dialog overflow, scrollbar, empty-filter, and composer checks with no browser errors.
 Mobile/tablet/desktop screenshots were inspected. No schema or publishing rules changed.
+
+### 2026-10-13 — make planner editor actions respond without a server render
+
+New post, empty-state creation, and loaded post editing now update URL state and open the
+composer locally. Closing keeps the active filter/cursor and existing unsaved-close checks.
+Previously these links waited for a fresh authenticated workspace render before updating the
+address or showing the editor. A delayed-response browser check reproduced that unchanged
+address/closed-editor state; the updated action makes zero editor-navigation requests.
+
+Verification: formatting, lint, strict types, 79 unit tests, and the production build passed
+under Node 24. Playwright checked all eight widths, creation from All/Published/Scheduled,
+empty-state creation, direct editor URLs, back/forward, new-tab links, loaded scheduled editing,
+dirty-close choices, restored focus, real photo upload and scheduling, and validation feedback.
+The isolated preview's stale Turbopack cache was moved aside after a compiler panic; no live
+compiler failure was found. No creator records, provider calls, or schema changes were used.
 
 ### Future entries
 

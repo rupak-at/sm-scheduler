@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { MoreHorizontal, Pencil, RotateCcw, Trash2, Ban } from 'lucide-react';
 import type { PlannerPost } from '@social-scheduler/shared';
+import { ComposerLink } from './composer-link';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -23,10 +23,10 @@ export function PostActions({ post, query, act, pending }: ActionsProps & { quer
         size="sm"
         className="h-11 px-2 text-xs text-muted hover:text-ink sm:h-9"
       >
-        <Link href={`/planner?${query}&compose=${post.id}`} scroll={false}>
+        <ComposerLink href={`/planner?${query}&compose=${post.id}`} scroll={false}>
           <Pencil className="size-3" aria-hidden="true" />
           Edit post
-        </Link>
+        </ComposerLink>
       </Button>
       <PostMenu post={post} act={act} pending={pending} />
     </div>

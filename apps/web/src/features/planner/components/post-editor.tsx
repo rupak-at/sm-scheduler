@@ -1,5 +1,4 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import { EditorHeader } from './editor-header';
 import { EditorActions } from './editor-actions';
 import { MediaField } from './media-field';
@@ -18,12 +17,11 @@ export function PostEditor({
   post?: PlannerPost;
   closeHref: string;
 }) {
-  const router = useRouter();
   const editor = usePostEditor(post, channels[0]?.id ?? '');
   function close() {
     if (editor.saving) return;
     if (editor.dirty && !window.confirm('Leave without saving this post?')) return;
-    router.replace(closeHref, { scroll: false });
+    window.history.replaceState(null, '', closeHref);
   }
   return (
     <Sheet

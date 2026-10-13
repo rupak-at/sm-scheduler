@@ -28,6 +28,7 @@
 - Compact publishing workspace with a single top bar, counted status tabs, chronological
   next-three agenda, media rows, account health, and accessible composer sheet/action menus.
   Responsive development styles have an explicit source anchor; all app scrollbars are thin.
+  New/empty-state/loaded-row editor actions use local URL state without waiting for a server render.
 - Durable PostgreSQL scheduling plus real Redis ID-only delivery. Database claims/leases,
   attempt history, saved containers/send markers, stale-claim recovery, readiness polling,
   and uncertain-outcome reconciliation without automatic duplicate sends.
@@ -91,6 +92,27 @@ Docker startup on this machine needs administrator access; temporary user-owned 
 were used for verification. A real Instagram publication is the user's next test.
 
 ## Update log
+
+### 2026-10-13 — responsive New post and editor navigation
+
+Replaced server navigation for New post, empty-state creation, and loaded post editing with
+local native-History URL updates. The composer reads current `compose` state, opens from the
+authenticated data already loaded, and closes locally with the existing dirty-close guard.
+Active view/cursor, deep links, browser history, and modified-click new tabs remain available.
+Actual saving/scheduling and filter data continue using authenticated server/API paths.
+
+A browser check held the old editor navigation response for 2.5 seconds: the address stayed
+unchanged and the editor stayed closed until the response arrived. With the updated flow,
+the editor appears without making that navigation request. The user's exact live-client
+failure was not independently reproduced; the live runtime reported no current compiler errors.
+
+Verification: formatting, ESLint, strict types, 79 unit tests, and the full production build
+passed under Node 24. Playwright passed all eight widths, creation from All/Published/Scheduled,
+empty-state actions, deep links, back/forward, new tabs, loaded scheduled editing, dirty-close
+choices, focus restoration, missing-media feedback, and actual photo upload/scheduling through
+the isolated API. No browser errors in the final runs. The isolated preview's compiler cache
+needed moving aside after a Turbopack panic. No schema change, live provider call, or creator
+database modification occurred.
 
 ### 2026-10-13 — compact planner revision and global thin scrollbars
 
