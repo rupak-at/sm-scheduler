@@ -39,7 +39,7 @@ The product preview shows an empty workspace rather than simulated creator data.
 ```
 
 Photography comes from an original imagegen asset, converted to a 200KB WebP and delivered
-through Next.js Image. See `apps/web/public/images/README.md` for provenance.
+through Next.js Image. See `frontend/public/images/README.md` for provenance.
 Mobile places the photograph before its companion copy; tablet uses a two-column composition.
 The layout reflows naturally rather than scaling a desktop canvas down to a phone.
 
@@ -112,7 +112,7 @@ remains in the top bar and full account/agenda controls follow the content list.
 keep secondary connection actions inside native details. Filters scroll intentionally on narrow
 screens. Page, filter, sheet, and textarea scrollbars use a shared thin neutral treatment.
 
-Tailwind source detection is explicitly rooted in `apps/web/src` through the global import.
+Tailwind source detection is explicitly rooted in `frontend/src` through the global import.
 Review development and production CSS: checking overflow alone does not establish that grid,
 spacing, and media utilities were generated. Assert computed columns, padding, and image sizes.
 

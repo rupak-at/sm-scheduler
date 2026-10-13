@@ -1,11 +1,13 @@
-import type { PrismaClient, SocialAccount } from '@social-scheduler/database';
+import type { PrismaClient, SocialAccount } from '../../../backend/src/database/index.js';
 import { randomUUID } from 'node:crypto';
 import { mkdtemp, rm } from 'node:fs/promises';
 import sharp from 'sharp';
 import request from 'supertest';
-import { AccountTokens, MediaStorage, TokenVault } from '@social-scheduler/publishing';
-import { createApp } from '../../../apps/api/src/app.js';
-import { createAuthentication } from '../../../apps/api/src/modules/auth/auth.service.js';
+import { AccountTokens } from '../../../backend/src/integrations/instagram/account-tokens.js';
+import { MediaStorage } from '../../../backend/src/lib/media/storage.js';
+import { TokenVault } from '../../../backend/src/integrations/instagram/token-crypto.js';
+import { createApp } from '../../../backend/src/app.js';
+import { createAuthentication } from '../../../backend/src/services/auth.service.js';
 import { instagramFixture, testKey, testOrigin, testSecret } from './instagram.js';
 import { integrationDatabase, deleteTestUsers } from './database.js';
 interface WorkspaceFixture extends ReturnType<typeof instagramFixture> {

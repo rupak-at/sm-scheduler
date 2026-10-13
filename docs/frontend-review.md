@@ -6,36 +6,36 @@ using web-design-guidelines. Applied frontend-design and original imagegen artwo
 
 ## Findings addressed
 
-`apps/web/src/app/globals.css:3` — fixed: system dark preference previously recolored shadcn
+`frontend/src/app/globals.css:3` — fixed: system dark preference previously recolored shadcn
 controls within a light page; dark styling now requires an explicit `.dark` ancestor.
 
-`apps/web/src/app/globals.css:24` — fixed: stronger input boundaries distinguish fields from white surfaces.
+`frontend/src/app/globals.css:24` — fixed: stronger input boundaries distinguish fields from white surfaces.
 
-`apps/web/src/features/landing/components/landing-footer.tsx:25` — fixed: footer sits outside
+`frontend/src/components/landing/landing-footer.tsx:25` — fixed: footer sits outside
 main so the public page has a proper content-information landmark.
 
-`apps/web/src/features/landing/components/landing-hero.tsx:38` — fixed: tablet imagery uses
+`frontend/src/components/landing/landing-hero.tsx:38` — fixed: tablet imagery uses
 side-by-side layout; mobile places photography first rather than a tall text-only panel.
 
 ## Reviewed implementation
 
-`apps/web/src/app/layout.tsx:26` — pass: visible-on-focus skip link, local font, matching light theme metadata.
+`frontend/src/app/layout.tsx:26` — pass: visible-on-focus skip link, local font, matching light theme metadata.
 
-`apps/web/src/features/landing/components/landing-hero.tsx:10` — pass: fluid headings, functional
+`frontend/src/components/landing/landing-hero.tsx:10` — pass: fluid headings, functional
 links, honest availability copy, explicit responsive image containers and sizes.
 
-`apps/web/src/features/auth/components/auth-form.tsx:14` — pass: labels, autocomplete,
+`frontend/src/components/auth/auth-form.tsx:14` — pass: labels, autocomplete,
 native validation, live feedback, pending state, and reduced-motion-aware spinner.
 
-`apps/web/src/features/auth/hooks/use-auth-form.ts:44` — pass: successful auth opens `/planner`.
+`frontend/src/hooks/auth/use-auth-form.ts:44` — pass: successful auth opens `/planner`.
 
-`apps/web/src/features/planner/components/content-filters.tsx:13` — pass: URL filters,
+`frontend/src/components/planner/content-filters.tsx:13` — pass: URL filters,
 current-page indication, keyboard focus, and intentional horizontal scrolling on narrow screens.
 
-`apps/web/src/features/planner/components/sidebar.tsx:41` — pass: long profile names truncate;
+`frontend/src/components/planner/sidebar.tsx:41` — pass: long profile names truncate;
 logout retains an accessible name when its desktop text is visually hidden.
 
-`apps/web/src/features/planner/components/connection-guide.tsx:6` — pass: native keyboard-operable
+`frontend/src/components/planner/connection-guide.tsx:6` — pass: native keyboard-operable
 expandable guidance; upcoming features are explanatory content.
 
 ## Browser validation
@@ -71,23 +71,23 @@ Reviewed the updated composer against the current Web Interface Guidelines using
 frontend-design and web-design-guidelines skills. The existing neutral Roboto/Tailwind/shadcn
 system is retained. No remaining findings in the reviewed composer after these corrections:
 
-`apps/web/src/features/planner/components/media-field.tsx:35` — fixed: asynchronous processing
+`frontend/src/components/planner/media-field.tsx:35` — fixed: asynchronous processing
 and ready state are announced through polite status regions; native file selection accompanies drag/drop.
 
-`apps/web/src/features/planner/components/caption-fields.tsx:16` — pass: labelled caption/hashtag
+`frontend/src/components/planner/caption-fields.tsx:16` — pass: labelled caption/hashtag
 controls, descriptive examples, combined counter, associated errors, and inexpensive live text updates.
 
-`apps/web/src/features/planner/components/post-fields.tsx:19` — fixed: native account selection
+`frontend/src/components/planner/post-fields.tsx:19` — fixed: native account selection
 has explicit light background/foreground colors; selected account drives the live preview.
 
-`apps/web/src/features/planner/components/editor-header.tsx:17` — pass: close link preserves
+`frontend/src/components/planner/editor-header.tsx:17` — pass: close link preserves
 URL filters and uses the existing unsaved-navigation guard without a second confirmation.
 
-`apps/web/src/features/planner/components/post-preview.tsx:37` — pass: native video controls,
+`frontend/src/components/planner/post-preview.tsx:37` — pass: native video controls,
 no autoplay, playsInline, media descriptions, dimensions on images, and actual user-authored text.
 Preview guidance explains provider cropping/display differences without invented engagement/actions.
 
-`apps/web/src/features/planner/components/post-editor.tsx:38` — pass: submit errors receive focus;
+`frontend/src/components/planner/post-editor.tsx:38` — pass: submit errors receive focus;
 caption entry remains usable while media prepares; save/schedule wait for confirmed upload completion.
 
 Chromium used a separate production web instance, real local API, and isolated PostgreSQL fixtures.
@@ -104,23 +104,23 @@ Reviewed the planner, overview, agenda, post rows, action menus, account details
 against the current Web Interface Guidelines. Research and design choices are recorded in
 [planner research](planner-research.md); the existing neutral Roboto system is retained.
 
-`apps/web/src/features/planner/components/planner.tsx` — fixed: explicit one-column mobile grid
+`frontend/src/components/planner/planner.tsx` — fixed: explicit one-column mobile grid
 tracks prevent long agenda captions from widening the page at 320px.
 
-`apps/web/src/features/planner/components/mobile-workspace-context.tsx` — pass: account health
+`frontend/src/components/planner/mobile-workspace-context.tsx` — pass: account health
 and the next queued publication remain reachable before the mobile content list.
 
-`apps/web/src/features/planner/components/workspace-overview.tsx` — pass: real workspace-wide
+`frontend/src/components/planner/workspace-overview.tsx` — pass: real workspace-wide
 counts, tabular numerals, URL links, focus/current states, and useful attention emphasis.
 
-`apps/web/src/features/planner/components/post-actions.tsx` — pass: visible edit action,
+`frontend/src/components/planner/post-actions.tsx` — pass: visible edit action,
 labelled keyboard-operable Radix menu, and confirmations before cancel/delete/retry.
 
-`apps/web/src/features/planner/components/post-editor.tsx` — pass: named Radix dialog,
+`frontend/src/components/planner/post-editor.tsx` — pass: named Radix dialog,
 focus trapping/restoration, initial heading focus without a mobile keyboard, dirty-close guard,
 scrollable content, inline error focus, and save/schedule actions outside the scroll region.
 
-`apps/web/src/features/planner/components/channel-row.tsx` — pass: real account status,
+`frontend/src/components/planner/channel-row.tsx` — pass: real account status,
 long-name truncation, native expandable details, and accessible connection maintenance.
 
 Browser validation results and limits are recorded in [implementation status](project-status.md).
@@ -128,10 +128,10 @@ The preview uses a separate production web instance, real local API, and isolate
 accounts/media. No creator records or live Instagram account were used. Physical Safari/iPad
 and assistive-technology testing remain pending.
 
-`apps/web/src/features/planner/components/post-status.tsx` — fixed: darkened neutral badge labels
+`frontend/src/components/planner/post-status.tsx` — fixed: darkened neutral badge labels
 so small text clears 4.5:1 contrast against the soft gray status surface.
 
-`apps/web/src/features/planner/components/editor-header.tsx` — fixed: mobile sheet header/body/actions
+`frontend/src/components/planner/editor-header.tsx` — fixed: mobile sheet header/body/actions
 respect horizontal device safe areas; header/footer also respect top/bottom insets.
 
 Chromium passed 320/390/768/820/1024/1280/1440/1920px populated, empty, composer, and long-content
@@ -146,23 +146,23 @@ records and never called a real Instagram provider. Physical Safari/iPad checks 
 Fetched the current Web Interface Guidelines again and reviewed the revised top bar, counted
 filters, media rows, account disclosures, mobile header, composer, and scrollbar treatment.
 
-`apps/web/src/app/globals.css:2` — fixed: utility detection is rooted in web source instead of
+`frontend/src/app/globals.css:2` — fixed: utility detection is rooted in web source instead of
 depending on compiler cwd. A real PostCSS/Tailwind regression check covers missing responsive CSS.
 
-`apps/web/src/app/globals.css:36` — pass: thin scrollbars remain visible on both axes, including
+`frontend/src/app/globals.css:36` — pass: thin scrollbars remain visible on both axes, including
 nested regions and textareas; neutral thumb contrast and hover indication are retained.
 
-`apps/web/src/app/icon.svg:1` — fixed: the browser tab now uses the brand mark rather than
+`frontend/src/app/icon.svg:1` — fixed: the browser tab now uses the brand mark rather than
 requesting a missing favicon.
 
-`apps/web/src/features/planner/components/workspace-nav.tsx:20` — pass: connection status has an
+`frontend/src/components/planner/workspace-nav.tsx:20` — pass: connection status has an
 accessible name on phones, 44px targets, keyboard focus, and a working account-details anchor.
 The profile name truncates and the compact logout control retains its accessible label.
 
-`apps/web/src/features/planner/components/content-filters.tsx:6` — pass: real counts, URL state,
+`frontend/src/components/planner/content-filters.tsx:6` — pass: real counts, URL state,
 current-page semantics, intentional narrow-screen scrolling, and visible inset keyboard focus.
 
-`apps/web/src/features/planner/components/planner-header.tsx:8` — fixed: a short phone heading
+`frontend/src/components/planner/planner-header.tsx:8` — fixed: a short phone heading
 keeps the page title and New post action aligned at 320px without hiding the primary action.
 
 Playwright used an isolated **development** web/API/database and a single published-post fixture
@@ -179,15 +179,15 @@ compiler source detection and browser layout assertions now cover that gap.
 Reviewed against freshly fetched Web Interface Guidelines. Reproduced the unresponsive-looking
 New post transition by delaying its server response, then verified the local URL-state flow.
 
-`apps/web/src/features/planner/components/composer-link.tsx:16` — fixed: editor links respond
+`frontend/src/components/planner/composer-link.tsx:16` — fixed: editor links respond
 without waiting for a server render. They retain real hrefs and standard modified-click behavior;
 account hash links retain their normal navigation.
 
-`apps/web/src/features/planner/components/planner.tsx:29` — pass: live URL state drives the
+`frontend/src/components/planner/planner.tsx:29` — pass: live URL state drives the
 composer, including direct URLs and browser history. Authenticated workspace data still owns
 media/account/post visibility; server validation still controls save/schedule.
 
-`apps/web/src/features/planner/components/post-editor.tsx:20` — pass: local closing preserves
+`frontend/src/components/planner/post-editor.tsx:20` — pass: local closing preserves
 view/cursor, checks unsaved changes, and restores focus to New post.
 
 Playwright passed all eight viewport checks and verified creation from All/Published/Scheduled,
@@ -205,10 +205,10 @@ asset headers exposed a four-hour browser cache TTL added through the tunnel, wh
 localhost previews did not exercise. Added development-only no-store directives, source-versioned
 asset URLs, and a fresh development compiler. The user confirmed working UI afterward.
 
-`apps/web/development-cache.ts:20` — fixed: development source versions and browser/CDN cache
+`frontend/development-cache.ts:20` — fixed: development source versions and browser/CDN cache
 policy prevent earlier assets from surviving page updates. Production retains Next.js defaults.
 
-`apps/web/next.config.ts:12` — fixed: avoid restoring a development compiler cache that reproduced
+`frontend/next.config.ts:12` — fixed: avoid restoring a development compiler cache that reproduced
 stale-task failures on workspace/media endpoints in the isolated preview.
 
 Final live localhost and HTTPS-tunnel styles include image dimensions, fixed sheet positioning,

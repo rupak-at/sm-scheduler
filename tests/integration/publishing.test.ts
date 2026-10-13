@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { PostsService } from '../../apps/api/src/modules/workspace/posts.service.js';
-import { createPublicationProcessor } from '../../apps/worker/src/publishing/processor.js';
+import { PostsService } from '../../backend/src/services/posts.service.js';
+import { createPublicationProcessor } from '../../backend/src/worker/publishing/processor.js';
 import { createWorkspaceFixture } from './fixtures/workspace.js';
 import { testOrigin } from './fixtures/instagram.js';
 let fixture: Awaited<ReturnType<typeof createWorkspaceFixture>>;

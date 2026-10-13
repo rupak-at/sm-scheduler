@@ -1,5 +1,5 @@
-import { createDatabase } from '@social-scheduler/database';
-import type { PrismaClient } from '@social-scheduler/database';
+import { createDatabase } from '../../../backend/src/database/index.js';
+import type { PrismaClient } from '../../../backend/src/database/index.js';
 export function integrationDatabase(): PrismaClient {
   if (!process.env.TEST_DATABASE_URL)
     throw new Error('Set TEST_DATABASE_URL to an isolated, migrated database');

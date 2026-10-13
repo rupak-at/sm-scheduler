@@ -3,8 +3,8 @@ import request from 'supertest';
 import { createWorkspaceFixture } from './fixtures/workspace.js';
 import { fixtureVideo } from './fixtures/video.js';
 import { testOrigin } from './fixtures/instagram.js';
-import { PostsService } from '../../apps/api/src/modules/workspace/posts.service.js';
-import { createPublicationProcessor } from '../../apps/worker/src/publishing/processor.js';
+import { PostsService } from '../../backend/src/services/posts.service.js';
+import { createPublicationProcessor } from '../../backend/src/worker/publishing/processor.js';
 
 let fixture: Awaited<ReturnType<typeof createWorkspaceFixture>>;
 let mediaId: string;

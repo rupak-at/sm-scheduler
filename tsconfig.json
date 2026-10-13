@@ -3,9 +3,8 @@
   "include": [
     "vitest*.ts",
     "tests/**/*.ts",
-    "packages/database/prisma.config.ts",
-    "apps/api/src/**/*.test.ts",
-    "apps/worker/src/**/*.test.ts",
+    "backend/prisma.config.ts",
+    "backend/src/**/*.test.ts",
     "packages/*/src/**/*.test.ts"
   ]
 }

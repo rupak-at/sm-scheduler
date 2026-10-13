@@ -12,7 +12,7 @@ export default tseslint.config(
       '**/.next/**',
       '**/coverage/**',
       '**/next-env.d.ts',
-      'packages/database/src/generated/**',
+      'backend/src/database/generated/**',
     ],
   },
   js.configs.recommended,
@@ -23,11 +23,11 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     ...nextPlugin.configs['core-web-vitals'],
-    files: ['apps/web/**/*.{ts,tsx}'],
-    settings: { next: { rootDir: 'apps/web/' } },
+    files: ['frontend/**/*.{ts,tsx}'],
+    settings: { next: { rootDir: 'frontend/' } },
   },
   {
-    files: ['apps/web/**/*.{ts,tsx}'],
+    files: ['frontend/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks },
     rules: {
       'react-hooks/rules-of-hooks': 'error',
@@ -45,14 +45,14 @@ export default tseslint.config(
     },
   },
   {
-    files: ['apps/web/**/*.{ts,tsx}'],
+    files: ['frontend/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
           patterns: [
             {
-              group: ['@social-scheduler/database', '@social-scheduler/config'],
+              group: ['@social-scheduler/backend', '@social-scheduler/backend/*', '**/backend/**'],
               message: 'Keep server infrastructure out of the web workspace. Call the API instead.',
             },
           ],

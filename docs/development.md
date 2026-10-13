@@ -44,7 +44,7 @@ sudo docker compose -f infra/docker-compose.yml up -d --wait
 ```
 
 Setup creates an untracked root `.env`, preserves existing values, and adds a random
-`BETTER_AUTH_SECRET` if missing. It also creates `apps/web/.env.local`.
+`BETTER_AUTH_SECRET` if missing. It also creates `frontend/.env.local`.
 Never copy development credentials into staging or production.
 
 ## Configuration
@@ -104,54 +104,82 @@ Intentionally ignored generated Next.js types do not produce hook warnings.
 
 ## Where features belong
 
-| Concern                                | Location                          |
-| -------------------------------------- | --------------------------------- |
-| Pages and layout                       | `apps/web/src/app`                |
-| Feature UI, hooks, view logic          | `apps/web/src/features/<feature>` |
-| Shared UI primitives                   | `apps/web/src/components/ui`      |
-| HTTP feature modules                   | `apps/api/src/modules/<feature>`  |
-| Worker processors                      | `apps/worker/src/processors`      |
-| Domain/request/job schemas             | `packages/shared/src`             |
-| Database schema and migrations         | `packages/database/prisma`        |
-| Provider publishing contracts/adapters | `packages/publishing/src`         |
+Read [the codebase walkthrough](codebase.md) first. It traces a post from the browser to
+Express, the database, and the worker, with concrete file links and examples of common edits.
 
-Keep pages thin. Separate request handling, validation, business rules, and persistence as
-those responsibilities appear. Use public package exports, not another app's internals.
+| Concern                                 | Location                                            |
+| --------------------------------------- | --------------------------------------------------- |
+| Next.js pages, layouts, proxies         | `frontend/src/app`                                  |
+| UI components                           | `frontend/src/components/{auth,landing,planner,ui}` |
+| Client hooks                            | `frontend/src/hooks/{auth,planner}`                 |
+| Frontend API clients/helpers            | `frontend/src/lib`                                  |
+| Express URLs/middleware wiring          | `backend/src/routes`                                |
+| Request validation/responses            | `backend/src/controllers`                           |
+| Business rules and transactions         | `backend/src/services`                              |
+| Database queries and mapping            | `backend/src/repositories`                          |
+| Provider calls, OAuth, encrypted tokens | `backend/src/integrations/instagram`                |
+| Media processing/storage                | `backend/src/lib/media`                             |
+| Worker startup/publishing/recovery      | `backend/src/worker`                                |
+| Environment and resource setup          | `backend/src/config`                                |
+| Prisma schema/migrations/client         | `backend/prisma`, `backend/src/database`            |
+| Browser-safe validation and types       | `packages/shared/src`                               |
+
+Backend files use ordinary relative imports; frontend files use `@/` imports.
+Only shared browser/backend code is an npm package. Avoid adding forwarding wrappers,
+generic repositories, or a service for a read that is already clear in a query module.
+Services can use Prisma transactions directly to keep locking and business rules together.
 Keep authored files small; ESLint enforces 250 nonblank source lines and 80 per function.
 Generated clients, migrations, and the lockfile are handled by their tools.
+
+`npm run dev` generates Prisma, builds shared, then watches shared, frontend, API, and worker.
+`npm run dev:frontend` runs Next.js; `npm run dev:backend` runs API and worker together.
+Run `npm run build:packages` first when starting individual processes or Vitest directly.
+`npm run dev:api` and `npm run dev:worker` are useful when debugging one backend process.
+`npm run dev:web` remains an alias for the frontend command.
+
+After pulling the directory reorganization, stop old development processes, run `npm install`,
+and restart with `npm run dev`. Move an existing `apps/web/.env.local` to `frontend/.env.local`
+when updating another checkout; `npm run setup:env` creates it for new installations.
+Root `.env` and `.data/media` paths are unchanged. Prisma commands now run inside `backend`;
+existing migration SQL and database tables are unchanged, so no new migration is needed.
+
+Build backend with `npm run build:backend`. Run the HTTP API with
+`npm run start -w @social-scheduler/backend` and the separate worker with
+`npm run start:worker -w @social-scheduler/backend`. Both use the same backend build.
+Set Vercel's project root to `frontend`; retain root workspace installation/shared compilation.
 
 Use Tailwind utilities and shared tokens, shadcn/ui primitives, and local Roboto.
 Read frontend-design before UI changes; use web-design-guidelines for review.
 Keep accessibility, mobile layout, loading/error states, and URL-based filters intact.
 
 The current design uses white/graphite surfaces, subtle gray dividers, and Roboto throughout.
-Theme colors are defined in `apps/web/src/app/globals.css`; avoid one-off feature palettes.
+Theme colors are defined in `frontend/src/app/globals.css`; avoid one-off feature palettes.
 The planner uses a single top bar, status tabs with real workspace-wide totals, a bounded
 upcoming-post agenda, compact media rows, account health, and a URL-linked composer sheet. Read
 [planner research](planner-research.md) for the design decisions. Count/agenda queries live in
 the workspace repository and check ownership independently of list filters/pagination; do not
 derive totals from the loaded page. The web and API must use the same updated workspace contract.
-No migration is needed; rebuild shared packages and restart individual web/API processes when
+No migration is needed; rebuild shared and restart individual frontend/API processes when
 updating them outside `npm run dev`. The composer uses Radix/shadcn sheet and menu primitives.
 New post, empty-state creation, and loaded-row editing use `ComposerLink` and the native History
 API to change `compose` without a server navigation. `Planner` reads the live URL through
 `useSearchParams`; closing removes `compose` locally after checking unsaved changes. Keep these
 editor actions in the current view/cursor. Filters and save/schedule still load actual server data;
 opening a new browser tab or refreshing an editor URL still uses the authenticated page.
-Public page components live in `src/features/landing`. Keep `/` independent of API availability.
+Public page components live in `src/components/landing`. Keep `/` independent of API availability.
 The Tailwind import explicitly sets `source('../')` relative to `src/app/globals.css`, so utility
 detection covers `src` regardless of the compiler working directory. Keep this source anchor.
 The CSS regression test compiles from an empty working directory and checks responsive utilities.
 Global scrollbar rules cover page and nested scrolling surfaces with native thin bars and a
 6px WebKit fallback. Keep scrollbars visible and keyboard scrolling available.
-Development cache settings live in `apps/web/development-cache.ts`. The source fingerprint
+Development cache settings live in `frontend/development-cache.ts`. The source fingerprint
 supplies a consistent development deployment ID when Next.js loads config, producing fresh
 asset URLs for changed source on restart. Development responses send browser, generic CDN, and
 Cloudflare no-store directives. Production receives none of these overrides. Persistent
 Turbopack development caching is disabled after a reproduced stale-task failure; cold starts
 recompile rather than restore that state. Recheck cache headers through the tunnel when diagnosing
 missing styles or inert UI; a localhost-only browser run cannot expose the CDN's cache policy.
-Original website imagery lives in `apps/web/public/images` with provenance notes. Use Next.js
+Original website imagery lives in `frontend/public/images` with provenance notes. Use Next.js
 Image and responsive sizes; preserve explicit aspect containers to avoid layout shifts.
 
 For substantial visual updates, inspect landing, login, signup, and planner at 320, 390, 768,
@@ -164,7 +192,7 @@ needs its own review when those browser targets are added to the validation envi
 
 ## Database changes
 
-Prisma loads multiple schema files in `packages/database/prisma`.
+Prisma loads multiple schema files in `backend/prisma`.
 The application domain lives in `schema.prisma`; auth models live in `auth.prisma`.
 
 ```sh
@@ -240,7 +268,7 @@ Never weaken origin checks or expose credentials while adding a feature.
 - Workspace imports missing: run `npm run build:packages` before starting an individual app.
 - Auth returns 403: ensure the browser origin exactly matches API `WEB_ORIGIN`.
 - Tunnel login buttons do nothing and `/_next/hmr` returns 502: ensure the tunnel hostname
-  is listed in `allowedDevOrigins` in `apps/web/next.config.ts`. The current private test
+  is listed in `allowedDevOrigins` in `frontend/next.config.ts`. The current private test
   hostname is `no.rupakbasnet.com.np`; replace it if your tunnel changes, restart Next.js,
   and reload the browser. Next.js blocks unapproved development WebSocket origins, and the
   blocked connection prevented React from attaching auth handlers in the observed dev session.
@@ -264,8 +292,9 @@ Workspace writes use per-user database throttles. Tests reset throttling counter
 `TEST_DATABASE_URL` for a creator's database. Integration fixtures simulate Meta, without
 network authorization or publishing to a real Instagram account.
 
-Use `packages/publishing` for the HTTP adapter, AES token storage, validation/renewal, and
-signed media links. Keep uploads, posts, channels, and OAuth separate API modules. Worker
+Use `backend/src/integrations/instagram` for the HTTP adapter, AES token storage, and
+validation/renewal. `backend/src/lib/media` owns signed media storage and processing.
+Keep uploads, posts, and channels in their named routes/controllers/services. Worker
 claims use database row locks/leases and store container/send markers before remote effects.
 Queues carry publication IDs only. Do not clear an uncertain send marker to force a retry.
 Media storage is persistent local disk in this iteration; S3/production retention remain future work.
@@ -502,6 +531,31 @@ and sheet utilities are generated. Repeated source hashing gives the same ID, ch
 gets a different ID, and production keeps Next.js defaults. Formatting/lint/types, 81 unit tests,
 and the full production build passed under Node 24. Temporary UI diagnostics were removed.
 Creator-media checking was read-only; no records, migrations, or provider calls were changed.
+
+### 2026-10-13 — simplify backend, frontend, and shared code
+
+Consolidated seven workspaces into `backend`, `frontend`, and `packages/shared`. The backend
+now owns Express, worker entry points, Prisma schema/migrations/client, environment validation,
+Instagram OAuth/client/tokens, and media processing/storage. Routes wire named controllers;
+controllers handle HTTP validation/responses, while services retain business rules and transactions.
+API and worker reuse one Instagram resource factory and one backend build. Removed unused generic
+provider contracts and redundant server package manifests/build watchers.
+
+Next.js now uses `src/app`, `components/{auth,landing,planner,ui}`, `hooks/{auth,planner}`, and
+`lib` with consistent `@/` imports. Updated setup scripts, npm workspaces/lockfile, tooling paths,
+frontend/backend import boundaries, and documentation links. Added [a codebase walkthrough](codebase.md)
+with the complete post flow and a table of common edits. Restart development processes after
+updating; `npm run dev` prepares and starts everything. Production uses the `frontend` hosting
+root and separate API/worker commands from the same backend build.
+
+Verification: formatting, lint, strict types, all 81 unit tests, all 28 isolated integration tests,
+Prisma validation, and production build passed under Node 24. All three migration SQL files are
+byte-for-byte unchanged and deployed successfully to a fresh temporary test database. Compiled
+API/frontend/worker startup, database diagnostics, and infrastructure queue consumption passed.
+Chromium verified landing, protected redirect, signup/session forwarding, composer, real PNG upload,
+and draft save/edit, with no page errors or overflow at 390/768/1280px. Root `npm run dev` started
+all processes and the shared watcher successfully. Compared 77 frontend/worker source bodies:
+only imports changed. No creator database, live provider calls, publishing rules, or UI design changed.
 
 ### Future entries
 

@@ -38,7 +38,7 @@ the entire login/connection flow: cookies created at `localhost` will not be ava
 on a different tunnel hostname.
 
 Next.js development also needs the tunnel hostname in `allowedDevOrigins` in
-`apps/web/next.config.ts`. The current private test hostname is `no.rupakbasnet.com.np`.
+`frontend/next.config.ts`. The current private test hostname is `no.rupakbasnet.com.np`.
 If it changes, update that exact hostname and restart Next.js before testing login.
 
 Run `npm run setup:env` to generate an independent token encryption key while preserving
@@ -58,7 +58,7 @@ MEDIA_STORAGE_PATH=.data/media
 `v25.0` is an example; use a supported version from your app dashboard.
 The callback must exactly equal `WEB_ORIGIN` plus `/api/auth/instagram/callback`.
 `MEDIA_PUBLIC_URL` is an HTTPS **origin**, serving the app's `/api/media/public/:id` route.
-Leave `apps/web/.env.local` pointing at the internal API, normally `http://localhost:4000`.
+Leave `frontend/.env.local` pointing at the internal API, normally `http://localhost:4000`.
 Restart web, API, and worker after changing credentials/origins.
 
 Register the callback as an **OAuth redirect URI** in Instagram Business Login settings.

@@ -1,5 +1,8 @@
 import { vi } from 'vitest';
-import { InstagramClient, INSTAGRAM_SCOPES } from '@social-scheduler/publishing';
+import {
+  InstagramClient,
+  INSTAGRAM_SCOPES,
+} from '../../../backend/src/integrations/instagram/client.js';
 export const testSecret = 'integration-only-secret-not-for-production';
 export const testKey = Buffer.alloc(32, 7).toString('base64');
 export const testOrigin = 'http://localhost:3000';

@@ -1,10 +1,10 @@
 import { Queue, Worker } from 'bullmq';
-import { redisConnectionOptions } from '@social-scheduler/config';
+import { redisConnectionOptions } from '../../backend/src/config/redis.js';
 import { PUBLISH_QUEUE, publicationJobSchema } from '@social-scheduler/shared';
 import { expect, it } from 'vitest';
-import { PostsService } from '../../apps/api/src/modules/workspace/posts.service.js';
-import { createPublicationProcessor } from '../../apps/worker/src/publishing/processor.js';
-import { reconcilePublications } from '../../apps/worker/src/publishing/reconcile.js';
+import { PostsService } from '../../backend/src/services/posts.service.js';
+import { createPublicationProcessor } from '../../backend/src/worker/publishing/processor.js';
+import { reconcilePublications } from '../../backend/src/worker/publishing/reconcile.js';
 import { createWorkspaceFixture } from './fixtures/workspace.js';
 import { testOrigin } from './fixtures/instagram.js';
 

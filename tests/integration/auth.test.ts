@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto';
-import { parseApiEnvironment } from '@social-scheduler/config';
-import { createDatabase } from '@social-scheduler/database';
+import { parseApiEnvironment } from '../../backend/src/config/environment.js';
+import { createDatabase } from '../../backend/src/database/index.js';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { createApp } from '../../apps/api/src/app.js';
-import { createResources } from '../../apps/api/src/lib/resources.js';
+import { createApp } from '../../backend/src/app.js';
+import { createResources } from '../../backend/src/config/resources.js';
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
 const redisUrl = process.env.TEST_REDIS_URL;

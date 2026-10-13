@@ -31,22 +31,29 @@ Do not present empty scaffolding as a completed product feature.
 
 ## Architecture and module ownership
 
-- `apps/web`: Next.js App Router frontend. Group components, styles, and view logic by
-  feature under `src/features`. Keep pages and layouts thin.
-- `apps/api`: Express HTTP interface. `app.ts` assembles middleware/routes;
-  `server.ts` starts the process. Group business features under `src/modules`.
-- `apps/worker`: always-on BullMQ process, deployed separately from web/API. Currently
-  consumes infrastructure and Instagram publication jobs, with PostgreSQL reconciliation.
-- `packages/shared`: browser-safe validation schemas, domain types, and job contracts.
-- `packages/config`: server-only environment loading, validation, logging, Redis options.
-- `packages/database`: Prisma schema, migrations, generated client, connection factory.
-- `packages/publishing`: Instagram HTTP client, encrypted token lifecycle, signed media storage, and provider contracts.
-- `infra`: local service configuration. Development credentials are never production credentials.
-- `docs`: architecture, setup decisions, feasibility results, and implementation status.
+There are three npm workspaces. Read `docs/codebase.md` for a walkthrough and common edits.
 
-Import workspace packages through their public exports. Do not import another
-application's internals or another package's source files. Never import database,
-credentials, Redis, or server configuration into the frontend. Use a single root lockfile.
+- `backend`: Express API and BullMQ worker in one Node.js project, with separate process entry
+  points (`src/server.ts` and `src/worker/main.ts`). Prisma schema and migrations live in
+  `backend/prisma`; client creation and generated types live in `backend/src/database`.
+- `backend/src/routes`: URL/middleware wiring. `controllers` validate HTTP input and return
+  responses. `services` own business rules and transactions; `repositories` hold database
+  queries when a separate query module makes the service easier to read.
+- `backend/src/middleware`, `config`, `lib`: reusable request guards, server configuration,
+  and focused helpers. `integrations/instagram` owns OAuth, provider calls, and encrypted tokens.
+  `worker/publishing` owns claims, publishing, recovery, and attempt outcomes.
+- `frontend`: Next.js App Router. `src/app` contains thin pages/layouts/proxies;
+  `src/components/{auth,landing,planner}` holds UI, `src/hooks/{auth,planner}` holds client
+  behavior, and `src/lib/{auth,planner}` holds API access and feature helpers.
+  Reusable primitives stay in `src/components/ui`.
+- `packages/shared`: browser-safe validation, domain types, caption helpers, and job contracts.
+  This is the only shared package. Import it through `@social-scheduler/shared`.
+- `infra`: local PostgreSQL/Redis services. `docs`: setup, architecture, and implementation status.
+
+Use ordinary relative imports within the backend and `@/` imports within the frontend.
+Keep dependencies explicit; reuse concrete helpers without adding generic base classes or
+pass-through layers. Frontend code must never import backend code, Prisma, credentials, or Redis.
+Use one root lockfile. The backend is built once; deploy API and worker as separate processes.
 Web runs on Vercel; API and worker need separate backend hosting.
 
 ## Modular, readable code
@@ -96,7 +103,7 @@ guidelines when reviewing. See `docs/frontend-design.md` for this project's desi
 Use **Tailwind CSS** for frontend styling and **Roboto**, locally hosted through
 `next/font/local`. Keep its font license. Define shared design tokens in the root stylesheet
 and use utility classes in feature components. Prettier sorts Tailwind classes.
-Use shadcn/ui primitives from `apps/web/src/components/ui`; add only needed components.
+Use shadcn/ui primitives from `frontend/src/components/ui`; add only needed components.
 Use semantic elements, labels, visible focus, keyboard navigation, accessible empty and
 error states, mobile layouts, and reduced-motion support when introducing motion.
 Keep filter/navigation state in URLs. Do not render fake posts, connected accounts,
@@ -168,7 +175,7 @@ Use Node 24 LTS (`.nvmrc`) and npm. From the repository root:
 - `npm run db:check`: check database connectivity and committed migration history without writes.
 - `npm run db:migrate -- --name feature_name`: create/apply a development migration.
 - `npm run db:deploy`: apply committed migrations in CI/staging/production.
-- `npm run dev`: build shared packages, then watch packages and all three applications.
+- `npm run dev`: generate Prisma, build shared, then watch shared, frontend, API, and worker.
 - `npm run queue:check`: enqueue an infrastructure check; inspect worker completion logs.
 - `npm run check`: formatting, linting, type checking, and tests.
 - `npm run test:integration`: authentication integration checks against isolated services.
@@ -176,5 +183,9 @@ Use Node 24 LTS (`.nvmrc`) and npm. From the repository root:
 - `npm run build`: compile packages, API, worker, and Next.js.
 - `npm run infra:down`: stop services while retaining local volumes.
 
-Application imports use emitted package APIs. Run `npm run build:packages` before launching
-an individual app, `npm run test:watch`, or directly invoking Vitest.
+Only `packages/shared` uses an emitted package API. Run `npm run build:packages` (Prisma generation
+and shared compilation) before launching an individual app, `npm run test:watch`, or Vitest.
+`npm run dev` performs this preparation and watches shared, frontend, API, and worker.
+Use `npm run dev:frontend` or `npm run dev:backend` for one side; backend runs both processes.
+Production uses `npm run start -w @social-scheduler/backend` for the API and
+`npm run start:worker -w @social-scheduler/backend` for publishing.

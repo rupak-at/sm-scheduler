@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { TokenVault } from '@social-scheduler/publishing';
-import { createAuthentication } from '../../apps/api/src/modules/auth/auth.service.js';
-import { createApp } from '../../apps/api/src/app.js';
+import { TokenVault } from '../../backend/src/integrations/instagram/token-crypto.js';
+import { createAuthentication } from '../../backend/src/services/auth.service.js';
+import { createApp } from '../../backend/src/app.js';
 import { instagramFixture, testKey, testOrigin, testSecret } from './fixtures/instagram.js';
 import { integrationDatabase, deleteTestUsers } from './fixtures/database.js';
 const db = integrationDatabase();

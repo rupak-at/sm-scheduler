@@ -54,20 +54,46 @@ Production uses hosting-injected secrets and an HTTPS `WEB_ORIGIN`.
 
 ## Workspace layout
 
-| Path                  | Responsibility                                            |
-| --------------------- | --------------------------------------------------------- |
-| `apps/web`            | Next.js App Router, Tailwind CSS, shadcn/ui, local Roboto |
-| `apps/api`            | Express health/auth endpoints and feature modules         |
-| `apps/worker`         | BullMQ publishing and recovery worker                     |
-| `packages/shared`     | Browser-safe validation and domain/job contracts          |
-| `packages/config`     | Server-only configuration and logging                     |
-| `packages/database`   | Prisma models, migrations, PostgreSQL client              |
-| `packages/publishing` | Instagram adapter, token encryption and media links       |
-| `infra`               | Persistent local PostgreSQL and Redis                     |
-| `docs`                | Architecture, design, and implementation status           |
+```text
+backend/
+  prisma/                 # Schema and migrations
+  src/
+    app.ts                # Assemble Express middleware and routes
+    server.ts             # Start the HTTP API
+    routes/               # URLs and middleware
+    controllers/          # Validate requests and send responses
+    services/             # Business rules and transactions
+    repositories/         # Database queries and response mapping
+    middleware/           # Authentication, origin checks, errors
+    config/               # Environment, logging, Redis, resource setup
+    database/             # Prisma client and generated types
+    integrations/instagram/ # OAuth, Instagram client, encrypted tokens
+    lib/media/            # Image/video processing and signed storage
+    worker/               # Queue startup, publishing, recovery
+frontend/
+  src/
+    app/                  # Next.js pages, layouts, API proxies
+    components/           # auth, landing, planner, and reusable ui
+    hooks/                # auth and planner client behavior
+    lib/                  # API clients, server helpers, utilities
+packages/shared/          # Validation and types used by both sides
+```
 
-Packages expose their emitted public APIs. Root commands build them in dependency order.
-Development watches shared packages and all three applications.
+Start with [the codebase walkthrough](docs/codebase.md) for request flows, common edits, and
+where to put new code. There are three workspaces and one lockfile. The backend compiles once;
+its API and worker run separately. Only browser-safe shared code needs a package build/watch.
+
+```sh
+npm run dev               # Everything, including shared compilation and Prisma generation
+npm run dev:frontend      # Frontend only, after npm run build:packages
+npm run dev:backend       # API + worker, after npm run build:packages
+```
+
+After this directory change, stop old development processes, run `npm install`, and restart
+with `npm run dev`. Existing local media stays in `.data/media`; the root `.env` stays in place.
+The frontend environment file is now `frontend/.env.local`. Hosting root becomes `frontend`.
+Production backend commands are `npm run start -w @social-scheduler/backend` and
+`npm run start:worker -w @social-scheduler/backend`, after `npm run build:backend`.
 
 ## Development commands
 

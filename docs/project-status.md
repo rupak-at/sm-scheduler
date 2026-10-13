@@ -2,8 +2,9 @@
 
 ## Implemented
 
-- Modular npm workspaces: Next.js web, Express API, BullMQ worker, shared contracts,
-  server configuration, PostgreSQL/Prisma, and provider publishing package.
+- Three npm workspaces: `frontend` (Next.js), `backend` (Express API, BullMQ worker,
+  Prisma, configuration, Instagram), and `packages/shared` (browser-safe validation/types).
+  Conventional routes/controllers/services and frontend app/components/hooks/lib folders.
 - Strict TypeScript, ESLint source/function limits, Prettier/Tailwind sorting,
   Husky/lint-staged, CI, living development docs, and explicit feature commits.
 - Responsive public landing, protected `/planner`, Tailwind/shadcn primitives, neutral
@@ -36,6 +37,22 @@
 - Environment validation, safe logging, health/readiness routes, database diagnostics,
   three reviewed migrations, and persistent local PostgreSQL/Redis configuration.
 - Requested frontend skills applied; setup and real-account guide in `instagram-setup.md`.
+
+## Latest structure update — 2026-10-13
+
+The repository now has three workspaces: `backend`, `frontend`, and `packages/shared`.
+Express routes/controllers/services, worker, Prisma, environment configuration, Instagram code,
+and media processing live together in the backend. Next.js uses app/components/hooks/lib folders.
+API and worker run as separate processes from one build; only browser-safe shared code is packaged.
+See [the codebase walkthrough](codebase.md) for request flows and common development tasks.
+
+Verification: formatting/lint/types, 81 unit tests, 28 isolated PostgreSQL/Redis/provider-fixture
+integration tests, Prisma validation, and production build passed under Node 24. Unchanged
+migration SQL deployed to a fresh test database. Compiled API/frontend/worker startup, queue
+consumption, database diagnostics, and the root development command passed. Chromium checked
+signup/session forwarding, PNG upload, composer, draft save/edit, and 390/768/1280px overflow.
+Frontend/worker source comparison confirmed 77 bodies unchanged apart from imports. No creator
+records, real provider calls, database model changes, or UI redesign were part of this refactor.
 
 ## Limits and pending work
 
