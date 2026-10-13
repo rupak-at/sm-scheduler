@@ -12,7 +12,11 @@ export async function proxyApi(request: NextRequest, prefix: string, path: strin
     if (value) headers.set(name, value);
   }
   try {
-    const upload = prefix === '/api/workspace' && path[0] === 'media' && request.method === 'POST';
+    const upload =
+      prefix === '/api/workspace' &&
+      path[0] === 'media' &&
+      path.length === 1 &&
+      request.method === 'POST';
     const limit = upload
       ? headers.get('content-type')?.split(';')[0] === 'video/mp4'
         ? VIDEO_UPLOAD_BYTES
@@ -34,6 +38,7 @@ export async function proxyApi(request: NextRequest, prefix: string, path: strin
       'Cache-Control': 'no-store',
     });
     for (const name of [
+      'location',
       'retry-after',
       'x-content-type-options',
       'content-range',

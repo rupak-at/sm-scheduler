@@ -1,3 +1,4 @@
+import { createMediaTicketController } from '../controllers/media-ticket.controller.js';
 import express, { Router } from 'express';
 import { MEDIA_UPLOAD_TYPES, VIDEO_UPLOAD_BYTES } from '@social-scheduler/shared';
 import { createMediaController } from '../controllers/media.controller.js';
@@ -12,6 +13,7 @@ export function publicMediaRouter(services: WorkspaceServices) {
 export function mediaRouter(services: WorkspaceServices) {
   const router = Router();
   const controller = createMediaController(services);
+  router.post('/media/ticket', createMediaTicketController(services).create);
   router.post(
     '/media',
     express.raw({ type: [...MEDIA_UPLOAD_TYPES], limit: VIDEO_UPLOAD_BYTES }),

@@ -22,14 +22,16 @@ export function createMediaController(services: WorkspaceServices) {
     privatePreview: async (request, response) => {
       const id = z.uuid().parse(request.params.id);
       const media = await readPrivateMedia(services, response.locals.userId, id);
-      sendMedia(request, response, media.bytes, media.mimeType);
+      if ('url' in media) response.set('Cache-Control', 'no-store').redirect(307, media.url);
+      else sendMedia(request, response, media.bytes, media.mimeType);
     },
     publicDownload: async (request, response) => {
       const id = z.uuid().parse(request.params.id);
       const expires = Number(request.query.expires);
       const signature = typeof request.query.signature === 'string' ? request.query.signature : '';
       const media = await readPublicMedia(services, id, expires, signature);
-      sendMedia(request, response, media.bytes, media.mimeType);
+      if ('url' in media) response.set('Cache-Control', 'no-store').redirect(307, media.url);
+      else sendMedia(request, response, media.bytes, media.mimeType);
     },
   } satisfies Record<string, RequestHandler>;
 }

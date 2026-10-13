@@ -27,6 +27,7 @@ From the repository root:
 ```sh
 npm ci
 npm run setup:env
+# Add Cloudinary credentials to the root .env; see cloudinary-setup.md.
 npm run infra:up
 npm run db:deploy
 npm run dev
@@ -49,18 +50,21 @@ Never copy development credentials into staging or production.
 
 ## Configuration
 
-| Variable             | Used by                 | Purpose                                                    |
-| -------------------- | ----------------------- | ---------------------------------------------------------- |
-| `DATABASE_URL`       | API, worker, Prisma CLI | PostgreSQL connection                                      |
-| `REDIS_URL`          | API, worker             | Queue/readiness connection                                 |
-| `WEB_ORIGIN`         | API                     | Exact trusted web origin; HTTPS in production              |
-| `BETTER_AUTH_SECRET` | API                     | High-entropy authentication secret, at least 32 characters |
-| `API_PORT`           | API                     | HTTP listener, default 4000                                |
-| `LOG_LEVEL`          | API, worker             | Structured log level                                       |
-| `WORKER_CONCURRENCY` | Worker                  | Concurrent infrastructure checks                           |
-| `API_BASE_URL`       | Web server              | Express origin; never exposed to browser code              |
-| `TEST_DATABASE_URL`  | Integration tests       | Isolated test PostgreSQL database                          |
-| `TEST_REDIS_URL`     | Integration tests       | Isolated test Redis service                                |
+| Variable                                                               | Used by                 | Purpose                                                                  |
+| ---------------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------ |
+| `DATABASE_URL`                                                         | API, worker, Prisma CLI | PostgreSQL connection                                                    |
+| `REDIS_URL`                                                            | API, worker             | Queue/readiness connection                                               |
+| `WEB_ORIGIN`                                                           | API                     | Exact trusted web origin; HTTPS in production                            |
+| `BETTER_AUTH_SECRET`                                                   | API                     | High-entropy authentication secret, at least 32 characters               |
+| `API_PUBLIC_URL`                                                       | API                     | Browser-reachable Express origin for direct uploads; HTTPS in production |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | API, worker             | Server-only Cloudinary credentials                                       |
+| `CLOUDINARY_FOLDER`                                                    | API, worker             | Environment-specific media namespace                                     |
+| `API_PORT`                                                             | API                     | HTTP listener, default 4000                                              |
+| `LOG_LEVEL`                                                            | API, worker             | Structured log level                                                     |
+| `WORKER_CONCURRENCY`                                                   | Worker                  | Concurrent infrastructure checks                                         |
+| `API_BASE_URL`                                                         | Web server              | Express origin; never exposed to browser code                            |
+| `TEST_DATABASE_URL`                                                    | Integration tests       | Isolated test PostgreSQL database                                        |
+| `TEST_REDIS_URL`                                                       | Integration tests       | Isolated test Redis service                                              |
 
 The root environment file serves API, worker, and Prisma CLI. Next.js reads its own
 workspace environment file. Hosting supplies production variables and keeps environments separate.
@@ -297,7 +301,8 @@ validation/renewal. `backend/src/lib/media` owns signed media storage and proces
 Keep uploads, posts, and channels in their named routes/controllers/services. Worker
 claims use database row locks/leases and store container/send markers before remote effects.
 Queues carry publication IDs only. Do not clear an uncertain send marker to force a retry.
-Media storage is persistent local disk in this iteration; S3/production retention remain future work.
+New media is stored as authenticated Cloudinary assets. Existing local uploads retain their read path;
+new uploads never fall back to disk. See [Cloudinary setup](cloudinary-setup.md).
 
 OAuth failure redirects expose only the application error category, a fixed operation name,
 HTTP status, and numeric Meta error code/subcode. The provider adapter accepts nested Graph
@@ -326,12 +331,14 @@ MP4 inputs are H.264/H.265, at most 64 MB, 3 seconds–15 minutes. FFprobe valid
 duration; FFmpeg prepares H.264/yuv420p at 30 fps, fits inside 1,920 × 1,920 without enlargement,
 and prepares optional AAC stereo audio at 48 kHz/128 kbps. Input metadata is stripped.
 There are at most two transcodes per API process, a 120-second transcode timeout, and a 64 MB
-output cap; truncated outputs are rejected. The Next.js/browser upload timeout is 180 seconds.
-Upload bodies are bounded while reading. API and production proxy/body/time limits must support
-these values; larger Vercel function uploads need a future direct-upload design.
+output cap; truncated outputs are rejected. The browser upload timeout is 180 seconds.
+Upload bodies are bounded while reading. The browser obtains a ten-minute one-use ticket via
+Next.js, then uploads directly to `API_PUBLIC_URL`; the API/proxy must support these body/time
+limits. File bytes bypass Vercel functions. Cloudinary credentials remain server-only.
 
-Existing JPEG storage stays compatible. Video storage uses `.mp4`; private/signed media routes
-validate ownership or signatures and serve byte ranges, which the web proxy forwards for playback.
+Cloudinary stores prepared JPEG/MP4s under immutable UUID identifiers. Private preview routes
+check ownership and redirect to expiring protected downloads. Local JPEG/MP4 storage stays readable,
+including existing signed routes and byte ranges. `MEDIA_PUBLIC_URL` is needed only for legacy media.
 The worker chooses photo or `REELS` containers from persisted media type/MIME, saves the
 container before polling, and keeps existing send-marker/uncertain-outcome protections.
 No schema migration is needed. HEIC/GIF, multiple attachments/carousels, and Stories remain unsupported.
@@ -556,6 +563,31 @@ Chromium verified landing, protected redirect, signup/session forwarding, compos
 and draft save/edit, with no page errors or overflow at 390/768/1280px. Root `npm run dev` started
 all processes and the shared watcher successfully. Compared 77 frontend/worker source bodies:
 only imports changed. No creator database, live provider calls, publishing rules, or UI design changed.
+
+### 2026-10-13 — Cloudinary storage and direct media uploads
+
+New prepared JPEG/MP4s now upload through the official Cloudinary Node SDK as authenticated
+assets, with overwrite disabled and persisted remote identifiers. Owned previews redirect to
+one-hour protected downloads; the worker generates a fresh 24-hour Cloudinary URL for Instagram.
+API/worker share server-only Cloudinary configuration. Existing local media remains readable;
+new uploads never fall back to permanent VPS disk. FFmpeg temporary files remain bounded and removed.
+
+The composer requests a small authenticated upload authorization through Next.js, then transfers
+bytes directly to Express at `API_PUBLIC_URL` without cookies. Ten-minute HMAC authorizations
+are bound to a media record and atomically claimed once; origin, MIME, declared size, actual bytes,
+and the existing photo/video validation are enforced. Failed reservations cannot be saved/replayed;
+database-save failures remove the matching remote asset. Auth/workspace proxies retain their role.
+Added [Cloudinary setup](cloudinary-setup.md), environment examples, and upload/publishing regression
+checks. No schema migration is needed; `MediaAsset.storageKey` stores the Cloudinary identifier.
+
+Verification: formatting/lint/types, 92 unit tests, all 34 isolated PostgreSQL/Redis/provider-fixture
+integration tests, and production build passed under Node 24. Real photo/video preparation runs in
+fixtures; Cloudinary and Instagram responses are simulated. Chromium checked signup/session proxy,
+a 5 MB file upload directly to Express, native redirect/image delivery through a local Cloudinary
+fixture, and draft save/reopen/edit, with no page errors or overflow at 390/768/1280px. Compiled
+API/frontend/worker startup, database diagnostics, and queue consumption also passed. Creator data
+was not migrated; no authorized live Cloudinary upload or Instagram publish, push, or deployment
+was performed. Live Cloudinary delivery and Meta fetching the signed photo/Reel URLs remain to test.
 
 ### Future entries
 

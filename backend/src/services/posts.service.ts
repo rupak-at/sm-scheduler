@@ -1,6 +1,7 @@
+import { findPostInputs } from '../repositories/post-input.repository.js';
 import type { PrismaClient } from '../database/index.js';
 import type { PostInput } from '@social-scheduler/shared';
-import type { MediaStorage } from '../lib/media/storage.js';
+import type { MediaStorage } from '../lib/media/media-storage.types.js';
 import { WorkspaceError } from '../lib/workspace-error.js';
 import { postInclude, postView } from '../repositories/post-view.js';
 
@@ -14,20 +15,7 @@ export class PostsService {
     this.validateSchedule(input);
     return this.db.$transaction(
       async (tx) => {
-        const account = await tx.socialAccount.findFirst({
-          where: { id: input.socialAccountId, userId, provider: 'INSTAGRAM' },
-        });
-        const media = await tx.mediaAsset.findFirst({
-          where: {
-            id: input.mediaAssetId,
-            userId,
-            status: 'READY',
-            OR: [
-              { type: 'IMAGE', mimeType: 'image/jpeg' },
-              { type: 'VIDEO', mimeType: 'video/mp4' },
-            ],
-          },
-        });
+        const { account, media } = await findPostInputs(tx, userId, input);
         if (!account || !media)
           throw new WorkspaceError(
             404,
@@ -40,6 +28,7 @@ export class PostsService {
             account.tokenExpiresAt.getTime() <= Date.now())
         )
           throw new WorkspaceError(422, 'Reconnect Instagram before scheduling.');
+        this.validateMediaDelivery(input, media);
         if (id) {
           await tx.$queryRaw`SELECT id FROM "Publication" WHERE "postId" = ${id}::uuid FOR UPDATE`;
           const previous = await tx.post.findFirst({
@@ -95,12 +84,20 @@ export class PostsService {
       throw new WorkspaceError(422, 'Schedule at least one minute in the future.');
     if (input.scheduledAt && !this.configured)
       throw new WorkspaceError(422, 'Configure Instagram before scheduling.');
-    if (input.scheduledAt) {
-      try {
-        this.storage.publicMediaUrl(input.mediaAssetId);
-      } catch {
-        throw new WorkspaceError(422, 'Configure a public HTTPS media URL before scheduling.');
-      }
+  }
+  private validateMediaDelivery(
+    input: PostInput,
+    media: { id: string; mimeType: string; storageKey: string },
+  ) {
+    if (!input.scheduledAt) return;
+    try {
+      this.storage.publicMediaUrl(
+        media.id,
+        media.mimeType === 'video/mp4' ? 'mp4' : 'jpg',
+        media.storageKey,
+      );
+    } catch {
+      throw new WorkspaceError(422, 'Configure media delivery before scheduling.');
     }
   }
   async remove(userId: string, id: string) {

@@ -46,6 +46,37 @@ describe('runtime configuration', () => {
     ).toThrow('TOKEN_ENCRYPTION_KEY');
   });
 
+  it('validates Cloudinary credentials together and requires HTTPS for browser-facing production uploads', () => {
+    expect(() => parseApiEnvironment({ ...valid, CLOUDINARY_CLOUD_NAME: 'private-cloud' })).toThrow(
+      'CLOUDINARY_API_KEY',
+    );
+    const configured = {
+      ...valid,
+      CLOUDINARY_CLOUD_NAME: 'fixture-cloud',
+      CLOUDINARY_API_KEY: '1234',
+      CLOUDINARY_API_SECRET: 'fixture-not-a-live-secret',
+    };
+    expect(parseApiEnvironment(configured).CLOUDINARY_FOLDER).toBe('social-scheduler');
+    expect(() => parseApiEnvironment({ ...configured, CLOUDINARY_FOLDER: '../escape' })).toThrow(
+      'CLOUDINARY_FOLDER',
+    );
+    expect(() =>
+      parseApiEnvironment({
+        ...configured,
+        NODE_ENV: 'production',
+        WEB_ORIGIN: 'https://web.example',
+      }),
+    ).toThrow('API_PUBLIC_URL');
+    expect(
+      parseApiEnvironment({
+        ...configured,
+        NODE_ENV: 'production',
+        WEB_ORIGIN: 'https://web.example',
+        API_PUBLIC_URL: 'https://api.example',
+      }).NODE_ENV,
+    ).toBe('production');
+  });
+
   it('preserves Redis TLS, credentials, and database selection', () => {
     expect(redisConnectionOptions('rediss://user:p%40ss@cache.example:6380/2')).toEqual({
       host: 'cache.example',

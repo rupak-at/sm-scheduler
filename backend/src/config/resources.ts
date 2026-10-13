@@ -1,6 +1,5 @@
 import { createInstagramServices } from '../integrations/instagram/services.js';
-import { MediaStorage } from '../lib/media/storage.js';
-import { projectPath } from './project-path.js';
+import { createMediaStorage } from './media-storage.js';
 import type { WorkspaceServices } from '../types/workspace.types.js';
 import { createLogger } from './logger.js';
 import { redisConnectionOptions } from './redis.js';
@@ -36,11 +35,15 @@ export function createResources(environment: ApiEnvironment): Resources {
     workspace: {
       database,
       instagramConfigured: instagram !== null,
-      storage: new MediaStorage(
-        projectPath(environment.MEDIA_STORAGE_PATH),
+      storage: createMediaStorage(
+        environment,
         environment.TOKEN_ENCRYPTION_KEY ?? environment.BETTER_AUTH_SECRET,
-        environment.MEDIA_PUBLIC_URL,
       ),
+      uploads: {
+        signingKey: environment.BETTER_AUTH_SECRET,
+        apiOrigin: environment.API_PUBLIC_URL,
+        webOrigin: environment.WEB_ORIGIN,
+      },
       ...(instagram ? { tokens: instagram.tokens } : {}),
     },
     auth: createAuthentication({

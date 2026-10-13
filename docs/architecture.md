@@ -41,6 +41,25 @@ Foreign keys preserve references, but they do not enforce matching ownership acr
 media asset, and social account. Post services enforce ownership transactionally; the worker rechecks it at execution.
 Restrictive deletions protect publication history until retention/deletion policy is designed.
 
+## Media storage and upload boundary
+
+New JPEG/MP4 assets are stored as authenticated Cloudinary media. `MediaAsset.storageKey` keeps
+an immutable `cloudinary:<public-id>.<format>` identifier; URLs are generated at access time.
+Cloudinary's Node SDK uploads prepared bytes and signs expiring private downloads. API and worker
+use the same server-only Cloudinary configuration; worker publishing requires no media disk mount.
+
+The authenticated, origin-checked workspace endpoint reserves an upload record and issues a
+ten-minute HMAC ticket. The browser sends file bytes directly to Express at `API_PUBLIC_URL`,
+without cookies. Express checks origin and the scoped token, atomically claims the reservation,
+checks declared MIME/size, and runs the existing photo/video preparation before Cloudinary upload.
+Failed/interrupted reservations cannot be saved as ready media or replayed. Expired reservations
+are marked failed when the owner requests another ticket. Database-save failures trigger remote cleanup.
+
+Next.js retains same-origin auth/workspace proxies. Private media routes verify ownership and
+redirect to a signed Cloudinary URL, so Cloudinary delivers the bytes. Legacy local records retain
+existing file/signed-route reads until re-uploaded or explicitly migrated; new uploads do not fall
+back to local storage. FFmpeg temporary files are removed after processing.
+
 ## Publishing and recovery
 
 PostgreSQL is authoritative. Saving a schedule does not require Redis. The scanner delivers due

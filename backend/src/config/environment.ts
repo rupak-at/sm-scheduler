@@ -1,25 +1,41 @@
+import { cloudinaryEnvironmentSchema } from './cloudinary.js';
 import { loadEnvironment } from './load-env.js';
 import { instagramEnvironmentSchema, instagramConfigured } from './instagram.js';
 import { z } from 'zod';
 
-const baseSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
-  DATABASE_URL: z.url().refine((value) => /^postgres(ql)?:/.test(value), 'Use a PostgreSQL URL'),
-  REDIS_URL: z.url().refine((value) => /^rediss?:/.test(value), 'Use a Redis URL'),
-});
+const baseSchema = z
+  .object({
+    NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    LOG_LEVEL: z
+      .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
+      .default('info'),
+    DATABASE_URL: z.url().refine((value) => /^postgres(ql)?:/.test(value), 'Use a PostgreSQL URL'),
+    REDIS_URL: z.url().refine((value) => /^rediss?:/.test(value), 'Use a Redis URL'),
+  })
+  .extend(cloudinaryEnvironmentSchema.shape);
 
 const apiSchema = baseSchema
   .extend(instagramEnvironmentSchema.shape)
   .extend({
     BETTER_AUTH_SECRET: z.string().min(32),
+    API_PUBLIC_URL: z
+      .url()
+      .refine(
+        (value) => /^https?:\/\/[^/@?#]+\/?$/.test(value),
+        'Use an HTTP(S) origin without credentials or a path',
+      )
+      .default('http://localhost:4000'),
     API_PORT: z.coerce.number().int().min(1).max(65535).default(4000),
     WEB_ORIGIN: z.url().refine((value) => /^https?:/.test(value), 'Use an HTTP(S) origin'),
   })
   .refine((input) => input.NODE_ENV !== 'production' || input.WEB_ORIGIN.startsWith('https://'), {
     path: ['WEB_ORIGIN'],
-    message: 'Production authentication requires HTTPS',
-  });
+    message: 'Production frontend origin requires HTTPS',
+  })
+  .refine(
+    (input) => input.NODE_ENV !== 'production' || input.API_PUBLIC_URL.startsWith('https://'),
+    { path: ['API_PUBLIC_URL'], message: 'Production upload API requires HTTPS' },
+  );
 const validatedApiSchema = apiSchema.refine(
   (input) =>
     !instagramConfigured(input) ||
@@ -32,7 +48,18 @@ const workerSchema = baseSchema.extend(instagramEnvironmentSchema.shape).extend(
 
 function parseEnvironment<T>(schema: z.ZodType<T>, input: NodeJS.ProcessEnv): T {
   const result = schema.safeParse(input);
-  if (result.success) return result.data;
+  if (result.success) {
+    const values =
+      input.CLOUDINARY_CLOUD_NAME || input.CLOUDINARY_API_KEY || input.CLOUDINARY_API_SECRET;
+    if (
+      values &&
+      !(input.CLOUDINARY_CLOUD_NAME && input.CLOUDINARY_API_KEY && input.CLOUDINARY_API_SECRET)
+    )
+      throw new Error(
+        'Invalid environment configuration: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET',
+      );
+    return result.data;
+  }
   // Do not include input values or URL credentials in configuration errors.
   const fields = result.error.issues.map((issue) => issue.path.join('.'));
   throw new Error(`Invalid environment configuration: ${[...new Set(fields)].join(', ')}`);

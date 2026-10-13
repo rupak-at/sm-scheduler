@@ -1,10 +1,11 @@
+import type { MediaStorage } from '../../../backend/src/lib/media/media-storage.types.js';
 import type { PrismaClient, SocialAccount } from '../../../backend/src/database/index.js';
 import { randomUUID } from 'node:crypto';
 import { mkdtemp, rm } from 'node:fs/promises';
 import sharp from 'sharp';
 import request from 'supertest';
 import { AccountTokens } from '../../../backend/src/integrations/instagram/account-tokens.js';
-import { MediaStorage } from '../../../backend/src/lib/media/storage.js';
+import { LocalMediaStorage } from '../../../backend/src/lib/media/local-storage.js';
 import { TokenVault } from '../../../backend/src/integrations/instagram/token-crypto.js';
 import { createApp } from '../../../backend/src/app.js';
 import { createAuthentication } from '../../../backend/src/services/auth.service.js';
@@ -22,7 +23,7 @@ interface WorkspaceFixture extends ReturnType<typeof instagramFixture> {
   close: () => Promise<void>;
 }
 export async function createWorkspaceFixture(
-  options: { accountId?: string } = {},
+  options: { accountId?: string; storage?: MediaStorage } = {},
 ): Promise<WorkspaceFixture> {
   const db = integrationDatabase();
   await db.rateLimit.deleteMany();
@@ -30,7 +31,8 @@ export async function createWorkspaceFixture(
   const fixture = instagramFixture();
   if (options.accountId) fixture.state.accountId = options.accountId;
   const vault = new TokenVault(testKey);
-  const storage = new MediaStorage(directory, testKey, 'https://test.example');
+  const storage =
+    options.storage ?? new LocalMediaStorage(directory, testKey, 'https://test.example');
   const tokens = new AccountTokens(db, fixture.client, vault);
   const auth = createAuthentication({
     database: db,
@@ -41,7 +43,17 @@ export async function createWorkspaceFixture(
   const app = createApp({
     webOrigin: testOrigin,
     auth,
-    workspace: { database: db, storage, tokens, instagramConfigured: true },
+    workspace: {
+      database: db,
+      storage,
+      tokens,
+      instagramConfigured: true,
+      uploads: {
+        signingKey: testSecret,
+        apiOrigin: 'https://api.test.example',
+        webOrigin: testOrigin,
+      },
+    },
     checks: { database: async () => {}, redis: async () => {} },
   });
   const agent = request.agent(app);

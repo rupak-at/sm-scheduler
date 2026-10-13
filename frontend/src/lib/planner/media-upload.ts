@@ -4,6 +4,7 @@ import {
   PHOTO_UPLOAD_BYTES,
   VIDEO_UPLOAD_BYTES,
   mediaUploadSchema,
+  mediaUploadTicketSchema,
 } from '@social-scheduler/shared';
 
 const extensions: Record<string, string> = {
@@ -25,13 +26,8 @@ export function uploadContentType(file: File): string {
     );
   return type;
 }
-export async function transferMedia(file: File, signal: AbortSignal) {
-  const response = await fetch('/api/workspace/media', {
-    method: 'POST',
-    headers: { 'Content-Type': uploadContentType(file) },
-    body: file,
-    signal: AbortSignal.any([signal, AbortSignal.timeout(180000)]),
-  });
+
+async function uploadResponse(response: Response): Promise<unknown> {
   let result: unknown;
   try {
     result = await response.json();
@@ -42,7 +38,27 @@ export async function transferMedia(file: File, signal: AbortSignal) {
     const error = z.object({ error: z.string() }).safeParse(result);
     throw new Error(error.success ? error.data.error : 'Media upload failed. Try again.');
   }
-  const media = mediaUploadSchema.safeParse(result);
+  return result;
+}
+
+export async function transferMedia(file: File, signal: AbortSignal) {
+  const mimeType = uploadContentType(file);
+  const uploadSignal = AbortSignal.any([signal, AbortSignal.timeout(180000)]);
+  const authorization = await fetch('/api/workspace/media/ticket', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mimeType, sizeBytes: file.size }),
+    signal: uploadSignal,
+  });
+  const ticket = mediaUploadTicketSchema.parse(await uploadResponse(authorization));
+  const response = await fetch(ticket.url, {
+    method: 'POST',
+    headers: { 'Content-Type': mimeType, Authorization: `Bearer ${ticket.token}` },
+    body: file,
+    signal: uploadSignal,
+    credentials: 'omit',
+  });
+  const media = mediaUploadSchema.safeParse(await uploadResponse(response));
   if (!media.success) throw new Error('The upload could not be confirmed. Try again.');
   return media.data;
 }

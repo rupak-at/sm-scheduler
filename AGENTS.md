@@ -40,7 +40,8 @@ There are three npm workspaces. Read `docs/codebase.md` for a walkthrough and co
   responses. `services` own business rules and transactions; `repositories` hold database
   queries when a separate query module makes the service easier to read.
 - `backend/src/middleware`, `config`, `lib`: reusable request guards, server configuration,
-  and focused helpers. `integrations/instagram` owns OAuth, provider calls, and encrypted tokens.
+  and focused helpers. `integrations/instagram` owns OAuth, provider calls, and encrypted tokens;
+  `integrations/cloudinary` owns protected remote media storage.
   `worker/publishing` owns claims, publishing, recovery, and attempt outcomes.
 - `frontend`: Next.js App Router. `src/app` contains thin pages/layouts/proxies;
   `src/components/{auth,landing,planner}` holds UI, `src/hooks/{auth,planner}` holds client
@@ -134,7 +135,13 @@ review phone/tablet/laptop/desktop layouts at 320, 390, 768, 820, 1024, 1280, 14
   on PATH and normalizes to H.264/AAC with bounded concurrency, time, and output size.
   Ownership and matching media type/MIME are checked when saving and publishing.
 - Persist container ID and publish-request marker before sending. Uncertain sends must never be blindly retried.
-- `.data/media` is local persistent storage, ignored by git. Public URLs are signed and expire.
+- New uploads use Cloudinary authenticated assets; server-only credentials and expiring download
+  URLs protect media. The browser obtains a ten-minute one-use upload ticket through the frontend
+  proxy, then sends bytes directly to Express at `API_PUBLIC_URL` with no session cookie.
+  Preserve origin checks, declared type/size checks, atomic claims, and server photo/video validation.
+- `.data/media` is a read path for pre-Cloudinary uploads only. Do not silently fall back to local
+  storage for new uploads. Temporary FFmpeg files are bounded and removed after processing.
+  Read `docs/cloudinary-setup.md` for credentials and the VPS/Vercel upload boundary.
 - The user is applying their database migrations. Create/test migrations against isolated services,
   but do not migrate the configured creator database without a new instruction.
 

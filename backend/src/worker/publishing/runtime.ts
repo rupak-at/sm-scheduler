@@ -4,9 +4,8 @@ import { startPoller } from './poller.js';
 import { publicationJobSchema } from '@social-scheduler/shared';
 import { Queue, Worker } from 'bullmq';
 import { PUBLISH_QUEUE } from '@social-scheduler/shared';
-import { projectPath } from '../../config/project-path.js';
 import { redisConnectionOptions } from '../../config/redis.js';
-import { MediaStorage } from '../../lib/media/storage.js';
+import { createMediaStorage } from '../../config/media-storage.js';
 import type { PrismaClient } from '../../database/index.js';
 import type { WorkerEnvironment } from '../../config/environment.js';
 import type { createLogger } from '../../config/logger.js';
@@ -23,11 +22,7 @@ export function createPublishingRuntime(
     return null;
   }
   const { client, tokens } = instagram;
-  const storage = new MediaStorage(
-    projectPath(env.MEDIA_STORAGE_PATH),
-    env.TOKEN_ENCRYPTION_KEY!,
-    env.MEDIA_PUBLIC_URL,
-  );
+  const storage = createMediaStorage(env, env.TOKEN_ENCRYPTION_KEY!);
   const connection = { ...redisConnectionOptions(env.REDIS_URL), maxRetriesPerRequest: null };
   const queue = new Queue(PUBLISH_QUEUE, { connection });
   queue.on('error', () => logger.warn('Publishing queue connection unavailable'));

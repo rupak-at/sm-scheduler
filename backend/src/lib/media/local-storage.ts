@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { mkdir, readFile, writeFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 
-export class MediaStorage {
+export class LocalMediaStorage {
   constructor(
     private readonly directory: string,
     private readonly signingKey: string,
@@ -11,6 +11,7 @@ export class MediaStorage {
   async put(id: string, bytes: Buffer, extension: 'jpg' | 'mp4' = 'jpg') {
     await mkdir(this.directory, { recursive: true, mode: 0o700 });
     await writeFile(this.path(id, extension), bytes, { flag: 'wx', mode: 0o600 });
+    return `${id}.${extension}`;
   }
   read(id: string, extension: 'jpg' | 'mp4' = 'jpg') {
     return readFile(this.path(id, extension));

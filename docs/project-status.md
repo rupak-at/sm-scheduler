@@ -21,6 +21,9 @@
 - Authenticated, origin-checked and throttled workspace actions. Validated JPEG/PNG/WebP/AVIF photo inputs
   converted to JPEG with metadata removal/orientation/resize/padding, bounded MP4 Reel processing,
   private previews, expiring signed public URLs, and byte-range video playback.
+- Cloudinary authenticated JPEG/MP4 storage, expiring owned previews/provider downloads,
+  and one-use direct-to-Express upload authorization; file bytes bypass Vercel functions.
+  Existing local assets retain their read path; new uploads never use permanent VPS storage.
 - Draft creation/editing/deletion, optimistic concurrency, ownership checks, local-timezone
   scheduling, cancellation, editing safe failures, and guarded retries. Post history is retained.
 - URL status filters/pagination, caption/hashtag editor, live photo/playable-video preview,
@@ -54,6 +57,20 @@ signup/session forwarding, PNG upload, composer, draft save/edit, and 390/768/12
 Frontend/worker source comparison confirmed 77 bodies unchanged apart from imports. No creator
 records, real provider calls, database model changes, or UI redesign were part of this refactor.
 
+## Cloudinary update — 2026-10-13
+
+Implemented protected Cloudinary storage using the official Node SDK, fresh signed provider
+URLs, owned preview redirects, and direct browser-to-Express uploads with scoped one-use tokens.
+Next.js proxies the small authorization request; file bytes bypass Vercel's request-body limit.
+New uploads need no persistent VPS media directory. Existing local records keep their legacy read
+path and are not migrated automatically. See [Cloudinary setup](cloudinary-setup.md).
+
+Verification: formatting/lint/types, 92 unit tests, 34 isolated integration tests, and production
+build passed under Node 24. Chromium checked a real 5 MB direct upload, simulated Cloudinary
+native preview delivery, and draft round-trip at 390/768/1280px. Compiled process startup,
+database diagnostics, and queue delivery passed. No schema migration or authorized live provider
+upload/publish was performed; real Cloudinary delivery and Instagram fetch/publish remain pending.
+
 ## Limits and pending work
 
 The implementation is ready for a **private real-account integration test**, not a claim
@@ -72,11 +89,13 @@ normalized for Reels; the API requires FFmpeg/FFprobe. HEIC, animated images, ca
 Stories, analytics, teams, Facebook, and TikTok remain unsupported. Live photo and Reel
 publishing remain unverified; future provider enum values do not enable those providers.
 
-Media uses a persistent local API filesystem, not S3. Uploads currently pass through Next.js;
-production body/time limits must accommodate them. Larger Vercel function uploads require
-a future upload-path change. Production storage/retention/quotas,
-verified hosting/proxy IP configuration, provider deauthorization/data-deletion callbacks,
-account erasure, deployments, and multi-key token rotation remain. Email verification and
+New media uses Cloudinary with server-only credentials. Browser uploads go directly to Express,
+while Next.js proxies small authorization/auth/workspace requests. Local media remains readable
+for pre-Cloudinary records, but is not migrated automatically. Cloudinary account upload/delivery
+limits apply; a live Cloudinary upload/download and Instagram photo/Reel publish remain unverified.
+Production storage retention/quotas, verified hosting/proxy IP configuration, provider
+deauthorization/data-deletion callbacks, account erasure, deployments, and multi-key token rotation remain.
+Email verification and
 password-reset delivery require a mail provider. Internal Instagram identity emails are not
 verified contact addresses. Confirmed container recovery may not recover an external post ID.
 An unconfirmed send remains UNCERTAIN and cannot be blindly retried.
@@ -87,13 +106,15 @@ their fixtures: never use a creator database for integration tests.
 
 ## Verification
 
-- Formatting, lint, strict workspace/tools types, and 81 unit tests.
+- Formatting, lint, strict workspace/tools types, and 92 unit tests.
 - Prisma schema validation; all three migrations applied to isolated PostgreSQL.
-- 28 integration tests against real isolated PostgreSQL/Redis and simulated Meta responses:
+- 34 integration tests against real isolated PostgreSQL/Redis and simulated Meta responses:
   session security, OAuth browser/state protection, explicit email linking, ownership,
   upload validation/private and signed media, draft concurrency, scheduling/cancellation,
   duplicate delivery, photo/Reel container polling, real video decoding/normalization, byte ranges,
   token expiry/renewal/revocation, and uncertain sends.
+- Cloudinary fixtures cover protected identifiers/downloads, one-use direct uploads, byte validation,
+  safe remote errors, cleanup after database failure, and cloud URLs passed into photo/Reel publishing.
 - Real BullMQ/Redis delivery verifies PostgreSQL reconciliation repairs missed enqueue
   and queues publication identifiers without captions or credentials.
 - Full package/API/worker/Next.js production build; production dependency audit reports zero vulnerabilities.

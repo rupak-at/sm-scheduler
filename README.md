@@ -7,7 +7,7 @@ and commits. The guide and implementation status must be updated with every comp
 The original `idea.md` is a local planning document excluded by the workspace's gitignore.
 
 The project includes email/password and Instagram sign-in, Instagram connection, photo/MP4 uploads,
-caption and hashtag fields, live previews, drafts, scheduling, and a separate publishing worker.
+caption and hashtag fields, live previews, drafts, scheduling, Cloudinary media storage, and a separate publishing worker.
 The user verified real Instagram sign-in;
 the first real publish is pending. Follow [Instagram setup](docs/instagram-setup.md) to test with your own account.
 
@@ -21,6 +21,7 @@ for MP4 processing. For example, Debian/Ubuntu packages both tools in `ffmpeg`.
 nvm use
 npm ci
 npm run setup:env
+# Add Cloudinary credentials to the root .env; see docs/cloudinary-setup.md.
 npm run infra:up
 npm run db:deploy
 npm run dev
@@ -68,6 +69,7 @@ backend/
     config/               # Environment, logging, Redis, resource setup
     database/             # Prisma client and generated types
     integrations/instagram/ # OAuth, Instagram client, encrypted tokens
+    integrations/cloudinary/ # Authenticated media uploads and signed downloads
     lib/media/            # Image/video processing and signed storage
     worker/               # Queue startup, publishing, recovery
 frontend/
@@ -156,10 +158,14 @@ encrypted on the backend; the browser receives ordinary application session cook
 Email verification and password-reset delivery still require a mail provider.
 
 Real publishing tests, production deployment/storage, additional media formats, and account/provider
-lifecycle callbacks remain. Current media storage requires a persistent API filesystem.
+lifecycle callbacks remain. Cloudinary stores new media; existing local assets retain their legacy read path.
 Next.js can run on Vercel; API and worker need separate always-on backend hosting.
-The current upload path passes through Next.js; production hosts must accommodate the
-configured body sizes and processing time. [Vercel’s function request-size limit](https://vercel.com/docs/functions/limitations#request-body-size) requires
-a different upload path for larger files before deploying these upload limits there.
+Media uploads obtain a small authorization ticket through Next.js, then send bytes directly to
+Express at `API_PUBLIC_URL`. The backend validates/prepares the file and uploads it to Cloudinary.
+Private previews redirect to expiring Cloudinary downloads; the worker passes a freshly signed
+Cloudinary URL to Instagram. The API needs temporary space for video processing, but new uploads
+need no persistent media volume. Old local uploads remain readable from their original directory.
+See [Cloudinary setup](docs/cloudinary-setup.md) for server-only credentials, domains, limits,
+and the first live test. The VPS/proxy must accept uploads up to 64 MB and the processing timeout.
 
 See [implementation status](docs/project-status.md) and [architecture](docs/architecture.md).

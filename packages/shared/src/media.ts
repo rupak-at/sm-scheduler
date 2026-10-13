@@ -15,3 +15,20 @@ export const mediaUploadSchema = z.object({
   height: z.number().int().positive(),
 });
 export type UploadedMedia = z.infer<typeof mediaUploadSchema>;
+
+export const mediaUploadRequestSchema = z
+  .object({
+    mimeType: z.enum(MEDIA_UPLOAD_TYPES),
+    sizeBytes: z.number().int().positive(),
+  })
+  .refine(
+    (input) =>
+      input.sizeBytes <= (input.mimeType === 'video/mp4' ? VIDEO_UPLOAD_BYTES : PHOTO_UPLOAD_BYTES),
+    { path: ['sizeBytes'], message: 'Media exceeds the upload limit.' },
+  );
+export type MediaUploadRequest = z.infer<typeof mediaUploadRequestSchema>;
+export const mediaUploadTicketSchema = z.object({
+  id: z.uuid(),
+  url: z.url(),
+  token: z.string().min(32),
+});

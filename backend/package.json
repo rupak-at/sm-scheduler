@@ -25,6 +25,7 @@
     "@social-scheduler/shared": "*",
     "better-auth": "1.7.7",
     "bullmq": "^5.61.2",
+    "cloudinary": "^2.11.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",

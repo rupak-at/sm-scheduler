@@ -40,7 +40,7 @@ Saving a schedule writes PostgreSQL. The worker is a separate process started by
 | `outcomes.ts`                           | Persist success, failure, uncertainty, or a delayed check              |
 | `poller.ts`                             | Run periodic tasks without overlapping; finish active work on shutdown |
 
-The worker and API reuse the same database client, environment validation, media storage,
+The worker and API reuse the same database client, environment validation, Cloudinary media storage,
 Instagram client, and token handling. They use separate processes so publishing can continue
 independently of HTTP requests. Queue jobs contain IDs; the current record is read from PostgreSQL.
 Keep the durable send marker and lease guards: a timeout can mean Instagram already published.
@@ -101,3 +101,9 @@ services with the committed migrations applied. Never use the creator database f
 No database migration is required solely for this folder reorganization. The existing migration
 history is now under `backend/prisma/migrations`. Prisma generation writes ignored code under
 `backend/src/database/generated`; do not edit or commit it.
+
+For uploads, the editor first calls `/api/workspace/media/ticket` through Next.js. The resulting
+one-use token authorizes a direct file request to Express `/api/media/upload/:id`. The API validates
+and prepares bytes, uploads them through `integrations/cloudinary/storage.ts`, and saves the
+Cloudinary identifier. The browser keeps the ordinary owned preview route; it redirects to an
+expiring Cloudinary download. See [Cloudinary setup](cloudinary-setup.md).

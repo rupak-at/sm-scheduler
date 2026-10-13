@@ -32,7 +32,8 @@ current requirements in your developer account before the first live test.
 
 ## Local HTTPS and environment
 
-Meta needs a publicly reachable HTTPS callback and media URL. Expose the Next.js app
+Meta needs a publicly reachable HTTPS callback and media URL. New media comes from signed
+Cloudinary downloads; configure [Cloudinary](cloudinary-setup.md) in API and worker first. Expose the Next.js app
 (port 3000) through your chosen HTTPS development tunnel. Visit the **tunnel URL** for
 the entire login/connection flow: cookies created at `localhost` will not be available
 on a different tunnel hostname.
@@ -83,9 +84,11 @@ the same Instagram Login app; do not substitute the parent Meta app's credential
 Keep the same `TOKEN_ENCRYPTION_KEY` in API and worker. Losing/changing it prevents
 existing ciphertext from being decrypted; reconnect accounts after a planned key change.
 Key version 1 is stored with each token; multiple active keys/automated rotation are future work.
-The media directory is ignored by git. Back it up and use a persistent API volume.
-This first implementation uses local disk, not an S3 bucket or serverless ephemeral storage.
-The worker signs media links; it does not download media from the API's disk.
+New media is stored as authenticated Cloudinary assets. The worker signs a fresh download URL
+when it creates the Instagram container, with 24-hour validity. Cloudinary credentials stay on
+API and worker; no media volume is needed for newly uploaded assets. Previously uploaded local
+media remains readable from the API's original directory and still requires `MEDIA_PUBLIC_URL`.
+See [Cloudinary setup](cloudinary-setup.md) for direct uploads and the first live delivery check.
 
 ## Apply the migration yourself
 
@@ -171,11 +174,11 @@ They cover browser-bound one-use state, real sessions, ownership, photo/video va
 concurrency, cancellation, duplicate delivery, photo/Reel container recovery, token renewal/revocation,
 and uncertain outcomes. They do not prove Meta app approval or live publishing eligibility.
 
-Production deployment, verified hosting/proxy IP settings, S3 storage, media retention/quotas,
+Production deployment, verified hosting/proxy IP settings, media retention/quotas,
 provider deauthorization/data-deletion callbacks, and account erasure are not implemented.
-The upload path currently runs through Next.js; production request/response/time limits must
-support the advertised media sizes. [Vercel Functions](https://vercel.com/docs/functions/limitations#request-body-size)
-limit payloads to 4.5 MB, so larger uploads there need a future direct-upload path.
+File uploads bypass Next.js after a small one-use authorization request; previews and provider
+media downloads use protected Cloudinary URLs. The VPS/proxy must support upload sizes/timeouts.
+Cloudinary upload/delivery and Meta fetching these signed URLs still require an authorized live test.
 Keep this as a private development test until those hosting/Meta lifecycle requirements are addressed.
 The user completed a live Instagram sign-in after the permission-check fix. No live Instagram
 post, push, or deployment was performed; the agent did not perform a live authorization flow.

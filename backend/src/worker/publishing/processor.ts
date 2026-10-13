@@ -2,7 +2,7 @@ import type { PrismaClient } from '../../database/index.js';
 import { InstagramError } from '../../integrations/instagram/http.js';
 import type { InstagramClient } from '../../integrations/instagram/client.js';
 import type { AccountTokens } from '../../integrations/instagram/account-tokens.js';
-import type { MediaStorage } from '../../lib/media/storage.js';
+import type { MediaStorage } from '../../lib/media/media-storage.types.js';
 import { claimPublication } from './claim.js';
 import type { ClaimedPublication } from './claim.js';
 import { finishPublication, deferPublication } from './outcomes.js';

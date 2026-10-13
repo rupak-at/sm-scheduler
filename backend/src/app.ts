@@ -1,3 +1,4 @@
+import { directMediaUploadRouter } from './routes/media-upload.routes.js';
 import type { WorkspaceServices } from './types/workspace.types.js';
 import { workspaceRouter } from './routes/workspace.routes.js';
 import { publicMediaRouter } from './routes/media.routes.js';
@@ -28,6 +29,7 @@ export function createApp({ webOrigin, checks, auth, workspace }: AppDependencie
   if (auth) app.all('/api/auth/*splat', createAuthHandler(auth, webOrigin));
   app.use(express.json({ limit: '100kb' }));
   if (workspace && auth) {
+    app.use('/api/media/upload', directMediaUploadRouter(workspace));
     app.use('/api/media/public', publicMediaRouter(workspace));
     app.use('/api/workspace', workspaceRouter(workspace, auth, webOrigin));
   }

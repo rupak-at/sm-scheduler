@@ -15,7 +15,11 @@ export async function preparePublicationContainer(
   const result = await create(
     record.socialAccount.providerAccountId,
     token,
-    storage.publicMediaUrl(media.id),
+    storage.publicMediaUrl(
+      media.id,
+      media.mimeType === 'video/mp4' ? 'mp4' : 'jpg',
+      media.storageKey,
+    ),
     record.captionOverride ?? record.post.caption,
   );
   const saved = await db.publication.updateMany({
