@@ -1,13 +1,13 @@
 'use client';
-import Link from 'next/link';
-import { WorkspaceLayout } from './workspace-layout';
-import { PlannerHeader } from './planner-header';
 import type { z } from 'zod';
 import type { workspaceSchema } from '@social-scheduler/shared';
-import { Button } from '@/components/ui/button';
-import { ContentFilters } from './content-filters';
+import { WorkspaceLayout } from './workspace-layout';
+import { PlannerHeader } from './planner-header';
+import { WorkspaceOverview } from './workspace-overview';
+import { MobileWorkspaceContext } from './mobile-workspace-context';
+import { ContentPanel } from './content-panel';
+import { UpcomingPosts } from './upcoming-posts';
 import { ChannelsPanel } from './channels-panel';
-import { PostList } from './post-list';
 import { PostEditor } from './post-editor';
 import { ConnectionNotice } from './connection-notice';
 import { useWorkspace } from '../hooks/use-workspace';
@@ -29,7 +29,7 @@ export function Planner({
   connection?: string;
 }) {
   const { data, refresh, act, error, pending } = useWorkspace(initial, query);
-  const post = data.posts.find((item) => item.id === compose);
+  const post = [...data.posts, ...data.upcoming].find((item) => item.id === compose);
   const canCompose = data.channels.length > 0;
   return (
     <WorkspaceLayout
@@ -38,9 +38,36 @@ export function Planner({
     >
       <PlannerHeader canCompose={canCompose} query={query} />
       <ConnectionNotice code={connection} />
-      <p role="alert" className="mb-4 text-sm text-destructive empty:hidden">
+      <p
+        role="alert"
+        className="mb-4 rounded-xl bg-destructive/5 p-3 text-sm text-destructive empty:hidden"
+      >
         {error}
       </p>
+      <WorkspaceOverview counts={data.counts} view={view} />
+      <MobileWorkspaceContext channels={data.channels} upcoming={data.upcoming} />
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
+        <ContentPanel
+          data={data}
+          view={view}
+          query={query}
+          act={act}
+          pending={pending}
+          refresh={refresh}
+        />
+        <aside
+          className="grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-1"
+          aria-label="Publishing overview"
+        >
+          <UpcomingPosts posts={data.upcoming} channels={data.channels} />
+          <ChannelsPanel
+            channels={data.channels}
+            configured={data.instagramConfigured}
+            act={act}
+            pending={pending}
+          />
+        </aside>
+      </div>
       {compose && canCompose && (compose === 'new' || post) && (
         <PostEditor
           key={post?.id ?? 'new'}
@@ -49,42 +76,6 @@ export function Planner({
           {...(post ? { post } : {})}
         />
       )}
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
-        <section
-          className="min-w-0 overflow-hidden rounded-xl border border-line bg-paper"
-          aria-label="Your content"
-        >
-          <ContentFilters view={view} />
-          <PostList posts={data.posts} query={query} act={act} pending={pending} />
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line p-4">
-            <Button variant="ghost" size="sm" disabled={pending} onClick={() => void refresh()}>
-              Refresh status
-            </Button>
-            {data.nextCursor && (
-              <Link
-                href={`/planner?view=${view}&cursor=${data.nextCursor}`}
-                className="rounded px-3 py-2 text-sm hover:bg-surface"
-              >
-                Next page
-              </Link>
-            )}
-            {query.includes('cursor=') && (
-              <Link
-                href={`/planner?view=${view}`}
-                className="rounded px-3 py-2 text-sm hover:bg-surface"
-              >
-                First page
-              </Link>
-            )}
-          </div>
-        </section>
-        <ChannelsPanel
-          channels={data.channels}
-          configured={data.instagramConfigured}
-          act={act}
-          pending={pending}
-        />
-      </div>
     </WorkspaceLayout>
   );
 }

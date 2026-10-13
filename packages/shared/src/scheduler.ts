@@ -54,10 +54,20 @@ export const postSchema = z.object({
   ),
 });
 export type PlannerPost = z.infer<typeof postSchema>;
+export const workspaceCountsSchema = z.object({
+  all: z.number().int().nonnegative(),
+  drafts: z.number().int().nonnegative(),
+  scheduled: z.number().int().nonnegative(),
+  published: z.number().int().nonnegative(),
+  attention: z.number().int().nonnegative(),
+});
+export type WorkspaceCounts = z.infer<typeof workspaceCountsSchema>;
 export const workspaceSchema = z.object({
   instagramConfigured: z.boolean(),
   channels: z.array(channelSchema),
   posts: z.array(postSchema),
   nextCursor: z.string().nullable(),
+  counts: workspaceCountsSchema,
+  upcoming: z.array(postSchema).max(3),
 });
 export const PUBLISH_QUEUE = 'instagram-publishing';

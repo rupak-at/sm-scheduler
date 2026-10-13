@@ -98,3 +98,25 @@ Reference principles inform the design; no brand artwork, product screenshots, o
 are copied. Use frontend-design for design planning and web-design-guidelines for final review.
 Review 320, 390, 768, 820, 1024, 1280, 1440, and 1920px viewports, including long names,
 keyboard focus, expanded setup guidance, system dark preference, and reduced motion.
+
+## Publishing desk — 2026-10-13
+
+See [planner research](planner-research.md) for the sources, decisions, and rejected alternatives.
+The updated planner uses a 208px quiet sidebar at laptop/desktop widths, a single segmented
+summary, a dominant media/content list, and a 300px agenda/account rail at wide widths.
+Narrow layouts expose a compact connection/next-publication summary before the list, with full
+agenda/account controls below it. Filters scroll intentionally on narrow screens.
+
+Counts cover the complete owned workspace, independent of the current page/filter. The agenda
+shows the next three scheduled publications in chronological order. There is no calendar,
+engagement analytics, suggested posting time, or simulated account/post data.
+
+Small green tokens (#256348 foreground, #edf7f0 surface) communicate connected/published states
+with text labels; red remains reserved for failures and attention. Roboto and the neutral base
+palette remain unchanged. Status links, aligned media rows, and a single New post action carry
+the hierarchy. Secondary actions use an accessible menu with existing confirmations.
+
+The URL-linked composer is an accessible Radix sheet with a full-height mobile layout,
+scrollable form/preview, a fixed header/action bar, focus trapping/restoration, and dirty-close
+confirmation. Existing real uploads, captions, hashtags, account selection, schedule validation,
+and provider/reliability behavior remain. Use touch-sized controls and preserve safe-area padding.

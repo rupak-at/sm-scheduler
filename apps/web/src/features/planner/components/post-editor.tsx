@@ -1,13 +1,14 @@
 'use client';
+import { useRouter } from 'next/navigation';
 import { EditorHeader } from './editor-header';
+import { EditorActions } from './editor-actions';
 import { MediaField } from './media-field';
 import { CaptionFields } from './caption-fields';
 import { PostPreview } from './post-preview';
 import { PostFields } from './post-fields';
 import type { Channel, PlannerPost } from '@social-scheduler/shared';
-import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { usePostEditor } from '../hooks/use-post-editor';
-
 export function PostEditor({
   channels,
   post,
@@ -17,60 +18,62 @@ export function PostEditor({
   post?: PlannerPost;
   closeHref: string;
 }) {
+  const router = useRouter();
   const editor = usePostEditor(post, channels[0]?.id ?? '');
+  function close() {
+    if (editor.saving) return;
+    if (editor.dirty && !window.confirm('Leave without saving this post?')) return;
+    router.replace(closeHref, { scroll: false });
+  }
   return (
-    <section
-      className="mb-6 rounded-xl border border-line bg-paper p-5 sm:p-6"
-      aria-labelledby="editor-heading"
+    <Sheet
+      open
+      onOpenChange={(open) => {
+        if (!open) close();
+      }}
     >
-      <EditorHeader editing={Boolean(post)} closeHref={closeHref} />
-      <form
-        onSubmit={editor.submit}
-        onChange={() => editor.setDirty(true)}
-        className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]"
-        aria-busy={editor.pending}
+      <SheetContent
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          document.getElementById('editor-heading')?.focus();
+        }}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          document.querySelector<HTMLElement>('[data-new-post]')?.focus();
+        }}
       >
-        <fieldset disabled={editor.saving} className="min-w-0 space-y-6">
-          <legend className="sr-only">Post details</legend>
-          <MediaField editor={editor} />
-          <CaptionFields editor={editor} />
-          <PostFields editor={editor} channels={channels} />
-          <p
-            ref={editor.errorRef}
-            id="post-editor-error"
-            tabIndex={-1}
-            role="alert"
-            className="text-sm text-destructive empty:hidden"
+        <EditorHeader editing={Boolean(post)} pending={editor.saving} />
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-[max(20px,env(safe-area-inset-left),env(safe-area-inset-right))] py-6 sm:px-[max(28px,env(safe-area-inset-left),env(safe-area-inset-right))]">
+          <form
+            id="post-form"
+            onSubmit={editor.submit}
+            onChange={() => editor.setDirty(true)}
+            className="grid gap-7 min-[860px]:grid-cols-[minmax(0,1fr)_300px]"
+            aria-busy={editor.pending}
           >
-            {editor.error}
-          </p>
-        </fieldset>
-        <PostPreview
-          editor={editor}
-          channel={channels.find((channel) => channel.id === editor.channelId)}
-        />
-        <div className="flex flex-wrap gap-3 border-t border-line pt-5 xl:col-span-2">
-          <Button
-            type="submit"
-            name="intent"
-            value="draft"
-            variant="outline"
-            disabled={editor.pending}
-            className="h-11 w-full sm:h-9 sm:w-auto"
-          >
-            {editor.uploading ? 'Preparing media…' : editor.saving ? 'Saving…' : 'Save draft'}
-          </Button>
-          <Button
-            type="submit"
-            name="intent"
-            value="schedule"
-            disabled={editor.pending}
-            className="h-11 w-full sm:h-9 sm:w-auto"
-          >
-            {editor.uploading ? 'Preparing media…' : editor.saving ? 'Saving…' : 'Schedule post'}
-          </Button>
+            <fieldset disabled={editor.saving} className="min-w-0 space-y-6">
+              <legend className="sr-only">Post details</legend>
+              <MediaField editor={editor} />
+              <CaptionFields editor={editor} />
+              <PostFields editor={editor} channels={channels} />
+              <p
+                ref={editor.errorRef}
+                id="post-editor-error"
+                tabIndex={-1}
+                role="alert"
+                className="rounded-lg bg-destructive/5 p-3 text-sm text-destructive empty:hidden"
+              >
+                {editor.error}
+              </p>
+            </fieldset>
+            <PostPreview
+              editor={editor}
+              channel={channels.find((channel) => channel.id === editor.channelId)}
+            />
+          </form>
         </div>
-      </form>
-    </section>
+        <EditorActions editor={editor} />
+      </SheetContent>
+    </Sheet>
   );
 }

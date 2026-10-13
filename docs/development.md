@@ -126,6 +126,13 @@ Keep accessibility, mobile layout, loading/error states, and URL-based filters i
 
 The current design uses white/graphite surfaces, subtle gray dividers, and Roboto throughout.
 Theme colors are defined in `apps/web/src/app/globals.css`; avoid one-off feature palettes.
+The planner's publishing desk adds real workspace-wide status totals, a bounded upcoming-post
+agenda, compact post rows, account health, and a URL-linked composer sheet. Read
+[planner research](planner-research.md) for the design decisions. Count/agenda queries live in
+the workspace repository and check ownership independently of list filters/pagination; do not
+derive totals from the loaded page. The web and API must use the same updated workspace contract.
+No migration is needed; rebuild shared packages and restart individual web/API processes when
+updating them outside `npm run dev`. The composer uses Radix/shadcn sheet and menu primitives.
 Public page components live in `src/features/landing`. Keep `/` independent of API availability.
 Original website imagery lives in `apps/web/public/images` with provenance notes. Use Next.js
 Image and responsive sizes; preserve explicit aspect containers to avoid layout shifts.
@@ -411,6 +418,22 @@ and other Node globals using VS Code's bundled TypeScript 6 server.
 Verification: VS Code's TypeScript server reports zero semantic errors across 118 source/test
 files after the fix. Strict root test typecheck passed. Full check/build results are recorded in
 [implementation status](project-status.md).
+
+### 2026-10-13 — redesign the publishing planner
+
+Researched scheduling workflows, information hierarchy, and mobile disclosure, then rebuilt
+the planner as a publishing desk: a quiet sidebar, real workspace-wide status totals, compact
+media rows, chronological next-three agenda, connection health, and a mobile summary. Added
+Radix/shadcn menus and a URL-linked composer sheet with fixed actions, focus management, and
+dirty-close protection. Counts and agenda are independent of filters/pagination and constrained
+to the authenticated creator. Existing publishing rules remain; no schema migration is needed.
+
+Verification: 78 unit tests, 28 isolated PostgreSQL/Redis/provider-fixture integration tests,
+formatting/lint/types, and production build passed under Node 24. Chromium checked populated,
+empty, composer, long-name/caption, and expanded/expired connection layouts at all eight widths.
+Verified real upload/schedule and draft editing through the isolated API, error focus, keyboard
+menus, focus trapping/restoration, dirty-close protection, dark preference, and reduced motion.
+No creator database or real Instagram account was changed. See [review](frontend-review.md).
 
 ### Future entries
 

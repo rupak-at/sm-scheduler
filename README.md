@@ -30,6 +30,11 @@ Open [localhost:3000](http://localhost:3000) and create an account.
 The public landing page is `/`; login/signup opens the protected workspace at `/planner`.
 The API runs at [localhost:4000](http://localhost:4000); the worker is a separate process.
 
+The planner brings workspace-wide status totals, your next three scheduled posts, Instagram
+connection health, and a compact content list together. New/edit posts open in a focused
+composer panel with mobile layouts and fixed save/schedule controls. See the
+[planner research and design](docs/planner-research.md) for the decisions behind the interface.
+
 In **New post**, drop or choose one photo or MP4, write a caption and hashtags, and review
 the live photo/playable-video preview before saving or scheduling. Still JPEG, PNG, WebP,
 and AVIF photos up to 8 MB become JPEGs. H.264/H.265 MP4s up to 64 MB, 3 seconds–15 minutes,

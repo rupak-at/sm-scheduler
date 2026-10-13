@@ -97,3 +97,46 @@ Verified PNG drag/drop and removal, caption/hashtag preview/save equality, draft
 playback through byte ranges, Reel scheduling, dark system preference, reduced motion, and focus.
 Fixture provider calls are blocked; no creator database or real Instagram account was changed.
 Physical Safari/iPad and assistive-technology testing remain pending.
+
+## Publishing desk review — 2026-10-13
+
+Reviewed the planner, overview, agenda, post rows, action menus, account details, and composer
+against the current Web Interface Guidelines. Research and design choices are recorded in
+[planner research](planner-research.md); the existing neutral Roboto system is retained.
+
+`apps/web/src/features/planner/components/planner.tsx` — fixed: explicit one-column mobile grid
+tracks prevent long agenda captions from widening the page at 320px.
+
+`apps/web/src/features/planner/components/mobile-workspace-context.tsx` — pass: account health
+and the next queued publication remain reachable before the mobile content list.
+
+`apps/web/src/features/planner/components/workspace-overview.tsx` — pass: real workspace-wide
+counts, tabular numerals, URL links, focus/current states, and useful attention emphasis.
+
+`apps/web/src/features/planner/components/post-actions.tsx` — pass: visible edit action,
+labelled keyboard-operable Radix menu, and confirmations before cancel/delete/retry.
+
+`apps/web/src/features/planner/components/post-editor.tsx` — pass: named Radix dialog,
+focus trapping/restoration, initial heading focus without a mobile keyboard, dirty-close guard,
+scrollable content, inline error focus, and save/schedule actions outside the scroll region.
+
+`apps/web/src/features/planner/components/channel-row.tsx` — pass: real account status,
+long-name truncation, native expandable details, and accessible connection maintenance.
+
+Browser validation results and limits are recorded in [implementation status](project-status.md).
+The preview uses a separate production web instance, real local API, and isolated PostgreSQL
+accounts/media. No creator records or live Instagram account were used. Physical Safari/iPad
+and assistive-technology testing remain pending.
+
+`apps/web/src/features/planner/components/post-status.tsx` — fixed: darkened neutral badge labels
+so small text clears 4.5:1 contrast against the soft gray status surface.
+
+`apps/web/src/features/planner/components/editor-header.tsx` — fixed: mobile sheet header/body/actions
+respect horizontal device safe areas; header/footer also respect top/bottom insets.
+
+Chromium passed 320/390/768/820/1024/1280/1440/1920px populated, empty, composer, and long-content
+states with no page/dialog overflow or console errors. Verified actual fixture upload/schedule,
+draft editing, error focus, keyboard menu navigation, dialog focus trapping/restoration, accepted
+and declined dirty-close confirmation, expanded/expired connections, dark preference, and reduced
+motion. Inspected desktop/tablet/mobile screenshots. Browser verification used isolated local
+records and never called a real Instagram provider. Physical Safari/iPad checks remain pending.

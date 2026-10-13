@@ -25,6 +25,8 @@
 - URL status filters/pagination, caption/hashtag editor, live photo/playable-video preview,
   file-picker/drag-drop media upload, channel actions, inline errors, automatic
   status refresh, and workspace logo/navigation that remain inside the application.
+- Publishing desk with workspace-wide status totals, chronological next-three agenda,
+  compact media rows, account health, mobile context, and accessible composer sheet/action menus.
 - Durable PostgreSQL scheduling plus real Redis ID-only delivery. Database claims/leases,
   attempt history, saved containers/send markers, stale-claim recovery, readiness polling,
   and uncertain-outcome reconciliation without automatic duplicate sends.
@@ -88,6 +90,33 @@ Docker startup on this machine needs administrator access; temporary user-owned 
 were used for verification. A real Instagram publication is the user's next test.
 
 ## Update log
+
+### 2026-10-13 — research and redesign the publishing planner
+
+Implemented a quieter, denser workspace with an integrated status overview, media list,
+upcoming-post agenda, and Instagram connection health. Phones show connection/next-publication
+context before the list. The URL-linked composer opens in an accessible sheet with a scrollable
+form/preview, fixed actions, focus trapping/restoration, and guarded dirty closing. Post maintenance
+uses keyboard-operable menus with existing confirmations; account maintenance uses native details.
+The existing neutral Roboto theme remains, with small labelled semantic status colors.
+
+Added ownership-constrained count and bounded chronological agenda queries independent of active
+filters and pagination. Production data stays real; no examples, analytics, future integrations,
+or calendar are presented as implemented. No schema migration or publishing-rule change.
+Research, design critique, and source links are recorded in [planner research](planner-research.md).
+
+Verification: formatting, ESLint, all strict types, 78 unit tests, 28 isolated integration tests,
+and the full production build passed under Node 24. Integration checks verify >30-row pagination,
+correct status grouping, chronological agenda limits, and cross-owner isolation. Chromium passed
+320/390/768/820/1024/1280/1440/1920px populated, empty, composer, and long-content layouts without
+page/dialog overflow; real fixture upload/schedule and draft edit/save, error focus, keyboard menus,
+focus trapping/restoration, dirty-close confirmation, expanded/expired connections, dark preference,
+and reduced motion. Mobile/tablet/desktop screenshots inspected; no browser console errors.
+Physical Safari/iPad and assistive-technology testing remain pending.
+
+Tests and Tailwind/Turbopack compilation needed approved local socket access. A cached sandbox
+compiler failure was moved aside before the successful build. All test/preview data uses temporary
+local services; no creator database migration, real Instagram call, push, or deployment occurred.
 
 ### 2026-10-13 — fix VS Code test-file diagnostics
 

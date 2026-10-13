@@ -1,4 +1,6 @@
 import type { PrismaClient } from '@social-scheduler/database';
+import { postSchema } from '@social-scheduler/shared';
+import type { PlannerPost } from '@social-scheduler/shared';
 
 export const postInclude = {
   media: {
@@ -23,11 +25,11 @@ type PostDetails = StoredPost & {
     attempts: { attemptNumber: number; status: string; errorCode: string | null }[];
   }[];
 };
-export function postView(post: PostDetails) {
+export function postView(post: PostDetails): PlannerPost {
   const publication = post.publications[0];
   const media = post.media[0];
   if (!publication || !media) throw new Error('Incomplete stored post');
-  return {
+  return postSchema.parse({
     id: post.id,
     caption: post.caption,
     updatedAt: post.updatedAt.toISOString(),
@@ -46,5 +48,5 @@ export function postView(post: PostDetails) {
       status: attempt.status,
       error: attempt.errorCode,
     })),
-  };
+  });
 }

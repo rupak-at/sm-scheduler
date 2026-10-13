@@ -9,6 +9,8 @@
   --color-surface: #f4f4f5;
   --color-paper: #ffffff;
   --color-line: #e4e4e7;
+  --color-success: #256348;
+  --color-success-surface: #edf7f0;
   --font-sans: var(--font-roboto), sans-serif;
   --color-background: #ffffff;
   --color-foreground: #27272a;

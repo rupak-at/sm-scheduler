@@ -5,7 +5,8 @@ import type { AuthGateway } from '../auth/auth.types.js';
 import { workspaceAuthorization } from './authorization.js';
 import type { WorkspaceServices } from './workspace.types.js';
 import { mediaRouter } from './media.routes.js';
-import { postInclude, postView } from './post-view.js';
+import { readWorkspace } from './workspace.repository.js';
+import { workspaceQuerySchema } from './workspace.schemas.js';
 import { PostsService } from './posts.service.js';
 import { channelsRouter } from './channels.routes.js';
 
@@ -17,44 +18,14 @@ export function workspaceRouter(services: WorkspaceServices, auth: AuthGateway, 
   router.use(mediaRouter(services));
   router.get('/', async (request, response) => {
     const userId: string = response.locals.userId;
-    const cursor = z.uuid().optional().parse(request.query.cursor);
-    const view = z
-      .enum(['all', 'drafts', 'scheduled', 'published', 'attention'])
-      .default('all')
-      .parse(request.query.view);
-    const statuses = {
-      drafts: ['DRAFT', 'CANCELLED'],
-      scheduled: ['SCHEDULED', 'PROCESSING'],
-      published: ['PUBLISHED'],
-      attention: ['FAILED', 'UNCERTAIN'],
-    } as const;
-    const filter =
-      view === 'all' ? {} : { publications: { some: { status: { in: [...statuses[view]] } } } };
-    const [channels, items] = await Promise.all([
-      database.socialAccount.findMany({
-        where: { userId, provider: 'INSTAGRAM' },
-        orderBy: { createdAt: 'asc' },
-        select: {
-          id: true,
-          displayName: true,
-          status: true,
-          tokenExpiresAt: true,
-          tokenCheckedAt: true,
-        },
-      }),
-      database.post.findMany({
-        where: { userId, ...filter },
-        include: postInclude,
-        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-        take: 31,
-        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-      }),
-    ]);
+    const workspace = await readWorkspace(
+      database,
+      userId,
+      workspaceQuerySchema.parse(request.query),
+    );
     response.set('Cache-Control', 'no-store').json({
       instagramConfigured: services.instagramConfigured,
-      channels,
-      posts: items.slice(0, 30).map(postView),
-      nextCursor: items.length > 30 ? items[29]?.id : null,
+      ...workspace,
     });
   });
   router.post('/posts', async (request, response) => {
