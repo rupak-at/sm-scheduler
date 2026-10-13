@@ -196,3 +196,22 @@ accepted/declined dirty close, focus restoration, missing-media validation, and 
 photo upload/scheduling. Final runs have no browser errors. The delayed-navigation check makes
 zero editor server requests after the change. Tests use isolated services; the exact failure in
 the user's open client was not reproduced. Physical Safari/iPad checks remain pending.
+
+## Live tunnel cache review — 2026-10-13
+
+The user reported that the changed editor URL still showed no sheet after refreshing, with
+missing post images. Read-only media checks confirmed the JPEG was ready and present. Live
+asset headers exposed a four-hour browser cache TTL added through the tunnel, which the separate
+localhost previews did not exercise. Added development-only no-store directives, source-versioned
+asset URLs, and a fresh development compiler. The user confirmed working UI afterward.
+
+`apps/web/development-cache.ts:20` — fixed: development source versions and browser/CDN cache
+policy prevent earlier assets from surviving page updates. Production retains Next.js defaults.
+
+`apps/web/next.config.ts:12` — fixed: avoid restoring a development compiler cache that reproduced
+stale-task failures on workspace/media endpoints in the isolated preview.
+
+Final live localhost and HTTPS-tunnel styles include image dimensions, fixed sheet positioning,
+and expected responsive utilities. Cache-Control is private/no-store; Cloudflare reports BYPASS.
+The preceding eight-size editor/history/upload/schedule browser checks remain valid. Temporary
+diagnostic route/hook removed; no diagnostics or fixture data ship in the interface.

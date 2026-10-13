@@ -107,3 +107,14 @@ and read it with `useSearchParams`. Real links preserve deep links and modified-
 Closing keeps filter/cursor state and asks before discarding edits. Save/schedule continue to
 validate through the actual API. The delayed-response Playwright comparison verifies the action
 without treating a fast local network as evidence of behavior on a slow connection.
+
+## Development tunnel assets — 2026-10-13
+
+Live header checks found the tunnel replacing development asset revalidation with a four-hour
+browser TTL. [Cloudflare's browser cache documentation](https://developers.cloudflare.com/cache/how-to/edge-browser-cache-ttl/)
+explains that changed assets can remain in repeat visitors' caches until that duration expires.
+Use development-only browser/CDN no-store headers plus Next.js asset versioning, and verify
+those headers through the tunnel. The [Cloudflare CDN header precedence](https://developers.cloudflare.com/cache/concepts/cdn-cache-control/)
+allows origin directives to control CDN caching when no overriding cache rule applies.
+The final tunnel response reports BYPASS with private/no-store directives; the user confirmed
+the editor works after the refreshed compiler/client. Production caching remains standard.

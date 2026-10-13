@@ -35,6 +35,8 @@ Instagram connection health, and a compact media list together beneath a single 
 App scrollbars are thin throughout. New post and Edit post open immediately in a
 URL-linked composer panel, with mobile layouts and fixed save/schedule controls. See the
 [planner research and design](docs/planner-research.md) for the decisions behind the interface.
+Development responses prevent browser/CDN storage and version asset URLs so the HTTPS test
+tunnel cannot mix cached UI code/styles with a newer page. Production keeps Next.js caching.
 
 In **New post**, drop or choose one photo or MP4, write a caption and hashtags, and review
 the live photo/playable-video preview before saving or scheduling. Still JPEG, PNG, WebP,

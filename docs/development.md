@@ -144,6 +144,13 @@ detection covers `src` regardless of the compiler working directory. Keep this s
 The CSS regression test compiles from an empty working directory and checks responsive utilities.
 Global scrollbar rules cover page and nested scrolling surfaces with native thin bars and a
 6px WebKit fallback. Keep scrollbars visible and keyboard scrolling available.
+Development cache settings live in `apps/web/development-cache.ts`. The source fingerprint
+supplies a consistent development deployment ID when Next.js loads config, producing fresh
+asset URLs for changed source on restart. Development responses send browser, generic CDN, and
+Cloudflare no-store directives. Production receives none of these overrides. Persistent
+Turbopack development caching is disabled after a reproduced stale-task failure; cold starts
+recompile rather than restore that state. Recheck cache headers through the tunnel when diagnosing
+missing styles or inert UI; a localhost-only browser run cannot expose the CDN's cache policy.
 Original website imagery lives in `apps/web/public/images` with provenance notes. Use Next.js
 Image and responsive sizes; preserve explicit aspect containers to avoid layout shifts.
 
@@ -480,6 +487,21 @@ empty-state creation, direct editor URLs, back/forward, new-tab links, loaded sc
 dirty-close choices, restored focus, real photo upload and scheduling, and validation feedback.
 The isolated preview's stale Turbopack cache was moved aside after a compiler panic; no live
 compiler failure was found. No creator records, provider calls, or schema changes were used.
+
+### 2026-10-13 — repair stale UI assets through the HTTPS development tunnel
+
+The user still saw a closed editor and missing post images after the address changed and a
+refresh. The stored published JPEG was ready and present. Header inspection found localhost
+development CSS using revalidation while the tunnel changed it to a four-hour browser TTL.
+Added development-only no-store browser/CDN/Cloudflare headers and source-versioned asset URLs.
+Disabled restored development compiler caches after reproducing stale-task failures in the
+isolated preview. The live web compiler restarted; the user confirmed the UI now works.
+
+Verification: final tunnel assets return private/no-store and Cloudflare BYPASS; expected image
+and sheet utilities are generated. Repeated source hashing gives the same ID, changed source
+gets a different ID, and production keeps Next.js defaults. Formatting/lint/types, 81 unit tests,
+and the full production build passed under Node 24. Temporary UI diagnostics were removed.
+Creator-media checking was read-only; no records, migrations, or provider calls were changed.
 
 ### Future entries
 

@@ -101,6 +101,8 @@ Use semantic elements, labels, visible focus, keyboard navigation, accessible em
 error states, mobile layouts, and reduced-motion support when introducing motion.
 Keep filter/navigation state in URLs. Do not render fake posts, connected accounts,
 unsupported provider formats, or inert actions that look available.
+Development assets use source-versioned URLs and no-store browser/CDN headers to prevent
+stale code/styles through the HTTPS tunnel. Keep this policy development-only.
 
 The public landing page is `/`; the authenticated workspace is `/planner`.
 Successful login/signup returns to `/planner`. Keep the landing page independent of API availability.

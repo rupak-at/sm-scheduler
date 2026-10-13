@@ -29,6 +29,7 @@
   next-three agenda, media rows, account health, and accessible composer sheet/action menus.
   Responsive development styles have an explicit source anchor; all app scrollbars are thin.
   New/empty-state/loaded-row editor actions use local URL state without waiting for a server render.
+  Development browser/CDN cache protection and versioned asset URLs prevent stale tunnel assets.
 - Durable PostgreSQL scheduling plus real Redis ID-only delivery. Database claims/leases,
   attempt history, saved containers/send markers, stale-claim recovery, readiness polling,
   and uncertain-outcome reconciliation without automatic duplicate sends.
@@ -69,7 +70,7 @@ their fixtures: never use a creator database for integration tests.
 
 ## Verification
 
-- Formatting, lint, strict workspace/tools types, and 79 unit tests.
+- Formatting, lint, strict workspace/tools types, and 81 unit tests.
 - Prisma schema validation; all three migrations applied to isolated PostgreSQL.
 - 28 integration tests against real isolated PostgreSQL/Redis and simulated Meta responses:
   session security, OAuth browser/state protection, explicit email linking, ownership,
@@ -92,6 +93,30 @@ Docker startup on this machine needs administrator access; temporary user-owned 
 were used for verification. A real Instagram publication is the user's next test.
 
 ## Update log
+
+### 2026-10-13 — fix development tunnel asset caching
+
+Investigated the user's continued closed composer/missing images after URL changes and refresh.
+The published JPEG record was READY and its file existed. The live compiler reported no current
+errors. Header inspection showed a concrete environment difference: localhost served CSS with
+`no-cache, must-revalidate`, while the HTTPS tunnel returned `max-age=14400, must-revalidate`.
+That browser TTL can retain earlier development code/styles after the page changes.
+A temporary live-browser check found the composer active but laid out below the content,
+with zero-size post images, confirming that the expected layout styles were not applied.
+
+Development responses now set browser, generic CDN, and Cloudflare no-store headers. A stable
+source fingerprint versions development assets; changed source gets fresh URLs when config
+loads. Production keeps its standard cache policy. Restored development compiler caching is
+disabled after an isolated preview restart reproduced a stale-task panic. Restarted only the
+live web compiler; the user confirmed the UI now works. Temporary diagnostics were removed.
+
+Verification: live localhost/tunnel styles return private/no-store, the tunnel reports Cloudflare
+BYPASS, and media/sheet utilities are present. Two regression checks cover changed-source cache
+versions, no-store directives, and preservation of production defaults. Formatting, ESLint,
+strict types, all 81 unit tests, and the full production build passed under Node 24.
+Published-media checks were read-only. No creator records, migrations, or provider calls changed.
+CDN rules that explicitly override origin directives still require host-side configuration;
+the current tunnel respects the new directives. Physical Safari/iPad checks remain pending.
 
 ### 2026-10-13 — responsive New post and editor navigation
 
