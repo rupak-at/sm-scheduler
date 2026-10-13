@@ -1,4 +1,5 @@
-@import 'tailwindcss';
+/* Keep utility discovery consistent across workspace builds and the dev server. */
+@import 'tailwindcss' source('../');
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -31,6 +32,26 @@
   html {
     color-scheme: light;
     -webkit-tap-highlight-color: #27272a18;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #8a8a93 transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: #8a8a93;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #71717a;
   }
   body {
     @apply m-0 bg-canvas font-sans text-base leading-relaxed text-ink;

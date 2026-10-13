@@ -24,18 +24,13 @@ export function ContentPanel({
 }) {
   return (
     <section
-      className="min-w-0 overflow-hidden rounded-2xl border border-line bg-paper shadow-xs"
+      className="min-w-0 overflow-hidden rounded-xl border border-line bg-paper"
       aria-labelledby="content-heading"
     >
-      <div className="flex items-center justify-between gap-3 px-4 pt-5 sm:px-5">
-        <h2 id="content-heading" className="text-[15px] font-semibold">
-          Your content
-        </h2>
-        <span className="text-xs text-muted tabular-nums">
-          {data.counts[view].toLocaleString('en')} {data.counts[view] === 1 ? 'post' : 'posts'}
-        </span>
-      </div>
-      <ContentFilters view={view} />
+      <h2 id="content-heading" className="sr-only">
+        Your content
+      </h2>
+      <ContentFilters view={view} counts={data.counts} />
       <PostList
         posts={data.posts}
         channels={data.channels}

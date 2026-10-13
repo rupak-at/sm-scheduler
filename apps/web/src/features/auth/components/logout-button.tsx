@@ -6,7 +6,7 @@ import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { authClient } from '../lib/auth-client';
 
-export function LogoutButton() {
+export function LogoutButton({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
@@ -37,7 +37,9 @@ export function LogoutButton() {
         disabled={pending}
       >
         <LogOut size={14} aria-hidden="true" />
-        <span className="md:sr-only">{pending ? 'Logging out…' : 'Log out'}</span>
+        <span className={compact ? 'sr-only' : 'md:sr-only'}>
+          {pending ? 'Logging out…' : 'Log out'}
+        </span>
       </Button>
       <p
         className="mt-1 max-w-48 text-xs text-destructive empty:hidden"

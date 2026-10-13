@@ -25,8 +25,9 @@
 - URL status filters/pagination, caption/hashtag editor, live photo/playable-video preview,
   file-picker/drag-drop media upload, channel actions, inline errors, automatic
   status refresh, and workspace logo/navigation that remain inside the application.
-- Publishing desk with workspace-wide status totals, chronological next-three agenda,
-  compact media rows, account health, mobile context, and accessible composer sheet/action menus.
+- Compact publishing workspace with a single top bar, counted status tabs, chronological
+  next-three agenda, media rows, account health, and accessible composer sheet/action menus.
+  Responsive development styles have an explicit source anchor; all app scrollbars are thin.
 - Durable PostgreSQL scheduling plus real Redis ID-only delivery. Database claims/leases,
   attempt history, saved containers/send markers, stale-claim recovery, readiness polling,
   and uncertain-outcome reconciliation without automatic duplicate sends.
@@ -67,9 +68,9 @@ their fixtures: never use a creator database for integration tests.
 
 ## Verification
 
-- Formatting, lint, strict workspace/tools types, and 78 unit tests.
+- Formatting, lint, strict workspace/tools types, and 79 unit tests.
 - Prisma schema validation; all three migrations applied to isolated PostgreSQL.
-- 26 integration tests against real isolated PostgreSQL/Redis and simulated Meta responses:
+- 28 integration tests against real isolated PostgreSQL/Redis and simulated Meta responses:
   session security, OAuth browser/state protection, explicit email linking, ownership,
   upload validation/private and signed media, draft concurrency, scheduling/cancellation,
   duplicate delivery, photo/Reel container polling, real video decoding/normalization, byte ranges,
@@ -90,6 +91,30 @@ Docker startup on this machine needs administrator access; temporary user-owned 
 were used for verification. A real Instagram publication is the user's next test.
 
 ## Update log
+
+### 2026-10-13 — compact planner revision and global thin scrollbars
+
+Rebuilt the layout after the supplied development screenshots: one top bar, a centered content
+canvas, counted status tabs, portrait media previews, and a restrained account/queue rail.
+Removed the sidebar and duplicated summary. Phones keep the title/New post action together;
+tablets place account/agenda panels beneath content. Healthy account connection actions use
+native disclosure. Page, filter, editor, and textarea scrollbars share a thin neutral treatment.
+The brand app icon prevents the missing favicon request found during browser review.
+
+Tailwind detection now explicitly uses the web source directory. A regression test compiles
+with an unrelated empty working directory, reproduces missing responsive CSS without the
+source anchor, and verifies grid/padding/clamp utilities with it. Fresh localhost and HTTPS
+tunnel development CSS applies the expected columns, spacing, and thin scrollbars; the precise
+cause of the earlier missing styles could not be conclusively recovered.
+
+Verification: formatting, ESLint, strict types, all 79 unit tests, and the full production build
+passed under Node 24. Playwright reviewed the actual development build using isolated local
+accounts/media, including one published post like the screenshots, empty-filter states, and
+the composer at 320/390/768/820/1024/1280/1440/1920px. Computed columns, padding, media dimensions,
+native thin scrollbars, and page/dialog overflow checks passed with no browser errors.
+Desktop/tablet/phone screenshots inspected. Physical Safari/iPad checks remain pending.
+This revision changes no API contract, database schema, or publishing rule; the prior 28 isolated
+integration checks cover those unchanged paths. No creator records or real provider calls used.
 
 ### 2026-10-13 — research and redesign the publishing planner
 

@@ -12,10 +12,10 @@ export function ChannelRow({
 }) {
   const connected = channel.status === 'CONNECTED';
   return (
-    <div className="rounded-xl bg-canvas p-3.5">
+    <div className="border-b border-line pb-1 last:border-b-0">
       <div className="flex items-center gap-3">
         <span
-          className="grid size-10 shrink-0 place-items-center rounded-full border border-line bg-paper text-sm font-medium"
+          className="grid size-9 shrink-0 place-items-center rounded-full border border-line bg-paper text-sm font-medium"
           aria-hidden="true"
         >
           {(channel.displayName ?? 'I').charAt(0).toLocaleUpperCase()}

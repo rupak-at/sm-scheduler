@@ -70,3 +70,30 @@ Counts and agenda must be independent of the active filter and pagination. Fetch
 backend with ownership constraints; do not infer workspace totals from the current 30-row page.
 No database migration is needed. Preserve publishing, cancellation, retry, ownership, and token
 rules. Reuse existing Radix/shadcn primitives for dialog and menu behavior.
+
+## Revision after the development screenshots — 2026-10-13
+
+The supplied screenshots show missing layout/spacing/thumbnail utilities and expose a separate
+problem with the design: duplicated navigation and oversized summary blocks delay access to
+content. The earlier review covered production previews but did not validate development CSS.
+
+Revised direction: a single 64px top bar, a centered canvas capped at 1,360px, compact status
+navigation with real counts, a dominant content list, and a restrained 288px account/queue rail.
+Keep the neutral six-color palette and local Roboto. Use a 28px page heading, 14px content,
+12px metadata, 64–80px media previews, and touch-sized actions. Account health is available in the
+top bar on phones, with full connection controls after the content list. No decorative stats cards
+or duplicated status controls. Creator media supplies the visual character.
+
+```text
+[Brand / Planner                             Connection / Profile]
+[Publishing planner                                      New post]
+[All 1 / Drafts 0 / Scheduled 0 / Published 1 / Attention 0]
+[Photo | authored caption | status / publication date] [Instagram]
+[Content actions / pagination                         ] [Up next  ]
+```
+
+Review the actual Tailwind development stylesheet through localhost and the HTTPS tunnel.
+Pin detection to web source per [Tailwind's source detection guidance](https://tailwindcss.com/docs/detecting-classes-in-source-files).
+Playwright must assert grid columns, padding, media dimensions, and editor placement in addition
+to overflow, and capture both single-published-post and empty states at eight widths. Use isolated
+preview accounts; do not change creator records or provider state during UI verification.

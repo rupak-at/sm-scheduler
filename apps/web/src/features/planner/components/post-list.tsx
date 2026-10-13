@@ -22,7 +22,7 @@ export function PostList({
   const empty = plannerViews.find((item) => item.id === view)!;
   if (!posts.length)
     return (
-      <div className="flex min-h-[330px] flex-col items-center justify-center px-5 py-10 text-center sm:min-h-[380px]">
+      <div className="flex min-h-[290px] flex-col items-center justify-center px-5 py-10 text-center sm:min-h-[360px]">
         <span className="mb-5 grid size-14 place-items-center rounded-2xl border border-line bg-canvas">
           <ImagePlus className="size-6 text-muted" strokeWidth={1.4} aria-hidden="true" />
         </span>

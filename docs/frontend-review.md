@@ -1,4 +1,4 @@
-# Frontend review — 2026-10-09
+# Frontend review
 
 Reviewed the landing page, auth screens, and protected planner against the current
 [Vercel Web Interface Guidelines](https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md)
@@ -140,3 +140,36 @@ draft editing, error focus, keyboard menu navigation, dialog focus trapping/rest
 and declined dirty-close confirmation, expanded/expired connections, dark preference, and reduced
 motion. Inspected desktop/tablet/mobile screenshots. Browser verification used isolated local
 records and never called a real Instagram provider. Physical Safari/iPad checks remain pending.
+
+## Compact planner revision — 2026-10-13
+
+Fetched the current Web Interface Guidelines again and reviewed the revised top bar, counted
+filters, media rows, account disclosures, mobile header, composer, and scrollbar treatment.
+
+`apps/web/src/app/globals.css:2` — fixed: utility detection is rooted in web source instead of
+depending on compiler cwd. A real PostCSS/Tailwind regression check covers missing responsive CSS.
+
+`apps/web/src/app/globals.css:36` — pass: thin scrollbars remain visible on both axes, including
+nested regions and textareas; neutral thumb contrast and hover indication are retained.
+
+`apps/web/src/app/icon.svg:1` — fixed: the browser tab now uses the brand mark rather than
+requesting a missing favicon.
+
+`apps/web/src/features/planner/components/workspace-nav.tsx:20` — pass: connection status has an
+accessible name on phones, 44px targets, keyboard focus, and a working account-details anchor.
+The profile name truncates and the compact logout control retains its accessible label.
+
+`apps/web/src/features/planner/components/content-filters.tsx:6` — pass: real counts, URL state,
+current-page semantics, intentional narrow-screen scrolling, and visible inset keyboard focus.
+
+`apps/web/src/features/planner/components/planner-header.tsx:8` — fixed: a short phone heading
+keeps the page title and New post action aligned at 320px without hiding the primary action.
+
+Playwright used an isolated **development** web/API/database and a single published-post fixture
+matching the supplied screenshots. All eight required widths passed computed grid/padding/media
+dimensions and page/dialog overflow checks; page and textarea scrollbar widths resolve to thin.
+Reviewed empty filters, composer, long profile names, dark preference, and reduced motion with
+no browser errors. Inspected mobile/tablet/desktop screenshots after waiting for fonts and decoded
+media. Fresh anonymous localhost/tunnel pages also serve and apply the correct development CSS.
+Historical production-only checks did not catch the supplied development-style failure; both
+compiler source detection and browser layout assertions now cover that gap.

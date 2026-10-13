@@ -3,8 +3,6 @@ import type { z } from 'zod';
 import type { workspaceSchema } from '@social-scheduler/shared';
 import { WorkspaceLayout } from './workspace-layout';
 import { PlannerHeader } from './planner-header';
-import { WorkspaceOverview } from './workspace-overview';
-import { MobileWorkspaceContext } from './mobile-workspace-context';
 import { ContentPanel } from './content-panel';
 import { UpcomingPosts } from './upcoming-posts';
 import { ChannelsPanel } from './channels-panel';
@@ -44,9 +42,7 @@ export function Planner({
       >
         {error}
       </p>
-      <WorkspaceOverview counts={data.counts} view={view} />
-      <MobileWorkspaceContext channels={data.channels} upcoming={data.upcoming} />
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_288px] lg:gap-7">
         <ContentPanel
           data={data}
           view={view}
@@ -56,16 +52,16 @@ export function Planner({
           refresh={refresh}
         />
         <aside
-          className="grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-1"
+          className="grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-1"
           aria-label="Publishing overview"
         >
-          <UpcomingPosts posts={data.upcoming} channels={data.channels} />
           <ChannelsPanel
             channels={data.channels}
             configured={data.instagramConfigured}
             act={act}
             pending={pending}
           />
+          <UpcomingPosts posts={data.upcoming} channels={data.channels} />
         </aside>
       </div>
       {compose && canCompose && (compose === 'new' || post) && (

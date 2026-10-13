@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { CalendarClock, ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import type { PlannerPost, Channel } from '@social-scheduler/shared';
 import { PostMedia } from './post-media';
 
@@ -7,7 +7,7 @@ export function UpcomingPosts({ posts, channels }: { posts: PlannerPost[]; chann
   return (
     <section
       aria-labelledby="upcoming-heading"
-      className="min-w-0 rounded-2xl border border-line bg-paper p-5 shadow-xs"
+      className="min-w-0 rounded-xl border border-line bg-paper p-5"
     >
       <div className="flex items-center justify-between gap-3">
         <h2 id="upcoming-heading" className="text-[15px] font-semibold">
@@ -57,11 +57,10 @@ export function UpcomingPosts({ posts, channels }: { posts: PlannerPost[]; chann
           ))}
         </ol>
       ) : (
-        <div className="mt-3 rounded-xl bg-canvas px-4 py-6">
-          <CalendarClock className="mb-3 size-5 text-muted" strokeWidth={1.5} aria-hidden="true" />
-          <p className="text-sm font-medium">Your next post starts here.</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted">
-            Choose a time when you create a post. Your next publications will appear here.
+        <div className="mt-2 border-t border-line pt-4 pb-1">
+          <p className="text-[13px] font-medium">Your queue is clear.</p>
+          <p className="mt-1.5 text-xs leading-relaxed text-muted">
+            Schedule a post when you’re ready. Your next publications will appear here.
           </p>
         </div>
       )}

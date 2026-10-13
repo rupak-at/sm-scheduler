@@ -49,9 +49,10 @@ Login/signup share a compact brand header, a focused form, and an inset photogra
 Mobile prioritizes form fields and hides the companion panel. Controls have explicit labels,
 comfortable touch targets, autocomplete, visible focus, and readable error/pending states.
 
-`/planner` is authenticated. Desktop uses a 232px sidebar, compact workspace bar, and a
-content canvas with a channel panel alongside it. Tablets/mobile stack channels beneath content.
-The account footer truncates long names; mobile exposes a labelled logout action.
+`/planner` is authenticated. A single 64px top bar holds the brand, connection health, profile,
+and labelled logout action. The centered canvas has a content list beside a 288px account/queue
+rail at laptop/desktop widths. Tablets place those panels side by side below the list; phones
+stack them. Long names truncate. Status tabs include actual workspace-wide counts.
 Filters remain URL links at `/planner?view=…`; the editor is deep-linked through `compose`.
 The neutral channel panel shows actual account status and offers connect/reconnect, validation,
 and disconnect. The media composer pairs labelled upload/caption/hashtag/account/scheduling
@@ -102,10 +103,16 @@ keyboard focus, expanded setup guidance, system dark preference, and reduced mot
 ## Publishing desk — 2026-10-13
 
 See [planner research](planner-research.md) for the sources, decisions, and rejected alternatives.
-The updated planner uses a 208px quiet sidebar at laptop/desktop widths, a single segmented
-summary, a dominant media/content list, and a 300px agenda/account rail at wide widths.
-Narrow layouts expose a compact connection/next-publication summary before the list, with full
-agenda/account controls below it. Filters scroll intentionally on narrow screens.
+The revised planner uses one top bar and a centered 1,360px content area at wide widths,
+compact counted status tabs, a dominant media/content list, and a 288px account/agenda rail.
+On phones the page title shortens to Planner so New post fits alongside it; connection health
+remains in the top bar and full account/agenda controls follow the content list. Healthy accounts
+keep secondary connection actions inside native details. Filters scroll intentionally on narrow
+screens. Page, filter, sheet, and textarea scrollbars use a shared thin neutral treatment.
+
+Tailwind source detection is explicitly rooted in `apps/web/src` through the global import.
+Review development and production CSS: checking overflow alone does not establish that grid,
+spacing, and media utilities were generated. Assert computed columns, padding, and image sizes.
 
 Counts cover the complete owned workspace, independent of the current page/filter. The agenda
 shows the next three scheduled publications in chronological order. There is no calendar,

@@ -126,21 +126,28 @@ Keep accessibility, mobile layout, loading/error states, and URL-based filters i
 
 The current design uses white/graphite surfaces, subtle gray dividers, and Roboto throughout.
 Theme colors are defined in `apps/web/src/app/globals.css`; avoid one-off feature palettes.
-The planner's publishing desk adds real workspace-wide status totals, a bounded upcoming-post
-agenda, compact post rows, account health, and a URL-linked composer sheet. Read
+The planner uses a single top bar, status tabs with real workspace-wide totals, a bounded
+upcoming-post agenda, compact media rows, account health, and a URL-linked composer sheet. Read
 [planner research](planner-research.md) for the design decisions. Count/agenda queries live in
 the workspace repository and check ownership independently of list filters/pagination; do not
 derive totals from the loaded page. The web and API must use the same updated workspace contract.
 No migration is needed; rebuild shared packages and restart individual web/API processes when
 updating them outside `npm run dev`. The composer uses Radix/shadcn sheet and menu primitives.
 Public page components live in `src/features/landing`. Keep `/` independent of API availability.
+The Tailwind import explicitly sets `source('../')` relative to `src/app/globals.css`, so utility
+detection covers `src` regardless of the compiler working directory. Keep this source anchor.
+The CSS regression test compiles from an empty working directory and checks responsive utilities.
+Global scrollbar rules cover page and nested scrolling surfaces with native thin bars and a
+6px WebKit fallback. Keep scrollbars visible and keyboard scrolling available.
 Original website imagery lives in `apps/web/public/images` with provenance notes. Use Next.js
 Image and responsive sizes; preserve explicit aspect containers to avoid layout shifts.
 
 For substantial visual updates, inspect landing, login, signup, and planner at 320, 390, 768,
 820, 1024, 1280, 1440, and 1920px. Check both viewport overflow and intentionally scrollable
 filters, long names, labelled controls, keyboard focus, expanded guidance, dark system preference,
-and reduced motion. Chromium viewport checks cover layout; physical-device/Safari behavior
+and reduced motion. Check development CSS as well as production: assert computed grid columns,
+padding, media dimensions, and editor placement rather than relying only on overflow checks.
+Chromium viewport checks cover layout; physical-device/Safari behavior
 needs its own review when those browser targets are added to the validation environment.
 
 ## Database changes
@@ -434,6 +441,25 @@ empty, composer, long-name/caption, and expanded/expired connection layouts at a
 Verified real upload/schedule and draft editing through the isolated API, error focus, keyboard
 menus, focus trapping/restoration, dirty-close protection, dark preference, and reduced motion.
 No creator database or real Instagram account was changed. See [review](frontend-review.md).
+
+### 2026-10-13 — revise the planner layout and thin all app scrollbars
+
+Replaced the sidebar, duplicated summary/navigation, and tall empty blocks with a single top
+bar, compact counted status tabs, a media list, and a 288px account/queue rail. Tablet panels sit
+beneath the list; phone titles/actions fit one row. Healthy account maintenance uses expandable
+details. Added thin scrollbars globally, including filters, editor content, and textareas.
+Added the brand app icon after browser review found a missing favicon request.
+
+Pinned Tailwind source detection to the web source directory and added a compiler regression
+test that reproduces missing responsive utilities without the explicit source. The supplied
+screenshots showed missing layout styles; fresh localhost/tunnel CSS now applies the grid,
+spacing, media, and thin scrollbar rules. The historical cause was not conclusively established.
+
+Verification: formatting, lint, strict types, 79 unit tests, and the full production build passed
+under Node 24. Playwright used an isolated development web/API/database with a single published
+post like the supplied screenshots. All eight widths passed computed column/padding/media-size,
+page/dialog overflow, scrollbar, empty-filter, and composer checks with no browser errors.
+Mobile/tablet/desktop screenshots were inspected. No schema or publishing rules changed.
 
 ### Future entries
 
