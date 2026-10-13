@@ -26,7 +26,7 @@
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "npm run build:packages && npm run typecheck --workspaces --if-present && tsc -p tsconfig.tools.json",
+    "typecheck": "npm run build:packages && npm run typecheck --workspaces --if-present && tsc -p tsconfig.json",
     "test": "npm run build:packages && vitest run",
     "test:watch": "vitest",
     "test:integration": "npm run build:packages && vitest run --config vitest.integration.config.ts",

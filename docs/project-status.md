@@ -89,6 +89,23 @@ were used for verification. A real Instagram publication is the user's next test
 
 ## Update log
 
+### 2026-10-13 — fix VS Code test-file diagnostics
+
+Added a discoverable root `tsconfig.json` for backend/package unit tests, tooling, and integration
+tests. Previously backend/package unit tests were excluded from build configs and had no editor
+project, allowing inferred TypeScript defaults to produce incorrect import/type diagnostics.
+The typecheck command now covers these tests with strict NodeNext settings; web tests remain
+owned by the Next.js config and production builds still exclude backend/package tests.
+Reproduced missing Node imports, `RequestInit`, and other globals in publishing source with
+VS Code's bundled TypeScript 6.0.3. Explicit `types: ["node"]` in the shared backend config
+fixes these editor errors using the existing Node type dependency.
+
+Verification: root test typecheck, formatting, ESLint, all workspace types, all 78 unit tests,
+and the full package/API/worker/Next.js production build passed under Node 24. No runtime
+behavior or database schema changed. A direct check using VS Code's actual TypeScript server
+reports zero semantic errors across 118 source/test files after enabling Node types;
+restart its TypeScript server if it retains stale errors.
+
 ### 2026-10-12 — HTTPS tunnel login fix
 
 Added `no.rupakbasnet.com.np` to Next.js's exact development-origin allowlist. Browser checks

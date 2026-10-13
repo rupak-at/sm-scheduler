@@ -157,8 +157,16 @@ display timezones. Enforce ownership across posts, accounts, and media in servic
 
 ## Testing
 
-`npm run check` checks formatting, ESLint, strict types (including tooling/integration tests),
+`npm run check` checks formatting, ESLint, strict types (including unit/tooling/integration tests),
 and unit tests. `npm run build` verifies all production builds.
+
+The root `tsconfig.json` gives VS Code a discoverable strict NodeNext project for backend/package
+unit tests and tooling/integration tests. Production workspace configs still exclude unit tests
+from emitted builds; the web config owns its browser tests. Open the repository root in VS Code.
+The shared Node config explicitly loads `node` types so editors using TypeScript 6 also resolve
+Node imports and globals such as `Buffer`, `fetch`, and `RequestInit` from installed `@types/node`.
+If diagnostics from an inferred project remain after pulling configuration changes, run
+**TypeScript: Restart TS Server** from the command palette. Build packages first for workspace types.
 
 Integration tests use a real PostgreSQL database and Redis. Provision isolated test services,
 set their test variables, migrate that database using `DATABASE_URL`, and run:
@@ -390,6 +398,19 @@ eight required widths, error focus, caption/hashtag draft round-trip, actual PNG
 MP4 playback/range responses and scheduling, dark preference, and reduced motion.
 Desktop/mobile/tablet screenshots were inspected. No real provider publish was performed;
 first live photo/Reel publishing and physical Safari/iPad testing remain pending.
+
+### 2026-10-13 — fix test-file TypeScript project discovery
+
+Added a root TypeScript configuration covering backend/package unit tests and existing tooling
+and integration checks, so VS Code resolves their NodeNext imports and Vitest types with the
+project's strict settings. The typecheck command now checks this config; production builds
+continue excluding test files. Web tests retain their Next.js configuration. Explicitly enabled
+Node types in the shared backend config after reproducing missing `node:crypto`, `RequestInit`,
+and other Node globals using VS Code's bundled TypeScript 6 server.
+
+Verification: VS Code's TypeScript server reports zero semantic errors across 118 source/test
+files after the fix. Strict root test typecheck passed. Full check/build results are recorded in
+[implementation status](project-status.md).
 
 ### Future entries
 
