@@ -12,6 +12,7 @@ export function createWorkspaceController(services: WorkspaceServices): RequestH
     );
     response.set('Cache-Control', 'no-store').json({
       instagramConfigured: services.instagramConfigured,
+      facebookConfigured: services.facebookConfigured ?? false,
       ...workspace,
     });
   };

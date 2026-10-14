@@ -1,15 +1,17 @@
 # Social Scheduler
 
-An Instagram-first social media scheduler for creators and small teams.
+An Instagram and Facebook Page scheduler for creators and small teams.
 Read [AGENTS.md](AGENTS.md) for product context, module boundaries, and development rules.
 Follow [the development guide](docs/development.md) for setup, feature work, migrations, testing,
 and commits. The guide and implementation status must be updated with every completed change.
 The original `idea.md` is a local planning document excluded by the workspace's gitignore.
 
-The project includes email/password and Instagram sign-in, Instagram connection, photo/MP4 uploads,
+The project includes email/password and Instagram sign-in, Instagram and Facebook Page connection, photo/MP4 uploads,
 caption and hashtag fields, live previews, drafts, scheduling, Cloudinary media storage, and a separate publishing worker.
 The user verified real Instagram sign-in;
-the first real publish is pending. Follow [Instagram setup](docs/instagram-setup.md) to test with your own account.
+the first real publish is pending. Follow [Instagram setup](docs/instagram-setup.md) and [Facebook setup](docs/facebook-setup.md)
+to configure accounts and test publishing. Facebook supports photos and Page videos with captions;
+its live authorization/publishing test is pending.
 
 ## Quick start
 
@@ -21,7 +23,7 @@ for MP4 processing. For example, Debian/Ubuntu packages both tools in `ffmpeg`.
 nvm use
 npm ci
 npm run setup:env
-# Add Cloudinary credentials to the root .env; see docs/cloudinary-setup.md.
+# Add Cloudinary and provider credentials to the root .env; see the setup guides.
 npm run infra:up
 npm run db:deploy
 npm run dev

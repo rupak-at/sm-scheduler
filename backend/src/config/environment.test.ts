@@ -10,6 +10,32 @@ const valid = {
 };
 
 describe('runtime configuration', () => {
+  it('supports Facebook independently with an exact callback and optional Business login configuration', () => {
+    const configured = {
+      ...valid,
+      WEB_ORIGIN: 'https://scheduler.example',
+      FACEBOOK_APP_ID: '123',
+      FACEBOOK_APP_SECRET: 'fixture-facebook-secret',
+      FACEBOOK_GRAPH_VERSION: 'v26.0',
+      FACEBOOK_REDIRECT_URI: 'https://scheduler.example/api/auth/facebook/callback',
+      FACEBOOK_LOGIN_CONFIG_ID: '456',
+      TOKEN_ENCRYPTION_KEY: Buffer.alloc(32, 8).toString('base64'),
+    };
+    expect(parseApiEnvironment(configured).FACEBOOK_LOGIN_CONFIG_ID).toBe('456');
+    expect(parseWorkerEnvironment(configured).FACEBOOK_APP_ID).toBe('123');
+    expect(() =>
+      parseApiEnvironment({
+        ...configured,
+        FACEBOOK_REDIRECT_URI: 'https://evil.example/api/auth/facebook/callback',
+      }),
+    ).toThrow('FACEBOOK_REDIRECT_URI');
+    expect(() =>
+      parseApiEnvironment({ ...configured, FACEBOOK_LOGIN_CONFIG_ID: 'invalid' }),
+    ).toThrow('FACEBOOK_LOGIN_CONFIG_ID');
+  });
+});
+
+describe('runtime validation', () => {
   it('rejects missing credentials without leaking values', () => {
     expect(() => parseApiEnvironment({ ...valid, REDIS_URL: 'private-secret' })).toThrow(
       'Invalid environment configuration: REDIS_URL',

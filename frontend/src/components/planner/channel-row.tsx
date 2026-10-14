@@ -1,6 +1,7 @@
 import type { Channel } from '@social-scheduler/shared';
 import { ChevronDown, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { channelName, channelProvider } from '@/lib/planner/channels';
 export function ChannelRow({
   channel,
   act,
@@ -21,11 +22,8 @@ export function ChannelRow({
           {(channel.displayName ?? 'I').charAt(0).toLocaleUpperCase()}
         </span>
         <div className="min-w-0">
-          <p
-            className="truncate text-sm font-medium"
-            title={`@${channel.displayName ?? 'Instagram'}`}
-          >
-            @{channel.displayName ?? 'Instagram'}
+          <p className="truncate text-sm font-medium" title={channelName(channel)}>
+            {channelName(channel)}
           </p>
           <p
             className={`mt-0.5 flex items-center gap-1.5 text-xs ${connected ? 'text-success' : 'text-destructive'}`}
@@ -86,7 +84,7 @@ function ConnectionDetails({
               onClick={() => {
                 if (
                   window.confirm(
-                    'Disconnect Instagram? Scheduled posts will fail until you reconnect. You can still sign in with Instagram.',
+                    `Disconnect ${channelProvider(channel)}? Scheduled posts for this account will fail until you reconnect.`,
                   )
                 )
                   void act(`/channels/${channel.id}/disconnect`);

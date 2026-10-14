@@ -1,6 +1,7 @@
 import type { PrismaClient, Prisma } from '../database/index.js';
 import type { z } from 'zod';
 import { postInclude, postView } from './post-view.js';
+import { channelSchema } from '@social-scheduler/shared';
 import type { WorkspaceCounts, workspaceSchema } from '@social-scheduler/shared';
 import type { WorkspaceQuery } from '../validators/workspace.schemas.js';
 const statuses = {
@@ -18,13 +19,14 @@ export async function readWorkspace(
   database: PrismaClient,
   userId: string,
   query: WorkspaceQuery,
-): Promise<Omit<z.infer<typeof workspaceSchema>, 'instagramConfigured'>> {
+): Promise<Omit<z.infer<typeof workspaceSchema>, 'instagramConfigured' | 'facebookConfigured'>> {
   const [channels, items, counts, upcoming] = await Promise.all([
     database.socialAccount.findMany({
-      where: { userId, provider: 'INSTAGRAM' },
+      where: { userId, provider: { in: ['INSTAGRAM', 'FACEBOOK'] } },
       orderBy: { createdAt: 'asc' },
       select: {
         id: true,
+        provider: true,
         displayName: true,
         status: true,
         tokenExpiresAt: true,
@@ -54,11 +56,13 @@ export async function readWorkspace(
       .then((publications) => publications.map(({ post }) => postView(post))),
   ]);
   return {
-    channels: channels.map((channel) => ({
-      ...channel,
-      tokenExpiresAt: channel.tokenExpiresAt?.toISOString() ?? null,
-      tokenCheckedAt: channel.tokenCheckedAt?.toISOString() ?? null,
-    })),
+    channels: channels.map((channel) =>
+      channelSchema.parse({
+        ...channel,
+        tokenExpiresAt: channel.tokenExpiresAt?.toISOString() ?? null,
+        tokenCheckedAt: channel.tokenCheckedAt?.toISOString() ?? null,
+      }),
+    ),
     posts: items.slice(0, 30).map(postView),
     nextCursor: items.length > 30 ? (items[29]?.id ?? null) : null,
     counts,

@@ -4,12 +4,14 @@ import type { PostInput } from '@social-scheduler/shared';
 import type { MediaStorage } from '../lib/media/media-storage.types.js';
 import { WorkspaceError } from '../lib/workspace-error.js';
 import { postInclude, postView } from '../repositories/post-view.js';
+import { channelCanSchedule, eligibleChannelWhere } from '../lib/channel-eligibility.js';
 
 export class PostsService {
   constructor(
     private readonly db: PrismaClient,
     private readonly storage: MediaStorage,
     private readonly configured = true,
+    private readonly facebookConfigured = false,
   ) {}
   async save(userId: string, input: PostInput, id?: string, revision?: string) {
     this.validateSchedule(input);
@@ -21,13 +23,10 @@ export class PostsService {
             404,
             'Choose an account and uploaded media from your workspace.',
           );
-        if (
-          input.scheduledAt &&
-          (account.status !== 'CONNECTED' ||
-            !account.tokenExpiresAt ||
-            account.tokenExpiresAt.getTime() <= Date.now())
-        )
-          throw new WorkspaceError(422, 'Reconnect Instagram before scheduling.');
+        if (input.scheduledAt && !this.providerConfigured(account.provider))
+          throw new WorkspaceError(422, 'Configure this provider before scheduling.');
+        if (input.scheduledAt && !channelCanSchedule(account))
+          throw new WorkspaceError(422, 'Reconnect this account before scheduling.');
         this.validateMediaDelivery(input, media);
         if (id) {
           await tx.$queryRaw`SELECT id FROM "Publication" WHERE "postId" = ${id}::uuid FOR UPDATE`;
@@ -82,8 +81,11 @@ export class PostsService {
   private validateSchedule(input: PostInput) {
     if (input.scheduledAt && new Date(input.scheduledAt).getTime() < Date.now() + 60000)
       throw new WorkspaceError(422, 'Schedule at least one minute in the future.');
-    if (input.scheduledAt && !this.configured)
-      throw new WorkspaceError(422, 'Configure Instagram before scheduling.');
+  }
+  private providerConfigured(provider: string) {
+    return provider === 'INSTAGRAM'
+      ? this.configured
+      : provider === 'FACEBOOK' && this.facebookConfigured;
   }
   private validateMediaDelivery(
     input: PostInput,
@@ -130,14 +132,16 @@ export class PostsService {
       throw new WorkspaceError(409, 'Only drafts and scheduled posts can be cancelled.');
   }
   async retry(userId: string, id: string) {
-    if (!this.configured) throw new WorkspaceError(422, 'Configure Instagram before retrying.');
+    const providers: ('INSTAGRAM' | 'FACEBOOK')[] = [];
+    if (this.configured) providers.push('INSTAGRAM');
+    if (this.facebookConfigured) providers.push('FACEBOOK');
     const result = await this.db.publication.updateMany({
       where: {
         postId: id,
         post: { userId },
         status: 'FAILED',
         publishRequestedAt: null,
-        socialAccount: { status: 'CONNECTED', tokenExpiresAt: { gt: new Date() } },
+        socialAccount: { userId, ...eligibleChannelWhere(providers) },
       },
       data: {
         status: 'SCHEDULED',
@@ -148,7 +152,7 @@ export class PostsService {
     if (result.count !== 1)
       throw new WorkspaceError(
         409,
-        'Reconnect Instagram or resolve the publishing outcome before retrying.',
+        'Configure or reconnect this account, or resolve the publishing outcome before retrying.',
       );
   }
 }

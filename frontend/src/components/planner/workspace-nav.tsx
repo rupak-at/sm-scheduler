@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Instagram } from 'lucide-react';
+import { Link2 } from 'lucide-react';
 import { Brand } from '@/components/brand';
 import { LogoutButton } from '@/components/auth/logout-button';
 export function WorkspaceNav({ userName, connected }: { userName: string; connected: boolean }) {
@@ -21,16 +21,16 @@ export function WorkspaceNav({ userName, connected }: { userName: string; connec
             href="#channels"
             className="flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-md px-1 text-xs text-muted hover:text-ink"
             aria-label={
-              connected ? 'Instagram connected. View account details' : 'Connect Instagram'
+              connected ? 'Account connected. View account details' : 'Connect an account'
             }
           >
-            <Instagram className="size-4 sm:hidden" aria-hidden="true" />
+            <Link2 className="size-4 sm:hidden" aria-hidden="true" />
             <span
               className={`size-1.5 rounded-full ${connected ? 'bg-success' : 'bg-muted'}`}
               aria-hidden="true"
             />
             <span className="hidden sm:block">
-              {connected ? 'Instagram connected' : 'Connect Instagram'}
+              {connected ? 'Account connected' : 'Connect an account'}
             </span>
           </Link>
           <div className="flex items-center gap-2 sm:border-l sm:border-line sm:pl-5">

@@ -30,7 +30,7 @@ export function PostList({
         <p className="mt-2 max-w-72 text-[13px] leading-relaxed text-muted">
           {channels.length
             ? empty.description
-            : 'Connect Instagram to add a photo or Reel, save a draft, and choose when to share it.'}
+            : 'Connect Instagram or a Facebook Page to prepare a photo or video and choose when to share it.'}
         </p>
         <Button
           asChild
@@ -42,7 +42,7 @@ export function PostList({
             scroll={false}
           >
             <Plus aria-hidden="true" />
-            {channels.length ? 'Create a post' : 'Connect Instagram'}
+            {channels.length ? 'Create a post' : 'Connect an account'}
           </ComposerLink>
         </Button>
       </div>

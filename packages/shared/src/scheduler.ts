@@ -21,6 +21,7 @@ export const postInputSchema = z.object({
 export type PostInput = z.infer<typeof postInputSchema>;
 export const channelSchema = z.object({
   id: z.uuid(),
+  provider: z.enum(['INSTAGRAM', 'FACEBOOK']).default('INSTAGRAM'),
   displayName: z.string().nullable(),
   status: z.enum(['CONNECTED', 'EXPIRED', 'REVOKED', 'DISCONNECTED']),
   tokenExpiresAt: z.string().nullable(),
@@ -64,10 +65,12 @@ export const workspaceCountsSchema = z.object({
 export type WorkspaceCounts = z.infer<typeof workspaceCountsSchema>;
 export const workspaceSchema = z.object({
   instagramConfigured: z.boolean(),
+  facebookConfigured: z.boolean().default(false),
   channels: z.array(channelSchema),
   posts: z.array(postSchema),
   nextCursor: z.string().nullable(),
   counts: workspaceCountsSchema,
   upcoming: z.array(postSchema).max(3),
 });
+// Keep the deployed queue name so pending Instagram jobs survive the Facebook rollout.
 export const PUBLISH_QUEUE = 'instagram-publishing';

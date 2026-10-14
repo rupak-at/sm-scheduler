@@ -129,3 +129,12 @@ The URL-linked composer is an accessible Radix sheet with a full-height mobile l
 scrollable form/preview, a fixed header/action bar, focus trapping/restoration, and dirty-close
 confirmation. Existing real uploads, captions, hashtags, account selection, schedule validation,
 and provider/reliability behavior remain. Use touch-sized controls and preserve safe-area padding.
+
+## Facebook integration — 2026-10-14
+
+Retain the existing white/graphite tokens, local Roboto, touch-sized shadcn buttons and account
+rail. Group actual channels under Instagram and Facebook Pages within Your accounts. Composer
+selection includes the provider and uses Page names without Instagram's @ prefix; previews use
+the selected provider icon and name and disclose that Page posts are public. Content rows and
+uncertain-outcome guidance identify the actual provider. Keep the selected media as the visual
+focus; no new colors, layout redesign or invented account/post data.

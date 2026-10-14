@@ -3,7 +3,7 @@
 ## Implemented
 
 - Three npm workspaces: `frontend` (Next.js), `backend` (Express API, BullMQ worker,
-  Prisma, configuration, Instagram), and `packages/shared` (browser-safe validation/types).
+  Prisma, configuration, Instagram/Facebook), and `packages/shared` (browser-safe validation/types).
   Conventional routes/controllers/services and frontend app/components/hooks/lib folders.
 - Strict TypeScript, ESLint source/function limits, Prettier/Tailwind sorting,
   Husky/lint-staged, CI, living development docs, and explicit feature commits.
@@ -13,6 +13,12 @@
 - Instagram OAuth sign-in and explicit linking to an existing email workspace.
   Immutable provider identity, browser-bound signed state cookies, ten-minute one-use
   database records, same-session linking, and reserved unverified internal email IDs.
+- Facebook managed-Page connection to the current authenticated workspace, granted/granular
+  scope and Page identity validation, provider-bound encrypted Page tokens and expiry/revocation
+  maintenance. Optional Facebook Login for Business User Access Token configuration.
+- Captioned Facebook photos and Page videos through official endpoints, persisted video IDs,
+  asynchronous processing/public-status checks, provider dispatch and guarded no-resend recovery.
+  Planner account selection/previews/channel actions identify Instagram versus Facebook.
 - Professional account/profile and scope validation. Provider credentials remain encrypted
   with AES-256-GCM and account-bound authenticated data; raw tokens never reach the browser
   or Better Auth Account storage. Independent local key setup and stored key version.
@@ -71,6 +77,27 @@ native preview delivery, and draft round-trip at 390/768/1280px. Compiled proces
 database diagnostics, and queue delivery passed. No schema migration or authorized live provider
 upload/publish was performed; real Cloudinary delivery and Instagram fetch/publish remain pending.
 
+## Facebook update — 2026-10-14
+
+Added Facebook Page connection and captioned photo/video scheduling alongside Instagram.
+The Page video endpoint supports the common MP4 composer without claiming dedicated Reels
+support. Long-lived Page tokens can have null fixed expiry; actual scopes, Page identity,
+token/data-access expiry and revocation are rechecked. Same-session, provider-bound OAuth and
+atomic ownership checks protect linking. Instagram credentials/ciphertext/queue jobs remain
+compatible, and either configured provider can operate independently. No schema change.
+
+See [setup](facebook-setup.md) and [research](facebook-research.md).
+
+Verification: formatting/lint/strict types, all 111 unit tests, all 53 isolated PostgreSQL/Redis/provider-fixture
+integration tests, and the production build passed under Node 24. Existing migrations deployed
+successfully to the isolated test database; schema/migrations are unchanged. Chromium checked
+320/390/768/820/1024/1280/1440/1920px with mixed providers, long Page names, caption composition,
+real stored MP4 metadata/playback availability and provider previews; no page errors or horizontal
+overflow. The Facebook button reached the authenticated start endpoint and its Meta redirect was
+intercepted before a live request. Desktop/mobile/tablet screenshots and changed UI were reviewed.
+No creator records, real provider writes, push or deployment; live Facebook connection/photo/video
+and signed Cloudinary delivery remain to verify.
+
 ## Limits and pending work
 
 The implementation is ready for a **private real-account integration test**, not a claim
@@ -86,7 +113,9 @@ fix. This verifies their login/account connection, not a successful scheduled pu
 The current vertical slice supports one photo or MP4 Reel per post. JPEG/PNG/WebP/AVIF
 photos up to 8 MB become JPEGs. H.264/H.265 MP4s up to 64 MB, 3 seconds–15 minutes, are
 normalized for Reels; the API requires FFmpeg/FFprobe. HEIC, animated images, carousels,
-Stories, analytics, teams, Facebook, and TikTok remain unsupported. Live photo and Reel
+Stories, analytics, teams, and TikTok remain unsupported. Facebook supports one photo or
+Page video with captions; dedicated Facebook Reels, profiles, Groups, text-only posts and
+multi-target crossposting remain unsupported. Live Instagram photo/Reel and Facebook photo/video
 publishing remain unverified; future provider enum values do not enable those providers.
 
 New media uses Cloudinary with server-only credentials. Browser uploads go directly to Express,

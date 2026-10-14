@@ -5,13 +5,14 @@ status at the same time. Record the change and its verification in the update lo
 
 ## Product and current scope
 
-Social Scheduler helps creators prepare and schedule Instagram content. Phase 1 is
-Instagram-first; future Facebook/TikTok providers share the domain model.
+Social Scheduler helps creators prepare and schedule Instagram and managed Facebook Page
+content. TikTok remains a future provider in the shared domain model.
 
 The current application has email/password and Instagram authentication, a protected planner,
 photo/MP4 uploads, caption and hashtag editing with live previews, drafts, durable scheduling,
 and a publishing/recovery worker. The user has
-verified real Instagram sign-in; a real publish still needs testing.
+verified real Instagram sign-in; a real publish still needs testing. Facebook Page connection and captioned photo/video
+publishing are implemented with fixture verification; live Facebook testing remains pending.
 Read [AGENTS.md](../AGENTS.md), [status](project-status.md), and [architecture](architecture.md)
 before choosing the next feature.
 
@@ -121,7 +122,7 @@ Express, the database, and the worker, with concrete file links and examples of 
 | Request validation/responses            | `backend/src/controllers`                           |
 | Business rules and transactions         | `backend/src/services`                              |
 | Database queries and mapping            | `backend/src/repositories`                          |
-| Provider calls, OAuth, encrypted tokens | `backend/src/integrations/instagram`                |
+| Provider calls, OAuth, encrypted tokens | `backend/src/integrations/{instagram,facebook}`     |
 | Media processing/storage                | `backend/src/lib/media`                             |
 | Worker startup/publishing/recovery      | `backend/src/worker`                                |
 | Environment and resource setup          | `backend/src/config`                                |
@@ -343,6 +344,32 @@ The worker chooses photo or `REELS` containers from persisted media type/MIME, s
 container before polling, and keeps existing send-marker/uncertain-outcome protections.
 No schema migration is needed. HEIC/GIF, multiple attachments/carousels, and Stories remain unsupported.
 The preview describes composition; Instagram cover cropping/text display can differ.
+
+## Facebook feature development
+
+Read [Facebook setup](facebook-setup.md) and [the official-source research](facebook-research.md).
+Set `FACEBOOK_APP_ID`, `FACEBOOK_APP_SECRET`, `FACEBOOK_GRAPH_VERSION` and
+`FACEBOOK_REDIRECT_URI` in API and worker environments, sharing the existing independent
+`TOKEN_ENCRYPTION_KEY`. Optional `FACEBOOK_LOGIN_CONFIG_ID` supports Business login
+configurations issuing User Access Tokens. Callback must match `WEB_ORIGIN` plus
+`/api/auth/facebook/callback`. Facebook can run independently of Instagram configuration.
+
+Page connection requires an existing application session. Meta consent selects allowed Pages;
+all returned eligible Pages are saved atomically with encrypted, provider-bound Page tokens.
+Actual grants/identity/expiry are checked on connect and before sending. Facebook Page tokens
+with no fixed expiry store null, with separate data-access expiry checks. Reconnect instead
+of using Instagram's refresh endpoint. See setup/research for App Review and production gates.
+
+The common composer saves one photo or MP4 with captions to one chosen account/Page. Its
+2,200-character caption and upload limits are application policy. Facebook uses `/photos`
+and `/videos`; it does not claim dedicated Reels support. Existing protected Cloudinary URLs
+and direct uploads are shared. No schema changes or creator database migrations are required.
+
+The existing `instagram-publishing` queue now dispatches by stored provider. Facebook sends
+under a durable marker/lease guard. Known video IDs resume processing/public-status checks;
+lost send responses without IDs stay uncertain, with no automatic resend or caption matching.
+The full isolated integration suite includes Facebook session/state/ownership, photo/video
+outcomes, token expiry/revocation, provider configuration and real Redis recovery.
 
 ## Update log
 
@@ -588,6 +615,29 @@ fixture, and draft save/reopen/edit, with no page errors or overflow at 390/768/
 API/frontend/worker startup, database diagnostics, and queue consumption also passed. Creator data
 was not migrated; no authorized live Cloudinary upload or Instagram publish, push, or deployment
 was performed. Live Cloudinary delivery and Meta fetching the signed photo/Reel URLs remain to test.
+
+### 2026-10-14 — Facebook Pages with captioned photos and videos
+
+Researched current Meta Page, Login, token, photo/video and Reels references; documented
+endpoint selection and setup gates. Added authenticated Page connection, encrypted Page
+tokens, actual/granular permission and expiry validation, optional Business login configuration,
+periodic validation, and provider-aware scheduling/channel actions. The planner offers both
+providers with real Page names, provider-specific previews and public Page-post disclosure.
+
+Facebook photos publish with captions; MP4s publish as Page videos with descriptions and
+saved IDs, then wait for processing and public status. The worker shares durable scheduling,
+ID-only Redis delivery and leases; lost responses retain a no-resend marker. Instagram jobs,
+OAuth modes and ciphertext remain compatible. No schema migration or live provider write.
+
+Verification: formatting/lint/strict types, all 111 unit tests, all 53 isolated PostgreSQL/Redis/provider-fixture
+integration tests, and the production build passed under Node 24. Existing migrations deployed
+successfully to the isolated test database; schema/migrations are unchanged. Chromium checked
+320/390/768/820/1024/1280/1440/1920px with mixed providers, long Page names, caption composition,
+real stored MP4 metadata/playback availability and provider previews; no page errors or horizontal
+overflow. The Facebook button reached the authenticated start endpoint and its Meta redirect was
+intercepted before a live request. Desktop/mobile/tablet screenshots and changed UI were reviewed.
+No creator records, real provider writes, push or deployment; live Facebook connection/photo/video
+and signed Cloudinary delivery remain to verify.
 
 ### Future entries
 

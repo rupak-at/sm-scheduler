@@ -1,8 +1,8 @@
-import type { PublishingServices } from './processor.js';
+import type { InstagramPublishingServices } from './instagram.js';
 import type { ClaimedPublication } from './claim.js';
 
 export async function preparePublicationContainer(
-  { db, client, storage }: PublishingServices,
+  { db, client, storage }: InstagramPublishingServices,
   record: ClaimedPublication,
   media: ClaimedPublication['post']['media'][number]['mediaAsset'],
   token: string,

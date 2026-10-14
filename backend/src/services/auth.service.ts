@@ -7,6 +7,8 @@ import { betterAuth } from 'better-auth/minimal';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { toNodeHandler } from 'better-auth/node';
 import type { AuthGateway } from '../types/auth.types.js';
+import { facebookPlugin } from '../integrations/facebook/facebook.plugin.js';
+import type { FacebookPluginOptions } from '../integrations/facebook/facebook.plugin.js';
 
 interface AuthOptions {
   database: PrismaClient;
@@ -14,6 +16,7 @@ interface AuthOptions {
   webOrigin: string;
   production: boolean;
   instagram?: InstagramPluginOptions;
+  facebook?: FacebookPluginOptions;
 }
 
 export function createAuthentication(options: AuthOptions): AuthGateway {
@@ -23,7 +26,10 @@ export function createAuthentication(options: AuthOptions): AuthGateway {
     secret: options.secret,
     database: prismaAdapter(options.database, { provider: 'postgresql' }),
     trustedOrigins: [options.webOrigin],
-    plugins: options.instagram ? [instagramPlugin(options.instagram)] : [],
+    plugins: [
+      ...(options.instagram ? [instagramPlugin(options.instagram)] : []),
+      ...(options.facebook ? [facebookPlugin(options.facebook)] : []),
+    ],
     account: { accountLinking: { enabled: false } },
     databaseHooks: {
       user: {

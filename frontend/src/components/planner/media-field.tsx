@@ -69,7 +69,8 @@ export function MediaField({ editor }: { editor: ReturnType<typeof usePostEditor
       {editor.preview && <SelectedMedia editor={editor} />}
       <p id="media-help" className="text-xs leading-relaxed text-muted">
         JPEG, PNG, WebP, or AVIF photos up to 8 MB. MP4 videos up to 64 MB, from 3 seconds to 15
-        minutes. One photo or Reel per post.
+        minutes. One photo or video per post. Instagram videos publish as Reels; Facebook videos
+        publish to your Page.
       </p>
     </div>
   );

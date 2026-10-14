@@ -1,4 +1,5 @@
 import { createInstagramServices } from '../integrations/instagram/services.js';
+import { createFacebookServices } from '../integrations/facebook/services.js';
 import { createMediaStorage } from './media-storage.js';
 import type { WorkspaceServices } from '../types/workspace.types.js';
 import { createLogger } from './logger.js';
@@ -30,11 +31,13 @@ export function createResources(environment: ApiEnvironment): Resources {
   });
   redis.on('error', () => logger.warn('Redis connection unavailable'));
   const instagram = createInstagramServices(environment, database);
+  const facebook = createFacebookServices(environment, database);
   return {
     logger,
     workspace: {
       database,
       instagramConfigured: instagram !== null,
+      facebookConfigured: facebook !== null,
       storage: createMediaStorage(
         environment,
         environment.TOKEN_ENCRYPTION_KEY ?? environment.BETTER_AUTH_SECRET,
@@ -45,12 +48,24 @@ export function createResources(environment: ApiEnvironment): Resources {
         webOrigin: environment.WEB_ORIGIN,
       },
       ...(instagram ? { tokens: instagram.tokens } : {}),
+      ...(facebook ? { facebookTokens: facebook.tokens } : {}),
     },
     auth: createAuthentication({
       database,
       secret: environment.BETTER_AUTH_SECRET,
       webOrigin: environment.WEB_ORIGIN,
       production: environment.NODE_ENV === 'production',
+      ...(facebook
+        ? {
+            facebook: {
+              database,
+              client: facebook.client,
+              vault: facebook.vault,
+              webOrigin: environment.WEB_ORIGIN,
+              production: environment.NODE_ENV === 'production',
+            },
+          }
+        : {}),
       ...(instagram
         ? {
             instagram: {

@@ -1,6 +1,7 @@
 import { ZodError } from 'zod';
 import { WorkspaceError } from '../lib/workspace-error.js';
 import { InstagramError } from '../integrations/instagram/http.js';
+import { FacebookError } from '../integrations/facebook/http.js';
 import type { ErrorRequestHandler } from 'express';
 
 // Keep implementation details and connection credentials out of public responses.
@@ -19,6 +20,13 @@ export const errorHandler: ErrorRequestHandler = (error: unknown, _request, resp
   if (error instanceof InstagramError) {
     response.status(422).json({
       error: 'Instagram could not verify this connection. Reconnect or try again shortly.',
+      code: error.code,
+    });
+    return;
+  }
+  if (error instanceof FacebookError) {
+    response.status(422).json({
+      error: 'Facebook could not verify this Page. Reconnect or try again shortly.',
       code: error.code,
     });
     return;

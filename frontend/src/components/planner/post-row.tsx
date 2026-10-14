@@ -2,6 +2,7 @@ import type { Channel, PlannerPost } from '@social-scheduler/shared';
 import { PostActions } from '@/components/planner/post-actions';
 import { PostMedia } from '@/components/planner/post-media';
 import { PostStatus } from '@/components/planner/post-status';
+import { channelName, channelProvider } from '@/lib/planner/channels';
 export function PostRow({
   post,
   channels,
@@ -24,15 +25,19 @@ export function PostRow({
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex min-w-0 flex-wrap items-center justify-between gap-2">
             <p className="min-w-0 truncate text-xs font-medium text-muted">
-              @{channel?.displayName ?? 'Instagram'}
+              {channelProvider(channel)} · {channelName(channel)}
               <span className="ml-2 font-normal">
-                {post.mediaMimeType === 'video/mp4' ? 'Reel' : 'Photo'}
+                {post.mediaMimeType === 'video/mp4'
+                  ? channel?.provider === 'FACEBOOK'
+                    ? 'Video'
+                    : 'Reel'
+                  : 'Photo'}
               </span>
             </p>
             <PostStatus status={post.status} />
           </div>
           <p className="line-clamp-3 text-[13px] leading-relaxed [overflow-wrap:anywhere] whitespace-pre-wrap sm:text-sm">
-            {post.caption || (post.mediaMimeType === 'video/mp4' ? 'Instagram Reel' : 'Photo post')}
+            {post.caption || (post.mediaMimeType === 'video/mp4' ? 'Video post' : 'Photo post')}
           </p>
           {date && (
             <p className="mt-3 text-xs leading-relaxed text-muted">
@@ -54,8 +59,8 @@ export function PostRow({
       </div>
       {post.status === 'UNCERTAIN' && (
         <p className="mt-4 rounded-lg bg-destructive/5 p-3 text-xs leading-relaxed text-destructive">
-          The publish outcome is unconfirmed. Check Instagram before creating another copy. We’ll
-          keep checking.
+          The publish outcome is unconfirmed. Check {channelProvider(channel)} before creating
+          another copy. We’ll keep checking.
         </p>
       )}
       {post.attempts[0]?.error && (

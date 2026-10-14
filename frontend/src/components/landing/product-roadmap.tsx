@@ -8,7 +8,7 @@ const stages = [
   },
   {
     title: 'Your first channel',
-    description: 'Connect your Business or Creator account after Instagram app setup.',
+    description: 'Connect Instagram or Facebook Pages after setting up your Meta app.',
     available: true,
   },
   {
@@ -34,8 +34,8 @@ export function ProductRoadmap() {
             More to come.
           </h2>
           <p className="max-w-[40ch] text-sm leading-6 text-muted">
-            We’re building the essentials with care, starting with Instagram. Here’s what you can
-            use today and what comes next.
+            Plan Instagram and Facebook Page content. Here’s what you can use today and what comes
+            next.
           </p>
         </div>
         <ol className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">

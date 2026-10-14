@@ -38,7 +38,7 @@ export function usePostEditor(post: PlannerPost | undefined, initialChannelId: s
     try {
       if (!media.asset) throw new Error('Add a photo or video before saving.');
       if (caption.captionProblem) throw new Error(caption.captionProblem);
-      if (!channelId) throw new Error('Choose an Instagram account.');
+      if (!channelId) throw new Error('Choose an Instagram account or Facebook Page.');
       if (scheduling && !schedule.scheduled)
         throw new Error('Choose a date and time for this post.');
       if (scheduling && new Date(schedule.scheduled).getTime() < Date.now() + 60000)

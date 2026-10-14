@@ -58,6 +58,7 @@ export function Planner({
           <ChannelsPanel
             channels={data.channels}
             configured={data.instagramConfigured}
+            facebookConfigured={data.facebookConfigured}
             act={act}
             pending={pending}
           />

@@ -5,7 +5,7 @@ import { InstagramError } from '../http.js';
 const hash = (value: string) => createHash('sha256').update(value).digest('hex');
 export async function createOAuthState(
   db: PrismaClient,
-  mode: 'login' | 'connect',
+  mode: 'login' | 'connect' | 'facebook-connect',
   userId?: string,
   sessionId?: string,
 ) {

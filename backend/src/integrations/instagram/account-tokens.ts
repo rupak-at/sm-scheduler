@@ -12,7 +12,12 @@ export class AccountTokens {
   ) {}
   async validToken(id: string): Promise<string> {
     const account = await this.db.socialAccount.findUniqueOrThrow({ where: { id } });
-    if (account.status !== 'CONNECTED' || !account.tokenCiphertext || !account.tokenExpiresAt)
+    if (
+      account.provider !== 'INSTAGRAM' ||
+      account.status !== 'CONNECTED' ||
+      !account.tokenCiphertext ||
+      !account.tokenExpiresAt
+    )
       throw new InstagramError('RECONNECT_REQUIRED');
     const guard = {
       id,

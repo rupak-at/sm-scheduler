@@ -43,7 +43,7 @@ Saving a schedule writes PostgreSQL. The worker is a separate process started by
 The worker and API reuse the same database client, environment validation, Cloudinary media storage,
 Instagram client, and token handling. They use separate processes so publishing can continue
 independently of HTTP requests. Queue jobs contain IDs; the current record is read from PostgreSQL.
-Keep the durable send marker and lease guards: a timeout can mean Instagram already published.
+Keep the durable send marker and lease guards: a timeout can mean the provider already published.
 
 ## Where to make common changes
 
@@ -107,3 +107,13 @@ one-use token authorizes a direct file request to Express `/api/media/upload/:id
 and prepares bytes, uploads them through `integrations/cloudinary/storage.ts`, and saves the
 Cloudinary identifier. The browser keeps the ordinary owned preview route; it redirects to an
 expiring Cloudinary download. See [Cloudinary setup](cloudinary-setup.md).
+
+## Facebook additions
+
+`backend/src/integrations/facebook` owns Login, Page discovery, granted permissions, Page-token
+validation and remote photo/video calls. `worker/publishing/processor.ts` selects the concrete
+provider from the stored account; `instagram.ts` preserves container behavior and `facebook.ts`
+handles send markers, photo outcomes and saved-video polling. Both use the same claims/attempts
+and queue. The API and worker create the configured providers independently; no generic base
+provider class is introduced. Page setup and research are in [Facebook setup](facebook-setup.md)
+and [Facebook research](facebook-research.md).

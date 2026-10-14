@@ -1,6 +1,7 @@
 import { cloudinaryEnvironmentSchema } from './cloudinary.js';
 import { loadEnvironment } from './load-env.js';
 import { instagramEnvironmentSchema, instagramConfigured } from './instagram.js';
+import { facebookEnvironmentSchema, facebookCredentials } from './facebook.js';
 import { z } from 'zod';
 
 const baseSchema = z
@@ -16,6 +17,7 @@ const baseSchema = z
 
 const apiSchema = baseSchema
   .extend(instagramEnvironmentSchema.shape)
+  .extend(facebookEnvironmentSchema.shape)
   .extend({
     BETTER_AUTH_SECRET: z.string().min(32),
     API_PUBLIC_URL: z
@@ -36,15 +38,25 @@ const apiSchema = baseSchema
     (input) => input.NODE_ENV !== 'production' || input.API_PUBLIC_URL.startsWith('https://'),
     { path: ['API_PUBLIC_URL'], message: 'Production upload API requires HTTPS' },
   );
-const validatedApiSchema = apiSchema.refine(
-  (input) =>
-    !instagramConfigured(input) ||
-    input.INSTAGRAM_REDIRECT_URI === `${input.WEB_ORIGIN}/api/auth/instagram/callback`,
-  { path: ['INSTAGRAM_REDIRECT_URI'], message: 'Callback must use the web origin' },
-);
-const workerSchema = baseSchema.extend(instagramEnvironmentSchema.shape).extend({
-  WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(20).default(2),
-});
+const validatedApiSchema = apiSchema
+  .refine(
+    (input) =>
+      !instagramConfigured(input) ||
+      input.INSTAGRAM_REDIRECT_URI === `${input.WEB_ORIGIN}/api/auth/instagram/callback`,
+    { path: ['INSTAGRAM_REDIRECT_URI'], message: 'Callback must use the web origin' },
+  )
+  .refine(
+    (input) =>
+      !facebookCredentials(input) ||
+      input.FACEBOOK_REDIRECT_URI === `${input.WEB_ORIGIN}/api/auth/facebook/callback`,
+    { path: ['FACEBOOK_REDIRECT_URI'], message: 'Callback must use the web origin' },
+  );
+const workerSchema = baseSchema
+  .extend(instagramEnvironmentSchema.shape)
+  .extend(facebookEnvironmentSchema.shape)
+  .extend({
+    WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(20).default(2),
+  });
 
 function parseEnvironment<T>(schema: z.ZodType<T>, input: NodeJS.ProcessEnv): T {
   const result = schema.safeParse(input);

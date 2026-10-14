@@ -215,3 +215,22 @@ Final live localhost and HTTPS-tunnel styles include image dimensions, fixed she
 and expected responsive utilities. Cache-Control is private/no-store; Cloudflare reports BYPASS.
 The preceding eight-size editor/history/upload/schedule browser checks remain valid. Temporary
 diagnostic route/hook removed; no diagnostics or fixture data ship in the interface.
+
+## Facebook provider UI — 2026-10-14
+
+Reviewed the changed account panel/button, channel rows, composer selection/preview, content rows,
+connection notices, navigation and empty state against the current Web Interface Guidelines
+(fetched 2026-10-14). Semantic buttons/selects/labels, native details, explicit provider names,
+focus rings, accessible alerts and reduced-motion loading indicators remain consistent. No
+outstanding findings in the changed UI. Existing white/graphite/Roboto layout is retained.
+
+Chromium used the production frontend and an isolated authenticated API/database with actual
+fixture JPEG/MP4 uploads and real mixed-provider account/post records. All eight required widths
+(320, 390, 768, 820, 1024, 1280, 1440, 1920px) passed page/composer overflow checks, long Page
+names, Facebook selection, live caption composition, stored video metadata/native playback
+controls and correct photo/video provider preview labels. Desktop, tablet and phone screenshots
+were inspected. The Facebook connection button reached the real authenticated start route;
+its Facebook redirect was intercepted before provider contact. No browser page errors occurred.
+
+This review uses provider fixtures, not live Facebook authorization/publication or a live
+Cloudinary asset. Physical Safari/iPad behavior remains untested. No creator data changed.

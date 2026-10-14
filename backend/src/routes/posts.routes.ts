@@ -5,7 +5,12 @@ import type { WorkspaceServices } from '../types/workspace.types.js';
 
 export function postsRouter(services: WorkspaceServices) {
   const router = Router();
-  const posts = new PostsService(services.database, services.storage, services.instagramConfigured);
+  const posts = new PostsService(
+    services.database,
+    services.storage,
+    services.instagramConfigured,
+    services.facebookConfigured ?? false,
+  );
   const controller = createPostsController(posts);
   router.post('/posts', controller.create);
   router.put('/posts/:id', controller.update);

@@ -12,7 +12,7 @@ const roboto = localFont({
 
 export const metadata: Metadata = {
   title: 'Social Scheduler — a considered space for your content',
-  description: 'Plan your Instagram content in one calm workspace.',
+  description: 'Plan your Instagram and Facebook Page content in one calm workspace.',
   robots: { index: false, follow: false },
 };
 export const viewport: Viewport = { themeColor: '#fafafa' };

@@ -31,6 +31,8 @@ export async function completeInstagramCallback(
     ctx.setCookie(cookie, '', { ...cookieOptions, maxAge: 0 });
     if (!query.state || !browser) throw new InstagramError('INVALID_OAUTH_STATE');
     const attempt = await consumeOAuthState(database, query.state, browser);
+    if (!['login', 'connect'].includes(attempt.mode))
+      throw new InstagramError('INVALID_OAUTH_STATE');
     destination = attempt.mode === 'connect' ? '/planner' : '/login';
     if (query.error || !query.code) throw new InstagramError('AUTHORIZATION_DECLINED');
     const session = await getSessionFromCtx(ctx);

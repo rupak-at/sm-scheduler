@@ -1,4 +1,5 @@
 import { createInstagramServices } from '../../integrations/instagram/services.js';
+import { createFacebookServices } from '../../integrations/facebook/services.js';
 import { reconcilePublications } from './reconcile.js';
 import { startPoller } from './poller.js';
 import { publicationJobSchema } from '@social-scheduler/shared';
@@ -17,16 +18,21 @@ export function createPublishingRuntime(
   logger: ReturnType<typeof createLogger>,
 ) {
   const instagram = createInstagramServices(env, db);
-  if (!instagram) {
-    logger.info('Instagram publishing disabled; configure Instagram credentials');
+  const facebook = createFacebookServices(env, db);
+  if (!instagram && !facebook) {
+    logger.info('Publishing disabled; configure provider credentials');
     return null;
   }
-  const { client, tokens } = instagram;
   const storage = createMediaStorage(env, env.TOKEN_ENCRYPTION_KEY!);
   const connection = { ...redisConnectionOptions(env.REDIS_URL), maxRetriesPerRequest: null };
   const queue = new Queue(PUBLISH_QUEUE, { connection });
   queue.on('error', () => logger.warn('Publishing queue connection unavailable'));
-  const processPublication = createPublicationProcessor({ db, client, tokens, storage });
+  const processPublication = createPublicationProcessor({
+    db,
+    storage,
+    ...(instagram ? { client: instagram.client, tokens: instagram.tokens } : {}),
+    ...(facebook ? { facebook } : {}),
+  });
   const worker = new Worker<{ publicationId: string }>(
     PUBLISH_QUEUE,
     async (job) => {
@@ -44,9 +50,11 @@ export function createPublishingRuntime(
     () => logger.warn('Publishing reconciliation unavailable; will retry'),
   );
   const stopTokens = startPoller(
-    () => tokens.maintain(),
+    async () => {
+      await Promise.all([instagram?.tokens.maintain(), facebook?.tokens.maintain()]);
+    },
     1800000,
-    () => logger.warn('Instagram token maintenance unavailable; will retry'),
+    () => logger.warn('Provider token maintenance unavailable; will retry'),
   );
   return {
     ready: () => worker.waitUntilReady(),
