@@ -1,5 +1,6 @@
 import { createInstagramServices } from '../../integrations/instagram/services.js';
 import { createFacebookServices } from '../../integrations/facebook/services.js';
+import { createTikTokServices } from '../../integrations/tiktok/services.js';
 import { reconcilePublications } from './reconcile.js';
 import { startPoller } from './poller.js';
 import { publicationJobSchema } from '@social-scheduler/shared';
@@ -19,7 +20,8 @@ export function createPublishingRuntime(
 ) {
   const instagram = createInstagramServices(env, db);
   const facebook = createFacebookServices(env, db);
-  if (!instagram && !facebook) {
+  const tiktok = createTikTokServices(env, db);
+  if (!instagram && !facebook && !tiktok) {
     logger.info('Publishing disabled; configure provider credentials');
     return null;
   }
@@ -32,6 +34,7 @@ export function createPublishingRuntime(
     storage,
     ...(instagram ? { client: instagram.client, tokens: instagram.tokens } : {}),
     ...(facebook ? { facebook } : {}),
+    ...(tiktok ? { tiktok } : {}),
   });
   const worker = new Worker<{ publicationId: string }>(
     PUBLISH_QUEUE,
@@ -51,7 +54,11 @@ export function createPublishingRuntime(
   );
   const stopTokens = startPoller(
     async () => {
-      await Promise.all([instagram?.tokens.maintain(), facebook?.tokens.maintain()]);
+      await Promise.all([
+        instagram?.tokens.maintain(),
+        facebook?.tokens.maintain(),
+        tiktok?.tokens.maintain(),
+      ]);
     },
     1800000,
     () => logger.warn('Provider token maintenance unavailable; will retry'),

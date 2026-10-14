@@ -234,3 +234,25 @@ its Facebook redirect was intercepted before provider contact. No browser page e
 
 This review uses provider fixtures, not live Facebook authorization/publication or a live
 Cloudinary asset. Physical Safari/iPad behavior remains untested. No creator data changed.
+
+## TikTok account/composer review — 2026-10-14
+
+Reviewed changed account groups/connect controls, provider naming/previews/actions, and TikTok
+metadata, interaction, commercial disclosure and consent controls against the current Web
+Interface Guidelines fetched 2026-10-14. Uses labeled native selects/checkboxes with shared
+hit targets, visible focus, clear unavailable settings, accessible status/error text and
+reduced-motion loading. Provider-required consent/disclosure gates take priority over the
+general guideline to keep submit enabled until a request. No outstanding changed-UI findings.
+
+Production Chromium checks used an isolated real API/database with actual JPEG/MP4 uploads
+and simulated TikTok capabilities. Checked all eight required widths, long names, blank new
+privacy selection, initially unchecked interactions, photo-only/video-only controls, disabled
+Stitch/private paid-partnership choice, commercial labels, consent reset on caption/media changes
+and reopening, scheduling enablement, native MP4 playback and page/dialog overflow. Real API
+scheduling succeeded with an explicit browser timezone. The connect button reached the real
+authenticated TikTok start endpoint, and provider navigation was intercepted before contact.
+No browser page errors or horizontal overflow. Phone, tablet and desktop screenshots inspected.
+System dark preference retained the explicitly light controls; reduced motion was honored.
+
+No real TikTok authorization/publication or live Cloudinary transport was performed. Physical
+Safari/iPad and provider-review acceptance remain unverified. No creator data was changed.

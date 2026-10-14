@@ -18,12 +18,16 @@ export function byteRange(range: string, length: number): { start: number; end: 
     return null;
   return { start, end };
 }
-export function sendMedia(request: Request, response: Response, bytes: Buffer, mimeType: string) {
+export function sendMedia(
+  request: Request,
+  response: Response,
+  bytes: Buffer,
+  mimeType: string,
+  cacheControl = 'private, max-age=300',
+) {
   if (!['image/jpeg', 'video/mp4'].includes(mimeType))
     throw new WorkspaceError(404, 'Media not found.');
-  response
-    .set({ 'Cache-Control': 'private, max-age=300', 'Accept-Ranges': 'bytes' })
-    .type(mimeType);
+  response.set({ 'Cache-Control': cacheControl, 'Accept-Ranges': 'bytes' }).type(mimeType);
   const rangeHeader = request.headers.range;
   if (rangeHeader) {
     const range = byteRange(rangeHeader, bytes.length);

@@ -2,6 +2,7 @@ import { cloudinaryEnvironmentSchema } from './cloudinary.js';
 import { loadEnvironment } from './load-env.js';
 import { instagramEnvironmentSchema, instagramConfigured } from './instagram.js';
 import { facebookEnvironmentSchema, facebookCredentials } from './facebook.js';
+import { tiktokEnvironmentSchema, tiktokCredentials } from './tiktok.js';
 import { z } from 'zod';
 
 const baseSchema = z
@@ -18,6 +19,7 @@ const baseSchema = z
 const apiSchema = baseSchema
   .extend(instagramEnvironmentSchema.shape)
   .extend(facebookEnvironmentSchema.shape)
+  .extend(tiktokEnvironmentSchema.shape)
   .extend({
     BETTER_AUTH_SECRET: z.string().min(32),
     API_PUBLIC_URL: z
@@ -50,10 +52,17 @@ const validatedApiSchema = apiSchema
       !facebookCredentials(input) ||
       input.FACEBOOK_REDIRECT_URI === `${input.WEB_ORIGIN}/api/auth/facebook/callback`,
     { path: ['FACEBOOK_REDIRECT_URI'], message: 'Callback must use the web origin' },
+  )
+  .refine(
+    (input) =>
+      !tiktokCredentials(input) ||
+      input.TIKTOK_REDIRECT_URI === `${input.WEB_ORIGIN}/api/auth/tiktok/callback`,
+    { path: ['TIKTOK_REDIRECT_URI'], message: 'Callback must use the web origin' },
   );
 const workerSchema = baseSchema
   .extend(instagramEnvironmentSchema.shape)
   .extend(facebookEnvironmentSchema.shape)
+  .extend(tiktokEnvironmentSchema.shape)
   .extend({
     WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(20).default(2),
   });

@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Image as ImageIcon, Instagram, Facebook } from 'lucide-react';
+import { Image as ImageIcon, Instagram, Facebook, Music2 } from 'lucide-react';
 import type { Channel } from '@social-scheduler/shared';
 import type { usePostEditor } from '@/hooks/planner/use-post-editor';
 import { channelName, channelProvider } from '@/lib/planner/channels';
@@ -12,9 +12,14 @@ export function PostPreview({
   channel: Channel | undefined;
 }) {
   const media = editor.preview;
-  const name = channelName(channel);
+  const name = editor.tiktok.creator?.creator_nickname ?? channelName(channel);
   const provider = channelProvider(channel);
-  const Icon = channel?.provider === 'FACEBOOK' ? Facebook : Instagram;
+  const Icon =
+    channel?.provider === 'TIKTOK'
+      ? Music2
+      : channel?.provider === 'FACEBOOK'
+        ? Facebook
+        : Instagram;
   return (
     <aside
       className="min-w-0 space-y-3 xl:sticky xl:top-6 xl:self-start"
@@ -33,7 +38,7 @@ export function PostPreview({
             <p className="text-xs text-muted">
               {provider}{' '}
               {media?.mimeType === 'video/mp4'
-                ? provider === 'Facebook'
+                ? provider !== 'Instagram'
                   ? 'video'
                   : 'Reel'
                 : 'photo'}
@@ -59,6 +64,8 @@ export function PostPreview({
       <p className="text-xs leading-relaxed text-muted">
         A composition preview. {provider} may crop the cover or format text differently.
         {provider === 'Facebook' && ' Posts to your Page are public.'}
+        {provider === 'TikTok' &&
+          ' Visibility follows your chosen TikTok setting; processing may take a few minutes.'}
         {media?.mimeType === 'image/jpeg' &&
           ' Your full photo is kept; narrow or wide photos may have a white border.'}
       </p>

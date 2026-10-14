@@ -30,6 +30,7 @@ export async function uploadMedia(
       sizeBytes: BigInt(media.bytes.length),
       width: media.width,
       height: media.height,
+      durationSeconds: media.durationSeconds ?? null,
     };
     if (reservedId) await database.mediaAsset.update({ where: { id }, data });
     else await database.mediaAsset.create({ data: { id, ...data } });

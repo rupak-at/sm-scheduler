@@ -6,7 +6,7 @@ status at the same time. Record the change and its verification in the update lo
 ## Product and current scope
 
 Social Scheduler helps creators prepare and schedule Instagram and managed Facebook Page
-content. TikTok remains a future provider in the shared domain model.
+content, plus TikTok photo/video Direct Post with account-specific settings and approval gates.
 
 The current application has email/password and Instagram authentication, a protected planner,
 photo/MP4 uploads, caption and hashtag editing with live previews, drafts, durable scheduling,
@@ -112,22 +112,22 @@ Intentionally ignored generated Next.js types do not produce hook warnings.
 Read [the codebase walkthrough](codebase.md) first. It traces a post from the browser to
 Express, the database, and the worker, with concrete file links and examples of common edits.
 
-| Concern                                 | Location                                            |
-| --------------------------------------- | --------------------------------------------------- |
-| Next.js pages, layouts, proxies         | `frontend/src/app`                                  |
-| UI components                           | `frontend/src/components/{auth,landing,planner,ui}` |
-| Client hooks                            | `frontend/src/hooks/{auth,planner}`                 |
-| Frontend API clients/helpers            | `frontend/src/lib`                                  |
-| Express URLs/middleware wiring          | `backend/src/routes`                                |
-| Request validation/responses            | `backend/src/controllers`                           |
-| Business rules and transactions         | `backend/src/services`                              |
-| Database queries and mapping            | `backend/src/repositories`                          |
-| Provider calls, OAuth, encrypted tokens | `backend/src/integrations/{instagram,facebook}`     |
-| Media processing/storage                | `backend/src/lib/media`                             |
-| Worker startup/publishing/recovery      | `backend/src/worker`                                |
-| Environment and resource setup          | `backend/src/config`                                |
-| Prisma schema/migrations/client         | `backend/prisma`, `backend/src/database`            |
-| Browser-safe validation and types       | `packages/shared/src`                               |
+| Concern                                 | Location                                               |
+| --------------------------------------- | ------------------------------------------------------ |
+| Next.js pages, layouts, proxies         | `frontend/src/app`                                     |
+| UI components                           | `frontend/src/components/{auth,landing,planner,ui}`    |
+| Client hooks                            | `frontend/src/hooks/{auth,planner}`                    |
+| Frontend API clients/helpers            | `frontend/src/lib`                                     |
+| Express URLs/middleware wiring          | `backend/src/routes`                                   |
+| Request validation/responses            | `backend/src/controllers`                              |
+| Business rules and transactions         | `backend/src/services`                                 |
+| Database queries and mapping            | `backend/src/repositories`                             |
+| Provider calls, OAuth, encrypted tokens | `backend/src/integrations/{instagram,facebook,tiktok}` |
+| Media processing/storage                | `backend/src/lib/media`                                |
+| Worker startup/publishing/recovery      | `backend/src/worker`                                   |
+| Environment and resource setup          | `backend/src/config`                                   |
+| Prisma schema/migrations/client         | `backend/prisma`, `backend/src/database`               |
+| Browser-safe validation and types       | `packages/shared/src`                                  |
 
 Backend files use ordinary relative imports; frontend files use `@/` imports.
 Only shared browser/backend code is an npm package. Avoid adding forwarding wrappers,
@@ -370,6 +370,36 @@ under a durable marker/lease guard. Known video IDs resume processing/public-sta
 lost send responses without IDs stay uncertain, with no automatic resend or caption matching.
 The full isolated integration suite includes Facebook session/state/ownership, photo/video
 outcomes, token expiry/revocation, provider configuration and real Redis recovery.
+
+## TikTok feature development
+
+Read [TikTok setup](tiktok-setup.md) and [the official-source research](tiktok-research.md).
+API/worker require `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET`, `TIKTOK_REDIRECT_URI`,
+`TIKTOK_MEDIA_ORIGIN` and the existing independent `TOKEN_ENCRYPTION_KEY`. The callback must
+match `WEB_ORIGIN` plus `/api/auth/tiktok/callback`. The media origin is an HTTPS Express
+origin verified in TikTok URL properties; it serves signed downloads directly without redirects.
+Default `TIKTOK_DIRECT_POST_AUDITED=false` limits testing to private accounts/Only me.
+Enable audited mode only after TikTok approves the app's Direct Post audit; scope approval,
+creator quotas and intended-use requirements also apply. No live provider feasibility is claimed.
+
+The nullable MediaAsset.durationSeconds migration records normalized MP4 duration for creator
+limit checks. Apply `20261014160000_tiktok_media_duration` through the user's migration workflow
+before starting updated code. Old videos without duration need reupload for TikTok. Create/test
+migrations on isolated services only; never deploy them to the creator database without instruction.
+
+Use `integrations/tiktok` for OAuth/tokens/client/validation, `tiktok-posts.service` for per-post
+preparation and `worker/publishing/tiktok.ts` for sends/status recovery. Publication metadata
+holds the chosen settings and server-recorded consent time. Creator info is fetched for the
+composer, scheduling and sending. Privacy stays unselected initially; interactions/disclosures
+are off. Draft choices persist but consent resets on reopening/edits. One-click retry is disabled
+for TikTok: review and reschedule after a definite safe failure. Known publish IDs resume polling;
+lost initialization responses stay uncertain. Inbox delivery is not marked published.
+
+`services/tiktok-media.service` checks the signed publication/media/owner state and serves
+protected Cloudinary bytes from the API. Remote download URLs and redirects are restricted to
+Cloudinary hosts, response bytes/time/concurrency are bounded, and photo delivery is resized to
+1080px. TikTok receives a two-hour signed owned-domain URL; no new disk storage fallback or
+browser credential is introduced. API bandwidth is required for this provider's media fetches.
 
 ## Update log
 
@@ -638,6 +668,30 @@ overflow. The Facebook button reached the authenticated start endpoint and its M
 intercepted before a live request. Desktop/mobile/tablet screenshots and changed UI were reviewed.
 No creator records, real provider writes, push or deployment; live Facebook connection/photo/video
 and signed Cloudinary delivery remain to verify.
+
+### 2026-10-14 — TikTok connection and captioned photo/video Direct Post
+
+Reviewed current official TikTok Login, token, creator, publishing, media, status and UX
+requirements. Implemented same-session account connection, encrypted rotating token bundles,
+serialized refresh, explicit per-post settings/consent, account-specific media checks and
+private-test/audited mode gates. Added provider-aware composer controls/previews and channel
+connection alongside Instagram/Facebook, with consent reset on edits and safe failed-post actions.
+
+The worker sends hosted media only after durable guards, saves publish IDs and polls terminal
+outcomes without duplicate sends. A signed, verified-domain API endpoint resolves protected
+Cloudinary delivery server-side and serves bounded JPEG/MP4 bytes without redirects. Added a
+nullable duration migration for normalized MP4s; the creator database was not migrated.
+
+Verification: formatting/lint/strict types, all 135 unit tests, all 75 isolated PostgreSQL/Redis/provider-fixture
+integration tests, Prisma validation and the production build passed under Node 24. All four
+migrations deployed to a fresh isolated database; a read-only schema comparison reports no drift.
+Chromium reviewed all eight required widths, long creator names, no default audience/interactions,
+commercial disclosures, disabled settings, caption/media/reopen consent reset, and real MP4
+playback. Real API scheduling and TikTok's authenticated start redirect passed; provider navigation
+was blocked before a live request. Phone/tablet/desktop screenshots and current UI guidelines were
+reviewed, with no page errors or horizontal overflow. No creator records, creator migrations,
+live TikTok/Meta/Cloudinary publishing, push or deployment. TikTok app/domain approval and live
+connection/refresh/photo/video tests remain pending.
 
 ### Future entries
 

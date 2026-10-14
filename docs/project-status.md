@@ -3,7 +3,7 @@
 ## Implemented
 
 - Three npm workspaces: `frontend` (Next.js), `backend` (Express API, BullMQ worker,
-  Prisma, configuration, Instagram/Facebook), and `packages/shared` (browser-safe validation/types).
+  Prisma, configuration, Instagram/Facebook/TikTok), and `packages/shared` (browser-safe validation/types).
   Conventional routes/controllers/services and frontend app/components/hooks/lib folders.
 - Strict TypeScript, ESLint source/function limits, Prettier/Tailwind sorting,
   Husky/lint-staged, CI, living development docs, and explicit feature commits.
@@ -19,6 +19,12 @@
 - Captioned Facebook photos and Page videos through official endpoints, persisted video IDs,
   asynchronous processing/public-status checks, provider dispatch and guarded no-resend recovery.
   Planner account selection/previews/channel actions identify Instagram versus Facebook.
+- TikTok Web Login account connection with immutable open_id, actual scopes and encrypted
+  access/rotating refresh tokens. Serialized refresh and lost-refresh reconnection guards.
+- TikTok photo/video Direct Post, current creator limits, explicit privacy/interactions/commercial
+  metadata and per-post consent, private-test defaults and audited-public mode gating. Signed
+  owned-domain non-redirecting API media delivery with bounded Cloudinary reads/1080px photos.
+  Persisted publish IDs, final-status polling and uncertain-send no-resend recovery.
 - Professional account/profile and scope validation. Provider credentials remain encrypted
   with AES-256-GCM and account-bound authenticated data; raw tokens never reach the browser
   or Better Auth Account storage. Independent local key setup and stored key version.
@@ -44,7 +50,7 @@
   attempt history, saved containers/send markers, stale-claim recovery, readiness polling,
   and uncertain-outcome reconciliation without automatic duplicate sends.
 - Environment validation, safe logging, health/readiness routes, database diagnostics,
-  three reviewed migrations, and persistent local PostgreSQL/Redis configuration.
+  four reviewed migrations, and persistent local PostgreSQL/Redis configuration.
 - Requested frontend skills applied; setup and real-account guide in `instagram-setup.md`.
 
 ## Latest structure update — 2026-10-13
@@ -98,6 +104,31 @@ intercepted before a live request. Desktop/mobile/tablet screenshots and changed
 No creator records, real provider writes, push or deployment; live Facebook connection/photo/video
 and signed Cloudinary delivery remain to verify.
 
+## TikTok update — 2026-10-14
+
+Added account connection and captioned photo/video Direct Post alongside both Meta providers.
+Read [setup](tiktok-setup.md) and [research](tiktok-research.md). TikTok requires Login/Content
+Posting approval, verified API media-domain ownership and a separate Direct Post audit for
+public posting. The default is private-account/Only me testing; an internal/private-only account
+utility is not eligible intended use. Live TikTok connection, refresh, transfer and publishing
+are unverified. Creator quotas can block posts regardless of local scheduling.
+
+Apply the new nullable MediaAsset.durationSeconds migration before restarting updated code.
+Older videos without recorded duration need reupload for TikTok. Only the isolated test database
+was migrated. Settings/consent live in existing Publication metadata; tokens are encrypted.
+TikTok receives signed API-hosted bytes without redirects; persistent storage remains Cloudinary.
+
+Verification: formatting/lint/strict types, all 135 unit tests, all 75 isolated PostgreSQL/Redis/provider-fixture
+integration tests, Prisma validation and the production build passed under Node 24. All four
+migrations deployed to a fresh isolated database; a read-only schema comparison reports no drift.
+Chromium reviewed all eight required widths, long creator names, no default audience/interactions,
+commercial disclosures, disabled settings, caption/media/reopen consent reset, and real MP4
+playback. Real API scheduling and TikTok's authenticated start redirect passed; provider navigation
+was blocked before a live request. Phone/tablet/desktop screenshots and current UI guidelines were
+reviewed, with no page errors or horizontal overflow. No creator records, creator migrations,
+live TikTok/Meta/Cloudinary publishing, push or deployment. TikTok app/domain approval and live
+connection/refresh/photo/video tests remain pending.
+
 ## Limits and pending work
 
 The implementation is ready for a **private real-account integration test**, not a claim
@@ -113,10 +144,11 @@ fix. This verifies their login/account connection, not a successful scheduled pu
 The current vertical slice supports one photo or MP4 Reel per post. JPEG/PNG/WebP/AVIF
 photos up to 8 MB become JPEGs. H.264/H.265 MP4s up to 64 MB, 3 seconds–15 minutes, are
 normalized for Reels; the API requires FFmpeg/FFprobe. HEIC, animated images, carousels,
-Stories, analytics, teams, and TikTok remain unsupported. Facebook supports one photo or
+Stories, analytics and teams remain unsupported. TikTok supports one photo or MP4 Direct Post
+with the required creator settings; inbox upload, application sign-in and carousels are unsupported. Facebook supports one photo or
 Page video with captions; dedicated Facebook Reels, profiles, Groups, text-only posts and
 multi-target crossposting remain unsupported. Live Instagram photo/Reel and Facebook photo/video
-publishing remain unverified; future provider enum values do not enable those providers.
+publishing remain unverified; TikTok live publishing is also pending review/setup and testing.
 
 New media uses Cloudinary with server-only credentials. Browser uploads go directly to Express,
 while Next.js proxies small authorization/auth/workspace requests. Local media remains readable

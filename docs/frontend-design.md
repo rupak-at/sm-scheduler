@@ -138,3 +138,15 @@ selection includes the provider and uses Page names without Instagram's @ prefix
 the selected provider icon and name and disclose that Page posts are public. Content rows and
 uncertain-outcome guidance identify the actual provider. Keep the selected media as the visual
 focus; no new colors, layout redesign or invented account/post data.
+
+## TikTok composer — 2026-10-14
+
+Retain white (#ffffff), porcelain (#fafafa), graphite (#27272a), slate (#71717a) and silver
+(#e4e4e7), local Roboto and the existing account rail/composer sheet. Add TikTok as a third
+actual account group. Place its current nickname, blank audience choice, interactions, photo
+title/music, AI label, commercial disclosure and consent below the shared schedule controls.
+The chosen media remains the visual focus; the preview names TikTok and describes processing.
+Use labeled native selects/checkboxes with shared hit targets and visible focus. Privacy has
+no new-post default; unsupported interactions are visibly unavailable. State why scheduling is
+blocked, and retain draft saving. Consent resets after edits, media changes and reopening.
+Keep photo-only/video-only controls distinct and preserve the existing phone/desktop layout.

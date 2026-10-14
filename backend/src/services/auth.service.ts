@@ -9,6 +9,8 @@ import { toNodeHandler } from 'better-auth/node';
 import type { AuthGateway } from '../types/auth.types.js';
 import { facebookPlugin } from '../integrations/facebook/facebook.plugin.js';
 import type { FacebookPluginOptions } from '../integrations/facebook/facebook.plugin.js';
+import { tiktokPlugin } from '../integrations/tiktok/tiktok.plugin.js';
+import type { TikTokPluginOptions } from '../integrations/tiktok/tiktok.plugin.js';
 
 interface AuthOptions {
   database: PrismaClient;
@@ -17,6 +19,7 @@ interface AuthOptions {
   production: boolean;
   instagram?: InstagramPluginOptions;
   facebook?: FacebookPluginOptions;
+  tiktok?: TikTokPluginOptions;
 }
 
 export function createAuthentication(options: AuthOptions): AuthGateway {
@@ -29,6 +32,7 @@ export function createAuthentication(options: AuthOptions): AuthGateway {
     plugins: [
       ...(options.instagram ? [instagramPlugin(options.instagram)] : []),
       ...(options.facebook ? [facebookPlugin(options.facebook)] : []),
+      ...(options.tiktok ? [tiktokPlugin(options.tiktok)] : []),
     ],
     account: { accountLinking: { enabled: false } },
     databaseHooks: {

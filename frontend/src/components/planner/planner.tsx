@@ -59,6 +59,7 @@ export function Planner({
             channels={data.channels}
             configured={data.instagramConfigured}
             facebookConfigured={data.facebookConfigured}
+            tiktokConfigured={data.tiktokConfigured}
             act={act}
             pending={pending}
           />

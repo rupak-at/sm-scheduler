@@ -7,7 +7,11 @@ export async function findPostInputs(
   input: PostInput,
 ): Promise<{ account: SocialAccount | null; media: MediaAsset | null }> {
   const account = await tx.socialAccount.findFirst({
-    where: { id: input.socialAccountId, userId, provider: { in: ['INSTAGRAM', 'FACEBOOK'] } },
+    where: {
+      id: input.socialAccountId,
+      userId,
+      provider: { in: ['INSTAGRAM', 'FACEBOOK', 'TIKTOK'] },
+    },
   });
   const media = await tx.mediaAsset.findFirst({
     where: {

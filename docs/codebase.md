@@ -117,3 +117,14 @@ handles send markers, photo outcomes and saved-video polling. Both use the same 
 and queue. The API and worker create the configured providers independently; no generic base
 provider class is introduced. Page setup and research are in [Facebook setup](facebook-setup.md)
 and [Facebook research](facebook-research.md).
+
+## TikTok additions
+
+`integrations/tiktok` owns Login Kit, token bundles/rotation, provider HTTP calls and creator-rule
+validation. `tiktok-posts.service` prepares per-post settings/consent; `tiktok-creator.service`
+returns current owned account settings to the composer. `worker/publishing/tiktok.ts` handles
+Direct Post init and saved-ID status polling. `tiktok-media.service` plus the signed API controller
+provides owned-domain non-redirecting bytes; `lib/media/remote-download` bounds Cloudinary reads.
+The shared contracts expose only browser-safe choices, creator info and prepared-media duration.
+The frontend `use-tiktok-settings` hook drives focused settings/interaction/disclosure/consent
+components. See [TikTok setup](tiktok-setup.md) and [research](tiktok-research.md).

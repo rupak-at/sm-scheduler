@@ -19,10 +19,15 @@ export async function readWorkspace(
   database: PrismaClient,
   userId: string,
   query: WorkspaceQuery,
-): Promise<Omit<z.infer<typeof workspaceSchema>, 'instagramConfigured' | 'facebookConfigured'>> {
+): Promise<
+  Omit<
+    z.infer<typeof workspaceSchema>,
+    'instagramConfigured' | 'facebookConfigured' | 'tiktokConfigured'
+  >
+> {
   const [channels, items, counts, upcoming] = await Promise.all([
     database.socialAccount.findMany({
-      where: { userId, provider: { in: ['INSTAGRAM', 'FACEBOOK'] } },
+      where: { userId, provider: { in: ['INSTAGRAM', 'FACEBOOK', 'TIKTOK'] } },
       orderBy: { createdAt: 'asc' },
       select: {
         id: true,

@@ -10,6 +10,7 @@ export function postsRouter(services: WorkspaceServices) {
     services.storage,
     services.instagramConfigured,
     services.facebookConfigured ?? false,
+    services.tiktok,
   );
   const controller = createPostsController(posts);
   router.post('/posts', controller.create);

@@ -28,10 +28,11 @@ export function PostRow({
               {channelProvider(channel)} · {channelName(channel)}
               <span className="ml-2 font-normal">
                 {post.mediaMimeType === 'video/mp4'
-                  ? channel?.provider === 'FACEBOOK'
+                  ? channel?.provider !== 'INSTAGRAM'
                     ? 'Video'
                     : 'Reel'
                   : 'Photo'}
+                {post.tiktokSettings?.privacy === 'SELF_ONLY' && ' · Only me'}
               </span>
             </p>
             <PostStatus status={post.status} />
@@ -54,7 +55,13 @@ export function PostRow({
               <span className="ml-1 text-[11px]">({post.timezone})</span>
             </p>
           )}
-          <PostActions post={post} query={query} act={act} pending={pending} />
+          <PostActions
+            post={post}
+            query={query}
+            act={act}
+            pending={pending}
+            provider={channel?.provider}
+          />
         </div>
       </div>
       {post.status === 'UNCERTAIN' && (

@@ -25,7 +25,7 @@ export function EditorActions({ editor }: { editor: ReturnType<typeof usePostEdi
         type="submit"
         name="intent"
         value="schedule"
-        disabled={editor.pending}
+        disabled={editor.pending || (editor.tiktok.active && Boolean(editor.tiktok.problem))}
         className="h-11 flex-1 rounded-xl sm:flex-none"
       >
         <CalendarClock aria-hidden="true" />

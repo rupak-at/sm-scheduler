@@ -1,5 +1,6 @@
 import { createInstagramServices } from '../integrations/instagram/services.js';
 import { createFacebookServices } from '../integrations/facebook/services.js';
+import { createTikTokServices } from '../integrations/tiktok/services.js';
 import { createMediaStorage } from './media-storage.js';
 import type { WorkspaceServices } from '../types/workspace.types.js';
 import { createLogger } from './logger.js';
@@ -32,6 +33,14 @@ export function createResources(environment: ApiEnvironment): Resources {
   redis.on('error', () => logger.warn('Redis connection unavailable'));
   const instagram = createInstagramServices(environment, database);
   const facebook = createFacebookServices(environment, database);
+  const tiktok = createTikTokServices(environment, database);
+  const authentication = createAuthentication({
+    database,
+    secret: environment.BETTER_AUTH_SECRET,
+    webOrigin: environment.WEB_ORIGIN,
+    production: environment.NODE_ENV === 'production',
+    ...providerAuthentication(environment, database, instagram, facebook, tiktok),
+  });
   return {
     logger,
     workspace: {
@@ -49,35 +58,9 @@ export function createResources(environment: ApiEnvironment): Resources {
       },
       ...(instagram ? { tokens: instagram.tokens } : {}),
       ...(facebook ? { facebookTokens: facebook.tokens } : {}),
+      ...(tiktok ? { tiktok } : {}),
     },
-    auth: createAuthentication({
-      database,
-      secret: environment.BETTER_AUTH_SECRET,
-      webOrigin: environment.WEB_ORIGIN,
-      production: environment.NODE_ENV === 'production',
-      ...(facebook
-        ? {
-            facebook: {
-              database,
-              client: facebook.client,
-              vault: facebook.vault,
-              webOrigin: environment.WEB_ORIGIN,
-              production: environment.NODE_ENV === 'production',
-            },
-          }
-        : {}),
-      ...(instagram
-        ? {
-            instagram: {
-              database,
-              client: instagram.client,
-              vault: instagram.vault,
-              webOrigin: environment.WEB_ORIGIN,
-              production: environment.NODE_ENV === 'production',
-            },
-          }
-        : {}),
-    }),
+    auth: authentication,
     checks: {
       database: () => database.$queryRaw`SELECT 1`,
       redis: () => redis.ping(),
@@ -86,5 +69,28 @@ export function createResources(environment: ApiEnvironment): Resources {
       redis.disconnect();
       await database.$disconnect();
     },
+  };
+}
+
+function providerAuthentication(
+  environment: ApiEnvironment,
+  database: WorkspaceServices['database'],
+  instagram: ReturnType<typeof createInstagramServices>,
+  facebook: ReturnType<typeof createFacebookServices>,
+  tiktok: ReturnType<typeof createTikTokServices>,
+) {
+  const common = {
+    database,
+    webOrigin: environment.WEB_ORIGIN,
+    production: environment.NODE_ENV === 'production',
+  };
+  return {
+    ...(instagram
+      ? { instagram: { ...common, client: instagram.client, vault: instagram.vault } }
+      : {}),
+    ...(facebook
+      ? { facebook: { ...common, client: facebook.client, vault: facebook.vault } }
+      : {}),
+    ...(tiktok ? { tiktok: { ...common, client: tiktok.client, vault: tiktok.vault } } : {}),
   };
 }

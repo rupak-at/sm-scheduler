@@ -2,6 +2,7 @@ import type { PrismaClient } from '../database/index.js';
 import type { AccountTokens } from '../integrations/instagram/account-tokens.js';
 import type { MediaStorage } from '../lib/media/media-storage.types.js';
 import type { FacebookAccountTokens } from '../integrations/facebook/account-tokens.js';
+import type { TikTokServices } from '../integrations/tiktok/services.js';
 
 export interface WorkspaceServices {
   database: PrismaClient;
@@ -11,4 +12,5 @@ export interface WorkspaceServices {
   facebookConfigured?: boolean;
   tokens?: AccountTokens;
   facebookTokens?: FacebookAccountTokens;
+  tiktok?: TikTokServices;
 }

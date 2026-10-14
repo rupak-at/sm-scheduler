@@ -1,10 +1,12 @@
 import { z } from 'zod';
 import { storedMediaTypeSchema } from './media.js';
+import { tiktokSettingsSchema } from './tiktok.js';
 
 export const postInputSchema = z.object({
   caption: z.string().max(2200),
   mediaAssetId: z.uuid(),
   socialAccountId: z.uuid(),
+  tiktokSettings: tiktokSettingsSchema.optional(),
   scheduledAt: z.iso.datetime({ offset: true }).nullable(),
   timezone: z
     .string()
@@ -21,7 +23,7 @@ export const postInputSchema = z.object({
 export type PostInput = z.infer<typeof postInputSchema>;
 export const channelSchema = z.object({
   id: z.uuid(),
-  provider: z.enum(['INSTAGRAM', 'FACEBOOK']).default('INSTAGRAM'),
+  provider: z.enum(['INSTAGRAM', 'FACEBOOK', 'TIKTOK']).default('INSTAGRAM'),
   displayName: z.string().nullable(),
   status: z.enum(['CONNECTED', 'EXPIRED', 'REVOKED', 'DISCONNECTED']),
   tokenExpiresAt: z.string().nullable(),
@@ -30,11 +32,14 @@ export const channelSchema = z.object({
 export type Channel = z.infer<typeof channelSchema>;
 export const postSchema = z.object({
   id: z.uuid(),
+  editable: z.boolean().default(true),
   caption: z.string(),
   updatedAt: z.string(),
   mediaAssetId: z.uuid(),
   mediaUrl: z.string(),
   mediaMimeType: storedMediaTypeSchema.default('image/jpeg'),
+  mediaDurationSeconds: z.number().positive().nullable().default(null),
+  tiktokSettings: tiktokSettingsSchema.optional(),
   publicationId: z.uuid(),
   socialAccountId: z.uuid(),
   status: z.enum([
@@ -66,6 +71,7 @@ export type WorkspaceCounts = z.infer<typeof workspaceCountsSchema>;
 export const workspaceSchema = z.object({
   instagramConfigured: z.boolean(),
   facebookConfigured: z.boolean().default(false),
+  tiktokConfigured: z.boolean().default(false),
   channels: z.array(channelSchema),
   posts: z.array(postSchema),
   nextCursor: z.string().nullable(),

@@ -3,7 +3,7 @@
 ## Runtime boundaries
 
 Next.js renders the creator workspace. Express owns authenticated account/media/post operations. BullMQ runs in a separate always-on Node process from the same backend build. Frontend and backend consume `packages/shared` through its public exports. The backend owns
-Prisma, server configuration, media handling, and Instagram/Facebook code; these are ordinary internal modules.
+Prisma, server configuration, media handling, and Instagram/Facebook/TikTok code; these are ordinary internal modules.
 
 Next.js serves a static public landing page at `/` without requiring the API or database.
 The authenticated planner lives at `/planner`; content filters use `/planner?view=…`.
@@ -11,7 +11,7 @@ Login/signup redirects and navigation consistently target this protected route.
 
 The worker consumes infrastructure checks and ID-only `instagram-publishing` jobs. A ten-second
 PostgreSQL scan repairs missed delivery; an overlap-safe maintenance loop checks credentials.
-The Instagram and Facebook adapters use official endpoints; automated tests inject provider fixtures.
+The Instagram, Facebook and TikTok adapters use official endpoints; automated tests inject provider fixtures.
 
 For folder ownership, request flows, and common edits, see [the codebase walkthrough](codebase.md).
 
@@ -31,7 +31,7 @@ See [Better Auth Express integration](https://better-auth.com/docs/integrations/
 ## Domain data
 
 Prisma models User, SocialAccount, MediaAsset, Post, ordered PostMedia, Publication, and
-PublishAttempt. Provider names are extensible with Instagram and Facebook Pages implemented; TikTok remains future scope.
+PublishAttempt. Provider names are extensible with Instagram and Facebook Pages implemented; TikTok Direct Post now supports photos/videos behind approval gates.
 Post content and account-specific publication outcomes are separate.
 
 Timestamps use PostgreSQL `timestamptz`. Users and publications preserve a timezone.
@@ -70,7 +70,7 @@ Unconfirmed outcomes remain UNCERTAIN with safe attempt codes; explicit safe fai
 
 The processor records published, processing, failed, or uncertain outcomes. Provider timeouts
 after a remote side effect require reconciliation rather than blind retries. The worker uses
-concrete Instagram/Facebook clients, selected by the stored account provider; there is no unused generic provider interface.
+concrete Instagram/Facebook/TikTok clients, selected by the stored account provider; there is no unused generic provider interface.
 
 ## Tooling choices
 
@@ -109,3 +109,17 @@ The shared deployed queue name remains unchanged. Instagram uses media container
 uses captioned `/photos` and `/videos` sends under durable markers. Returned Facebook video
 IDs persist before polling; ready and public status are both required for success. Lost responses
 without IDs cannot be safely matched or resent. See [research](facebook-research.md).
+
+## TikTok Direct Post
+
+TikTok uses a distinct Login Kit connection mode, immutable open_id and encrypted token bundle.
+Refresh rotations serialize under a SocialAccount row lock. Publication metadata contains
+creator-selected privacy/interactions/disclosures and server-recorded consent. Current creator
+info is checked on rendering, scheduling and sending; no privacy/interaction substitution.
+
+Direct Post initialization runs after the durable marker, then publish_id is saved and polled.
+Lost init responses cannot be blindly resent. Private success may lack a public post ID; inbox
+delivery remains unconfirmed. The API serves signed publication/media-bound bytes from a verified
+HTTPS domain, resolving protected Cloudinary redirects server-side under bounded allowlisted
+fetching. Photos receive a 1080px rendition. Normalized video duration is stored in the new nullable
+media column. TikTok review/audit and real testing remain gates; see [research](tiktok-research.md).

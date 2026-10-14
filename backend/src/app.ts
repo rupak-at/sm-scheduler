@@ -12,6 +12,7 @@ import type { HealthChecks } from './services/health.service.js';
 import type { AuthGateway } from './types/auth.types.js';
 import { createAuthRouter } from './routes/auth.routes.js';
 import { createAuthHandler } from './controllers/auth.handler.js';
+import { createTikTokMediaController } from './controllers/tiktok-media.controller.js';
 
 export interface AppDependencies {
   webOrigin: string;
@@ -31,6 +32,7 @@ export function createApp({ webOrigin, checks, auth, workspace }: AppDependencie
   if (workspace && auth) {
     app.use('/api/media/upload', directMediaUploadRouter(workspace));
     app.use('/api/media/public', publicMediaRouter(workspace));
+    app.get('/api/media/tiktok/:publicationId/:mediaId', createTikTokMediaController(workspace));
     app.use('/api/workspace', workspaceRouter(workspace, auth, webOrigin));
   }
   app.use('/health', createHealthRouter(checks));

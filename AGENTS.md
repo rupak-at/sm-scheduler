@@ -7,11 +7,11 @@ Follow `docs/development.md` for setup and the development workflow.
 ## What we are building
 
 A social media scheduler for solo creators and small teams. A creator signs in, connects
-an eligible Instagram account, uploads supported media, writes a caption, schedules a
+an eligible social account, uploads supported media, writes a caption, schedules a
 publication, and later sees its outcome after closing the browser.
 
-The current implementation supports Instagram and managed Facebook Pages. TikTok remains a
-future provider; its enum value is architectural preparation, not an implemented integration.
+The current implementation supports Instagram, managed Facebook Pages and TikTok Direct Post
+photos/videos. TikTok defaults to private testing until its app review/audit requirements are met.
 Use official APIs and authorization flows. Verify account eligibility, permissions,
 formats, limits, and app-review requirements against official documentation before
 promising support. A successful authorized test publish is required before claiming real provider feasibility; the user authorized implementation before their own live test.
@@ -24,8 +24,8 @@ Facebook Page connection, photo/MP4 uploads, caption/hashtag editing and live pr
 durable scheduling, and a BullMQ publishing/recovery worker.
 The user verified real Instagram sign-in on 2026-10-12; the first real publishing test is pending.
 Automated provider tests use fixtures.
-Read `docs/instagram-setup.md` and `docs/facebook-setup.md` before changing the corresponding
-integration or running a live test. Facebook authorization/photo/video publishing remain unverified.
+Read the corresponding `docs/{instagram,facebook,tiktok}-setup.md` before changing an integration
+or running a live test. Facebook/TikTok authorization and publishing remain unverified.
 
 Email verification and password-reset delivery require a mail provider and remain unimplemented.
 Do not present empty scaffolding as a completed product feature.
@@ -41,7 +41,7 @@ There are three npm workspaces. Read `docs/codebase.md` for a walkthrough and co
   responses. `services` own business rules and transactions; `repositories` hold database
   queries when a separate query module makes the service easier to read.
 - `backend/src/middleware`, `config`, `lib`: reusable request guards, server configuration,
-  and focused helpers. `integrations/{instagram,facebook}` own OAuth, provider calls, and encrypted tokens;
+  and focused helpers. `integrations/{instagram,facebook,tiktok}` own OAuth, provider calls, and encrypted tokens;
   `integrations/cloudinary` owns protected remote media storage.
   `worker/publishing` owns claims, publishing, recovery, and attempt outcomes.
 - `frontend`: Next.js App Router. `src/app` contains thin pages/layouts/proxies;
@@ -170,6 +170,35 @@ review phone/tablet/laptop/desktop layouts at 320, 390, 768, 820, 1024, 1280, 14
   stored provider, and allow API/worker operation when either or both providers are configured.
 - No schema migration is needed for Facebook. See `docs/facebook-research.md` for the source
   review and `docs/facebook-setup.md` for credentials, App Review gates and user-run live tests.
+
+## TikTok workflow
+
+- Use Web Login Kit to connect an existing session, with `user.info.basic` and `video.publish`.
+  Validate actual token scopes and immutable profile `open_id`; no email/name matching.
+  Keep a separate `tiktok-connect` state mode and cookie, with same-session atomic consumption.
+- Encrypt access/refresh tokens together with `tiktok:1:<open-id>` authenticated data. Persist
+  provider expiries/rotated refresh tokens; serialize refresh under a database row lock. A lost
+  rotating-refresh response revokes the local connection and requires fresh authorization.
+- Fetch current creator info when rendering the TikTok composer, on schedule validation and
+  before sending. No default privacy; interactions/disclosures begin off. Respect unavailable
+  interactions, creator video duration, commercial labels and explicit per-post consent.
+- Default `TIKTOK_DIRECT_POST_AUDITED=false`: private account/Only me testing only. Public
+  posting requires actual review/audit approval; the flag cannot grant it. Internal/private
+  team-only upload utilities are not eligible intended use under TikTok's guidelines.
+- TikTok settings and server consent timestamp live in Publication.providerMetadata. Consent
+  resets after content/settings/media changes and reopening. Failed posts require review/edit/
+  rescheduling; the generic one-click retry is unavailable for TikTok.
+- Use `PULL_FROM_URL` through `/api/media/tiktok/:publicationId/:mediaId` on the verified
+  HTTPS `TIKTOK_MEDIA_ORIGIN`. Serve signed, owner/publication-bound bytes without redirects.
+  Resolve protected Cloudinary downloads only on allowed hosts with bounded size/time/concurrency;
+  photos get a 1080px delivery rendition. New persistent media remains in Cloudinary.
+- Persist normalized MP4 duration in MediaAsset.durationSeconds. Apply the new nullable-column
+  migration through the user's own workflow; older videos need reupload before TikTok scheduling.
+- Save the send marker before init, then persist `publish_id`; resume status polling across
+  restarts. Only `PUBLISH_COMPLETE` is success. Inbox delivery is not Direct Post completion.
+  Private posts may have no public post ID; parse returned int64 IDs without rounding.
+- See `docs/tiktok-research.md` and `docs/tiktok-setup.md` for constraints and user-run live tests.
+  Never migrate the creator database, contact live providers or claim feasibility from fixtures.
 
 ## Development flow
 

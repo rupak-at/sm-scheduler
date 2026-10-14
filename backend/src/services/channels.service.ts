@@ -2,7 +2,7 @@ import { WorkspaceError } from '../lib/workspace-error.js';
 import type { WorkspaceServices } from '../types/workspace.types.js';
 
 export async function updateChannel(
-  { database, tokens, facebookTokens }: WorkspaceServices,
+  { database, tokens, facebookTokens, tiktok }: WorkspaceServices,
   userId: string,
   id: string,
   action: 'validate' | 'disconnect',
@@ -15,9 +15,12 @@ export async function updateChannel(
         ? facebookTokens
         : account.provider === 'INSTAGRAM'
           ? tokens
-          : undefined;
+          : account.provider === 'TIKTOK'
+            ? tiktok?.tokens
+            : undefined;
     if (!providerTokens) throw new WorkspaceError(503, 'This provider is not configured.');
-    await providerTokens.validToken(id);
+    const token = await providerTokens.validToken(id);
+    if (account.provider === 'TIKTOK' && tiktok) await tiktok.client.creatorInfo(token);
   } else {
     await database.socialAccount.update({
       where: { id },

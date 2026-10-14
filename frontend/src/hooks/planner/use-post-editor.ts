@@ -2,20 +2,23 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import type { PlannerPost } from '@social-scheduler/shared';
+import type { PlannerPost, Channel } from '@social-scheduler/shared';
 import { workspaceRequest } from '@/lib/planner/workspace-client';
 import { useMediaUpload } from '@/hooks/planner/use-media-upload';
 import { useEditorSchedule } from '@/hooks/planner/use-editor-schedule';
 import { useUnsavedChanges } from '@/hooks/planner/use-unsaved-changes';
 import { useCaption } from '@/hooks/planner/use-caption';
+import { useTikTokSettings } from '@/hooks/planner/use-tiktok-settings';
+import { validateEditorSchedule, scheduleRequested } from '@/lib/planner/post-schedule';
 
-export function usePostEditor(post: PlannerPost | undefined, initialChannelId: string) {
+export function usePostEditor(post: PlannerPost | undefined, channels: Channel[]) {
   const router = useRouter();
   const original = useRef(post);
   const caption = useCaption(post?.caption ?? '');
-  const [channelId, setChannelId] = useState(post?.socialAccountId ?? initialChannelId);
+  const [channelId, setChannelId] = useState(post?.socialAccountId ?? channels[0]?.id ?? '');
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [mediaVersion, setMediaVersion] = useState(0);
   const [error, setError] = useState('');
   const errorRef = useRef<HTMLParagraphElement>(null);
   useEffect(() => {
@@ -28,21 +31,31 @@ export function usePostEditor(post: PlannerPost | undefined, initialChannelId: s
       problem === '' ? '' : problem instanceof Error ? problem.message : 'Could not save the post.',
     );
   }
-  const media = useMediaUpload(original.current, () => setDirty(true), fail);
+  const media = useMediaUpload(
+    original.current,
+    () => {
+      setDirty(true);
+      setMediaVersion((version) => version + 1);
+    },
+    fail,
+  );
+  const tiktok = useTikTokSettings(
+    channels.find((channel) => channel.id === channelId)?.provider === 'TIKTOK' ? channelId : null,
+    media.preview?.mimeType === 'video/mp4',
+    post,
+    mediaVersion,
+  );
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
     if (saving || media.uploading) return;
-    const submitter = (event.nativeEvent as SubmitEvent).submitter;
-    const scheduling = submitter instanceof HTMLButtonElement && submitter.value === 'schedule';
+    const scheduling = scheduleRequested(event.nativeEvent);
     try {
       if (!media.asset) throw new Error('Add a photo or video before saving.');
       if (caption.captionProblem) throw new Error(caption.captionProblem);
-      if (!channelId) throw new Error('Choose an Instagram account or Facebook Page.');
-      if (scheduling && !schedule.scheduled)
-        throw new Error('Choose a date and time for this post.');
-      if (scheduling && new Date(schedule.scheduled).getTime() < Date.now() + 60000)
-        throw new Error('Choose a time at least one minute in the future.');
+      if (!channelId) throw new Error('Choose an account to publish to.');
+      if (scheduling && tiktok.active && tiktok.problem) throw new Error(tiktok.problem);
+      validateEditorSchedule(schedule.scheduled, scheduling);
       setSaving(true);
       await workspaceRequest(post ? `/posts/${post.id}` : '/posts', post ? 'PUT' : 'POST', {
         caption: caption.composedCaption,
@@ -50,6 +63,7 @@ export function usePostEditor(post: PlannerPost | undefined, initialChannelId: s
         socialAccountId: channelId,
         timezone: schedule.timezone,
         scheduledAt: scheduling ? new Date(schedule.scheduled).toISOString() : null,
+        ...(tiktok.active ? { tiktokSettings: tiktok.settings } : {}),
         ...(post ? { revision: original.current?.updatedAt } : {}),
       });
       setDirty(false);
@@ -65,6 +79,7 @@ export function usePostEditor(post: PlannerPost | undefined, initialChannelId: s
     ...media,
     ...schedule,
     ...caption,
+    tiktok,
     channelId,
     setChannelId,
     pending: saving || media.uploading,

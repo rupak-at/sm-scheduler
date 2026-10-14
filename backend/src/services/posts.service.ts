@@ -5,6 +5,9 @@ import type { MediaStorage } from '../lib/media/media-storage.types.js';
 import { WorkspaceError } from '../lib/workspace-error.js';
 import { postInclude, postView } from '../repositories/post-view.js';
 import { channelCanSchedule, eligibleChannelWhere } from '../lib/channel-eligibility.js';
+import type { TikTokServices } from '../integrations/tiktok/services.js';
+import { prepareTikTokPost } from './tiktok-posts.service.js';
+import { Prisma } from '../database/index.js';
 
 export class PostsService {
   constructor(
@@ -12,9 +15,11 @@ export class PostsService {
     private readonly storage: MediaStorage,
     private readonly configured = true,
     private readonly facebookConfigured = false,
+    private readonly tiktok?: TikTokServices,
   ) {}
   async save(userId: string, input: PostInput, id?: string, revision?: string) {
     this.validateSchedule(input);
+    const metadata = await prepareTikTokPost(this.db, this.tiktok, userId, input);
     return this.db.$transaction(
       async (tx) => {
         const { account, media } = await findPostInputs(tx, userId, input);
@@ -53,6 +58,7 @@ export class PostsService {
           timezone: input.timezone,
           externalContainerId: null,
           publishRequestedAt: null,
+          providerMetadata: metadata ?? Prisma.DbNull,
         };
         const post = id
           ? await tx.post.update({
@@ -85,7 +91,9 @@ export class PostsService {
   private providerConfigured(provider: string) {
     return provider === 'INSTAGRAM'
       ? this.configured
-      : provider === 'FACEBOOK' && this.facebookConfigured;
+      : provider === 'FACEBOOK'
+        ? this.facebookConfigured
+        : provider === 'TIKTOK' && Boolean(this.tiktok);
   }
   private validateMediaDelivery(
     input: PostInput,
@@ -132,6 +140,15 @@ export class PostsService {
       throw new WorkspaceError(409, 'Only drafts and scheduled posts can be cancelled.');
   }
   async retry(userId: string, id: string) {
+    if (
+      await this.db.publication.findFirst({
+        where: { postId: id, post: { userId }, socialAccount: { provider: 'TIKTOK' } },
+      })
+    )
+      throw new WorkspaceError(
+        422,
+        'Edit this TikTok post and review its current settings before rescheduling.',
+      );
     const providers: ('INSTAGRAM' | 'FACEBOOK')[] = [];
     if (this.configured) providers.push('INSTAGRAM');
     if (this.facebookConfigured) providers.push('FACEBOOK');

@@ -8,6 +8,7 @@ export interface PreparedMedia {
   extension: 'jpg' | 'mp4';
   width: number;
   height: number;
+  durationSeconds?: number;
 }
 export function mediaExtension(mimeType: string): 'jpg' | 'mp4' {
   if (mimeType === 'image/jpeg') return 'jpg';

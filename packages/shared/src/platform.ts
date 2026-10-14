@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-// TikTok describes the data model only; enabled scheduling providers are Instagram and Facebook.
+// Provider availability also requires configured credentials and each platform’s approval gates.
 export const platformSchema = z.enum(['INSTAGRAM', 'FACEBOOK', 'TIKTOK']);
 export type Platform = z.infer<typeof platformSchema>;
 

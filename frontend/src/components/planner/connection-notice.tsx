@@ -1,4 +1,14 @@
 const messages: Record<string, string> = {
+  TIKTOK_connected:
+    'TikTok connected. Review its posting settings when scheduling a photo or video.',
+  TIKTOK_AUTHORIZATION_DECLINED:
+    'TikTok access was declined. Connect again and allow profile and publishing access.',
+  TIKTOK_INVALID_OAUTH_STATE:
+    'This TikTok connection expired or belongs to another browser. Start again here.',
+  TIKTOK_SESSION_CHANGED: 'Your session changed during TikTok connection. Log in and start again.',
+  TIKTOK_ACCOUNT_ALREADY_LINKED:
+    'This TikTok account belongs to another workspace. Use that workspace or connect a different account.',
+  TIKTOK_PERMISSION_REQUIRED: 'Allow profile and direct publishing access, then reconnect TikTok.',
   FACEBOOK_connected:
     'Facebook Pages connected. You can create photo and video posts with captions.',
   FACEBOOK_NO_ELIGIBLE_PAGES:
@@ -30,9 +40,11 @@ export function ConnectionNotice({ code }: { code?: string | undefined }) {
   return (
     <p role="status" className="mb-6 rounded-lg border border-line bg-surface p-4 text-sm">
       {messages[code] ??
-        (code.startsWith('FACEBOOK_')
-          ? 'Facebook could not connect. Check Page access and Facebook app settings, then try again.'
-          : 'Instagram could not connect. Check your professional account and app settings, then try again.')}
+        (code.startsWith('TIKTOK_')
+          ? 'TikTok could not connect. Check Login Kit and Content Posting app permissions, then try again.'
+          : code.startsWith('FACEBOOK_')
+            ? 'Facebook could not connect. Check Page access and Facebook app settings, then try again.'
+            : 'Instagram could not connect. Check your professional account and app settings, then try again.')}
     </p>
   );
 }

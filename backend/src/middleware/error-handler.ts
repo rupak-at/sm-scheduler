@@ -2,6 +2,8 @@ import { ZodError } from 'zod';
 import { WorkspaceError } from '../lib/workspace-error.js';
 import { InstagramError } from '../integrations/instagram/http.js';
 import { FacebookError } from '../integrations/facebook/http.js';
+import { TikTokError } from '../integrations/tiktok/http.js';
+import { tiktokMessage } from '../integrations/tiktok/messages.js';
 import type { ErrorRequestHandler } from 'express';
 
 // Keep implementation details and connection credentials out of public responses.
@@ -27,6 +29,13 @@ export const errorHandler: ErrorRequestHandler = (error: unknown, _request, resp
   if (error instanceof FacebookError) {
     response.status(422).json({
       error: 'Facebook could not verify this Page. Reconnect or try again shortly.',
+      code: error.code,
+    });
+    return;
+  }
+  if (error instanceof TikTokError) {
+    response.status(422).json({
+      error: tiktokMessage(error.code),
       code: error.code,
     });
     return;

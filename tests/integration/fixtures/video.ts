@@ -4,7 +4,7 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const run = promisify(execFile);
-export async function fixtureVideo(duration = 3): Promise<Buffer> {
+export async function fixtureVideo(duration = 3, size = '320x568'): Promise<Buffer> {
   const directory = await mkdtemp('/tmp/social-scheduler-test-video-');
   try {
     const path = join(directory, 'test.mp4');
@@ -17,7 +17,7 @@ export async function fixtureVideo(duration = 3): Promise<Buffer> {
         '-f',
         'lavfi',
         '-i',
-        'testsrc2=size=320x568:rate=30',
+        `testsrc2=size=${size}:rate=30`,
         '-f',
         'lavfi',
         '-i',

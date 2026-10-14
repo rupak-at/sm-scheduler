@@ -9,6 +9,9 @@ import { claimPublication } from './claim.js';
 import { finishPublication, deferPublication } from './outcomes.js';
 import { publishInstagram } from './instagram.js';
 import { publishFacebook } from './facebook.js';
+import { publishTikTok } from './tiktok.js';
+import { TikTokError } from '../../integrations/tiktok/http.js';
+import type { TikTokServices } from '../../integrations/tiktok/services.js';
 
 export interface PublishingServices {
   db: PrismaClient;
@@ -16,13 +19,17 @@ export interface PublishingServices {
   tokens?: AccountTokens;
   facebook?: NonNullable<ReturnType<typeof createFacebookServices>>;
   storage: MediaStorage;
+  tiktok?: TikTokServices;
 }
 export function createPublicationProcessor(services: PublishingServices) {
   return async (id: string) => {
     const record = await claimPublication(services.db, id);
     if (!record) return;
     try {
-      if (record.socialAccount.provider === 'FACEBOOK') {
+      if (record.socialAccount.provider === 'TIKTOK') {
+        if (!services.tiktok) throw new TikTokError('PROVIDER_NOT_CONFIGURED');
+        await publishTikTok({ ...services, tiktok: services.tiktok }, record);
+      } else if (record.socialAccount.provider === 'FACEBOOK') {
         if (!services.facebook) throw new FacebookError('PROVIDER_NOT_CONFIGURED');
         await publishFacebook({ ...services, facebook: services.facebook }, record);
       } else if (record.socialAccount.provider === 'INSTAGRAM') {
@@ -39,7 +46,9 @@ export function createPublicationProcessor(services: PublishingServices) {
         select: { publishRequestedAt: true, externalContainerId: true },
       });
       const code =
-        error instanceof InstagramError || error instanceof FacebookError
+        error instanceof InstagramError ||
+        error instanceof FacebookError ||
+        error instanceof TikTokError
           ? error.code
           : 'PUBLISHING_UNAVAILABLE';
       if (
@@ -50,14 +59,20 @@ export function createPublicationProcessor(services: PublishingServices) {
         await deferPublication(services.db, record);
         return;
       }
-      // Clear the Facebook send marker only when Meta explicitly rejected this
+      // Clear the send marker only when Facebook/TikTok explicitly rejected this
       // request. Network, malformed, and 5xx outcomes retain their duplicate guard.
       const rejected =
-        error instanceof FacebookError &&
+        (error instanceof FacebookError || error instanceof TikTokError) &&
         !error.uncertain &&
-        ['TOKEN_REVOKED', 'PERMISSION_REQUIRED', 'RATE_LIMITED', 'PROVIDER_REJECTED'].includes(
-          code,
-        ) &&
+        [
+          'TOKEN_REVOKED',
+          'PERMISSION_REQUIRED',
+          'RATE_LIMITED',
+          'PROVIDER_REJECTED',
+          'MEDIA_DOMAIN_UNVERIFIED',
+          'PRIVATE_TEST_ACCOUNT_REQUIRED',
+          'CREATOR_POSTING_UNAVAILABLE',
+        ].includes(code) &&
         !record.publishRequestedAt &&
         !requested?.externalContainerId;
       if (rejected)

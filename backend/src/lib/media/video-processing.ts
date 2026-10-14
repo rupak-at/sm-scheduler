@@ -39,6 +39,7 @@ export async function prepareVideo(bytes: Buffer): Promise<PreparedMedia> {
       bytes: normalized,
       width: dimensions.width,
       height: dimensions.height,
+      durationSeconds: dimensions.duration,
       mimeType: 'video/mp4',
       type: 'VIDEO',
       extension: 'mp4',

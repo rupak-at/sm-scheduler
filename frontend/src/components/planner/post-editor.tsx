@@ -8,6 +8,7 @@ import { PostFields } from '@/components/planner/post-fields';
 import type { Channel, PlannerPost } from '@social-scheduler/shared';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { usePostEditor } from '@/hooks/planner/use-post-editor';
+import { TikTokSettings } from '@/components/planner/tiktok-settings';
 export function PostEditor({
   channels,
   post,
@@ -17,7 +18,7 @@ export function PostEditor({
   post?: PlannerPost;
   closeHref: string;
 }) {
-  const editor = usePostEditor(post, channels[0]?.id ?? '');
+  const editor = usePostEditor(post, channels);
   function close() {
     if (editor.saving) return;
     if (editor.dirty && !window.confirm('Leave without saving this post?')) return;
@@ -45,7 +46,14 @@ export function PostEditor({
           <form
             id="post-form"
             onSubmit={editor.submit}
-            onChange={() => editor.setDirty(true)}
+            onChange={(event) => {
+              editor.setDirty(true);
+              if (
+                editor.tiktok.settings.consent &&
+                (event.target as HTMLElement).id !== 'tiktok-consent'
+              )
+                editor.tiktok.update({ consent: false });
+            }}
             className="grid gap-7 min-[860px]:grid-cols-[minmax(0,1fr)_300px]"
             aria-busy={editor.pending}
           >
@@ -54,6 +62,7 @@ export function PostEditor({
               <MediaField editor={editor} />
               <CaptionFields editor={editor} />
               <PostFields editor={editor} channels={channels} />
+              <TikTokSettings editor={editor} />
               <p
                 ref={editor.errorRef}
                 id="post-editor-error"
