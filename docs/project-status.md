@@ -1,5 +1,19 @@
 # Implementation status
 
+## Regression update — 2026-10-25
+
+Reproduced failures with 1,000 simultaneous authenticated users, then fixed the shared session
+throttle, false serialization conflicts/admission failures, and stale cancellation/retry revisions.
+Added repeatable adversarial, production-browser and HTTP/Redis load suites. Patched reported
+dependency advisories; final audit reports zero. No schema migration or creator/provider write.
+
+Verification: 135 unit tests, 84 isolated integration tests, three browser scenarios, formatting,
+lint, strict types, Prisma validation and production build passed. Two identical final runs each
+validated 10,000 HTTP requests at 1,000 users per phase and processed 1,000 fixture publications
+with no duplicate sends. See [the full report](regression-report-2026-10-25.md) for before/after
+measurements, test conditions and limits. Existing-session local bursts are verified; sustained
+production capacity, mass onboarding and real provider publishing remain unverified.
+
 ## Implemented
 
 - Three npm workspaces: `frontend` (Next.js), `backend` (Express API, BullMQ worker,

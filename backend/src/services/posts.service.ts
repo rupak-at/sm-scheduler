@@ -8,6 +8,7 @@ import { channelCanSchedule, eligibleChannelWhere } from '../lib/channel-eligibi
 import type { TikTokServices } from '../integrations/tiktok/services.js';
 import { prepareTikTokPost } from './tiktok-posts.service.js';
 import { Prisma } from '../database/index.js';
+import { advancePostRevision } from '../repositories/post-revision.js';
 
 export class PostsService {
   constructor(
@@ -33,6 +34,7 @@ export class PostsService {
         if (input.scheduledAt && !channelCanSchedule(account))
           throw new WorkspaceError(422, 'Reconnect this account before scheduling.');
         this.validateMediaDelivery(input, media);
+        const updatedAt = new Date();
         if (id) {
           await tx.$queryRaw`SELECT id FROM "Publication" WHERE "postId" = ${id}::uuid FOR UPDATE`;
           const previous = await tx.post.findFirst({
@@ -42,6 +44,7 @@ export class PostsService {
           if (!previous) throw new WorkspaceError(404, 'Post not found.');
           if (!revision || previous.updatedAt.toISOString() !== revision)
             throw new WorkspaceError(409, 'This post changed. Reload before saving.');
+          updatedAt.setTime(Math.max(Date.now(), previous.updatedAt.getTime() + 1));
           if (
             previous.publications.some(
               (item) =>
@@ -65,6 +68,7 @@ export class PostsService {
               where: { id },
               data: {
                 caption: input.caption,
+                updatedAt,
                 media: { deleteMany: {}, create: { mediaAssetId: media.id, position: 0 } },
                 publications: { updateMany: { where: { postId: id }, data: publication } },
               },
@@ -81,7 +85,9 @@ export class PostsService {
             });
         return postView(post);
       },
-      { isolationLevel: 'Serializable' },
+      // Publication locks serialize edits/claims; input row locks protect ownership
+      // and eligibility. Predicate locking creates false conflicts across creators.
+      { isolationLevel: 'ReadCommitted' },
     );
   }
   private validateSchedule(input: PostInput) {
@@ -132,12 +138,15 @@ export class PostsService {
     });
   }
   async cancel(userId: string, id: string) {
-    const result = await this.db.publication.updateMany({
-      where: { postId: id, post: { userId }, status: { in: ['DRAFT', 'SCHEDULED'] } },
-      data: { status: 'CANCELLED', scheduledAt: null },
+    await this.db.$transaction(async (tx) => {
+      const result = await tx.publication.updateMany({
+        where: { postId: id, post: { userId }, status: { in: ['DRAFT', 'SCHEDULED'] } },
+        data: { status: 'CANCELLED', scheduledAt: null },
+      });
+      if (result.count !== 1)
+        throw new WorkspaceError(409, 'Only drafts and scheduled posts can be cancelled.');
+      await advancePostRevision(tx, id, userId);
     });
-    if (result.count !== 1)
-      throw new WorkspaceError(409, 'Only drafts and scheduled posts can be cancelled.');
   }
   async retry(userId: string, id: string) {
     if (
@@ -152,24 +161,27 @@ export class PostsService {
     const providers: ('INSTAGRAM' | 'FACEBOOK')[] = [];
     if (this.configured) providers.push('INSTAGRAM');
     if (this.facebookConfigured) providers.push('FACEBOOK');
-    const result = await this.db.publication.updateMany({
-      where: {
-        postId: id,
-        post: { userId },
-        status: 'FAILED',
-        publishRequestedAt: null,
-        socialAccount: { userId, ...eligibleChannelWhere(providers) },
-      },
-      data: {
-        status: 'SCHEDULED',
-        scheduledAt: new Date(Date.now() + 60000),
-        externalContainerId: null,
-      },
+    await this.db.$transaction(async (tx) => {
+      const result = await tx.publication.updateMany({
+        where: {
+          postId: id,
+          post: { userId },
+          status: 'FAILED',
+          publishRequestedAt: null,
+          socialAccount: { userId, ...eligibleChannelWhere(providers) },
+        },
+        data: {
+          status: 'SCHEDULED',
+          scheduledAt: new Date(Date.now() + 60000),
+          externalContainerId: null,
+        },
+      });
+      if (result.count !== 1)
+        throw new WorkspaceError(
+          409,
+          'Configure or reconnect this account, or resolve the publishing outcome before retrying.',
+        );
+      await advancePostRevision(tx, id, userId);
     });
-    if (result.count !== 1)
-      throw new WorkspaceError(
-        409,
-        'Configure or reconnect this account, or resolve the publishing outcome before retrying.',
-      );
   }
 }

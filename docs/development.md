@@ -236,7 +236,44 @@ npm run test:integration
 
 Tests cover auth origins, password hashing, session persistence/revocation, invalid credentials,
 and expiry. They create and clean up test users. CI provisions fresh services and runs migrations,
-unit/integration tests, and builds. Add worker recovery and publishing tests as those features arrive.
+unit/integration tests, and builds. Provider fixtures exercise Instagram/Facebook/TikTok OAuth,
+uploads, ownership, worker claims, duplicate delivery, token lifecycle and uncertain outcomes.
+
+Additional suites deliberately use a **separate loopback database whose name ends in
+`_load_test`**. Apply the existing migrations there using an explicit `DATABASE_URL` first.
+Do not reuse creator or shared development services. Queue load tests additionally require
+a loopback Redis URL selecting dedicated database `/1`. Tests create/delete their own fixtures.
+
+```sh
+# Example dedicated services; substitute the isolated ports you provisioned.
+export TEST_DATABASE_URL=postgresql://scheduler:scheduler_test@127.0.0.1:55449/scheduler_load_test
+export TEST_REDIS_URL=redis://127.0.0.1:56449/1
+npm run build
+npm run test:browser
+npm run test:load
+```
+
+Browser tests start an isolated API and production Next.js server on port 3159, and use headless
+Chromium at `/usr/bin/chromium` (override `CHROMIUM_PATH` if needed). Install Chromium and FFmpeg
+first. They exercise real forms/proxies, direct uploads, photo/video processing, draft editing,
+scheduling, a fixture publication, cancellation/deletion, logout and eight viewport widths.
+The provider connection and storage are test fixtures; no live credentials are used.
+
+Load tests seed 1,000 independent signed sessions, launch each HTTP phase with 1,000 simultaneous
+requests, validate responses and owner isolation, then separately drain 1,000 due publications
+through actual Redis with worker concurrency 2. Reports default to
+`/tmp/scheduler-load-results.json` and `/tmp/scheduler-load-queue.json`; override `LOAD_REPORT_PATH`
+and `QUEUE_REPORT_PATH`. Results are local burst measurements, not a sustained production SLA.
+See [the regression report](regression-report-2026-10-25.md) for evidence and exclusions.
+
+Post saves use Read Committed transactions with shared locks on the chosen owned account/media
+and an exclusive publication lock for edits. Keep those locks together with revision/state guards
+when changing transactions. Cancellation and retry advance the post revision atomically so an
+already-open editor cannot undo them. Database pool acquisition and transaction admission wait
+at most ten seconds; queries retain a three-second timeout and transactions five seconds.
+Read-only auth session checks bypass the shared IP bucket; credential/OAuth and per-user mutation
+limits remain. Without a trusted client-IP deployment configuration, credential routes retain
+the auth library's shared fallback bucket: the load suite measures existing sessions, not mass signup.
 
 ## Verify running applications
 
@@ -692,6 +729,20 @@ was blocked before a live request. Phone/tablet/desktop screenshots and current 
 reviewed, with no page errors or horizontal overflow. No creator records, creator migrations,
 live TikTok/Meta/Cloudinary publishing, push or deployment. TikTok app/domain approval and live
 connection/refresh/photo/video tests remain pending.
+
+### 2026-10-25 — adversarial regression and 1,000-user concurrency fixes
+
+Added `test:browser` and `test:load` with dedicated loopback service guards, headless production
+frontend flows, 1,000-user HTTP bursts and 1,000-publication Redis recovery. Added nine integration
+regressions for authorization, concurrent edits, throttling and cancellation/retry revisions.
+Fixed shared session throttling, unrelated-save serialization/admission failures and stale editors
+undoing status changes; retained row ownership/eligibility/state guards and credential limits.
+Patched Next.js/Vitest and compatible vulnerable dependencies. No schema change or creator migration.
+
+Verification: 135 unit tests, 84 integrations, three browser scenarios/eight widths, repeated
+10,000-request and 1,000-publication runs, formatting/lint/types, Prisma validation, build and
+zero-advisory npm audit. [The report](regression-report-2026-10-25.md) records fixtures and limits;
+mass signup, long-running production load and live providers are not verified by these tests.
 
 ### Future entries
 

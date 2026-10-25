@@ -4,6 +4,9 @@ An Instagram, Facebook Page and TikTok scheduler for creators and small teams.
 Read [AGENTS.md](AGENTS.md) for product context, module boundaries, and development rules.
 Follow [the development guide](docs/development.md) for setup, feature work, migrations, testing,
 and commits. The guide and implementation status must be updated with every completed change.
+The [regression report](docs/regression-report-2026-10-25.md) records adversarial tests and
+1,000-user local load results. Repeat them with `npm run test:browser` and `npm run test:load`
+using the isolated services described in the development guide.
 The original `idea.md` is a local planning document excluded by the workspace's gitignore.
 
 The project includes email/password and Instagram sign-in, Instagram, Facebook Page and TikTok connection, photo/MP4 uploads,

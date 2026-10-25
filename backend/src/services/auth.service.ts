@@ -60,6 +60,10 @@ export function createAuthentication(options: AuthOptions): AuthGateway {
       window: 60,
       max: 100,
       customRules: {
+        // The frontend checks each session during server rendering. With no trusted
+        // client IP, the library otherwise puts every creator in one shared bucket.
+        // Keep write/credential limits; a read-only session check must not lock out others.
+        '/get-session': false,
         '/sign-in/email': { window: 60, max: 5 },
         '/sign-up/email': { window: 60, max: 3 },
       },

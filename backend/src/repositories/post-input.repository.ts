@@ -6,6 +6,10 @@ export async function findPostInputs(
   userId: string,
   input: PostInput,
 ): Promise<{ account: SocialAccount | null; media: MediaAsset | null }> {
+  // Keep eligibility/ownership stable until the save commits without taking
+  // serializable predicate locks on unrelated creators' posts.
+  await tx.$queryRaw`SELECT id FROM "SocialAccount" WHERE id = ${input.socialAccountId}::uuid AND "userId" = ${userId}::uuid FOR SHARE`;
+  await tx.$queryRaw`SELECT id FROM "MediaAsset" WHERE id = ${input.mediaAssetId}::uuid AND "userId" = ${userId}::uuid FOR SHARE`;
   const account = await tx.socialAccount.findFirst({
     where: {
       id: input.socialAccountId,

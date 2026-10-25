@@ -241,7 +241,14 @@ Use Node 24 LTS (`.nvmrc`) and npm. From the repository root:
 - `npm run queue:check`: enqueue an infrastructure check; inspect worker completion logs.
 - `npm run check`: formatting, linting, type checking, and tests.
 - `npm run test:integration`: authentication integration checks against isolated services.
-  Set `TEST_DATABASE_URL` and `TEST_REDIS_URL`; migrate that test database first. Tests reset throttling counters and remove their fixtures, so never use a creator database.
+  Set `TEST_DATABASE_URL` and `TEST_REDIS_URL`; migrate that test database first. Tests reset
+  throttling counters and remove their fixtures, so never use a creator database.
+- `npm run test:browser`: production Chromium auth/upload/planner flows after `npm run build`.
+  Requires a dedicated loopback test database ending in `_load_test`, Chromium and FFmpeg;
+  the suite starts its own API and frontend on port 3159. Override `CHROMIUM_PATH` if needed.
+- `npm run test:load`: 1,000-user HTTP bursts and 1,000-publication Redis fixture recovery.
+  Requires a loopback database ending in `_load_test` and dedicated loopback Redis database `/1`.
+  Reports and test boundaries are documented in `docs/regression-report-2026-10-25.md`.
 - `npm run build`: compile packages, API, worker, and Next.js.
 - `npm run infra:down`: stop services while retaining local volumes.
 
