@@ -9,6 +9,8 @@ import type { TikTokServices } from '../integrations/tiktok/services.js';
 import { prepareTikTokPost } from './tiktok-posts.service.js';
 import { Prisma } from '../database/index.js';
 import { advancePostRevision } from '../repositories/post-revision.js';
+import { prepareYouTubePost } from './youtube-posts.service.js';
+import type { YouTubeServices } from '../integrations/youtube/services.js';
 
 export class PostsService {
   constructor(
@@ -17,10 +19,13 @@ export class PostsService {
     private readonly configured = true,
     private readonly facebookConfigured = false,
     private readonly tiktok?: TikTokServices,
+    private readonly youtube?: YouTubeServices,
   ) {}
   async save(userId: string, input: PostInput, id?: string, revision?: string) {
     this.validateSchedule(input);
-    const metadata = await prepareTikTokPost(this.db, this.tiktok, userId, input);
+    const metadata =
+      (await prepareTikTokPost(this.db, this.tiktok, userId, input)) ??
+      (await prepareYouTubePost(this.db, this.youtube, userId, input));
     return this.db.$transaction(
       async (tx) => {
         const { account, media } = await findPostInputs(tx, userId, input);
@@ -33,7 +38,8 @@ export class PostsService {
           throw new WorkspaceError(422, 'Configure this provider before scheduling.');
         if (input.scheduledAt && !channelCanSchedule(account))
           throw new WorkspaceError(422, 'Reconnect this account before scheduling.');
-        this.validateMediaDelivery(input, media);
+        // YouTube receives server-uploaded bytes; legacy assets need no public URL.
+        if (account.provider !== 'YOUTUBE') this.validateMediaDelivery(input, media);
         const updatedAt = new Date();
         if (id) {
           await tx.$queryRaw`SELECT id FROM "Publication" WHERE "postId" = ${id}::uuid FOR UPDATE`;
@@ -99,7 +105,9 @@ export class PostsService {
       ? this.configured
       : provider === 'FACEBOOK'
         ? this.facebookConfigured
-        : provider === 'TIKTOK' && Boolean(this.tiktok);
+        : provider === 'TIKTOK'
+          ? Boolean(this.tiktok)
+          : provider === 'YOUTUBE' && Boolean(this.youtube);
   }
   private validateMediaDelivery(
     input: PostInput,
@@ -151,12 +159,16 @@ export class PostsService {
   async retry(userId: string, id: string) {
     if (
       await this.db.publication.findFirst({
-        where: { postId: id, post: { userId }, socialAccount: { provider: 'TIKTOK' } },
+        where: {
+          postId: id,
+          post: { userId },
+          socialAccount: { provider: { in: ['TIKTOK', 'YOUTUBE'] } },
+        },
       })
     )
       throw new WorkspaceError(
         422,
-        'Edit this TikTok post and review its current settings before rescheduling.',
+        'Edit this post and review its current provider settings before rescheduling.',
       );
     const providers: ('INSTAGRAM' | 'FACEBOOK')[] = [];
     if (this.configured) providers.push('INSTAGRAM');

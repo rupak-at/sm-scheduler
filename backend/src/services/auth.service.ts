@@ -11,6 +11,8 @@ import { facebookPlugin } from '../integrations/facebook/facebook.plugin.js';
 import type { FacebookPluginOptions } from '../integrations/facebook/facebook.plugin.js';
 import { tiktokPlugin } from '../integrations/tiktok/tiktok.plugin.js';
 import type { TikTokPluginOptions } from '../integrations/tiktok/tiktok.plugin.js';
+import { youtubePlugin } from '../integrations/youtube/youtube.plugin.js';
+import type { YouTubePluginOptions } from '../integrations/youtube/youtube.plugin.js';
 
 interface AuthOptions {
   database: PrismaClient;
@@ -20,6 +22,7 @@ interface AuthOptions {
   instagram?: InstagramPluginOptions;
   facebook?: FacebookPluginOptions;
   tiktok?: TikTokPluginOptions;
+  youtube?: YouTubePluginOptions;
 }
 
 export function createAuthentication(options: AuthOptions): AuthGateway {
@@ -33,6 +36,7 @@ export function createAuthentication(options: AuthOptions): AuthGateway {
       ...(options.instagram ? [instagramPlugin(options.instagram)] : []),
       ...(options.facebook ? [facebookPlugin(options.facebook)] : []),
       ...(options.tiktok ? [tiktokPlugin(options.tiktok)] : []),
+      ...(options.youtube ? [youtubePlugin(options.youtube)] : []),
     ],
     account: { accountLinking: { enabled: false } },
     databaseHooks: {

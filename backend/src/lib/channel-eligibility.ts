@@ -1,7 +1,7 @@
 import type { Prisma } from '../database/index.js';
 
 export function eligibleChannelWhere(
-  providers: ('INSTAGRAM' | 'FACEBOOK' | 'TIKTOK')[],
+  providers: ('INSTAGRAM' | 'FACEBOOK' | 'TIKTOK' | 'YOUTUBE')[],
 ): Prisma.SocialAccountWhereInput {
   return {
     provider: { in: providers },

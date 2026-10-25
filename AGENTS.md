@@ -10,8 +10,8 @@ A social media scheduler for solo creators and small teams. A creator signs in, 
 an eligible social account, uploads supported media, writes a caption, schedules a
 publication, and later sees its outcome after closing the browser.
 
-The current implementation supports Instagram, managed Facebook Pages and TikTok Direct Post
-photos/videos. TikTok defaults to private testing until its app review/audit requirements are met.
+The current implementation supports Instagram, managed Facebook Pages, TikTok Direct Post
+photos/videos and YouTube MP4 uploads. TikTok defaults to private testing until its app review/audit requirements are met.
 Use official APIs and authorization flows. Verify account eligibility, permissions,
 formats, limits, and app-review requirements against official documentation before
 promising support. A successful authorized test publish is required before claiming real provider feasibility; the user authorized implementation before their own live test.
@@ -20,12 +20,12 @@ promising support. A successful authorized test publish is required before claim
 
 This repository includes npm workspaces, a public landing page, a protected Next.js planner,
 email/password and Instagram sign-in, Instagram account connection, encrypted tokens,
-Facebook Page connection, photo/MP4 uploads, caption/hashtag editing and live previews, draft editing/deletion,
+Facebook Page, TikTok and YouTube connection, photo/MP4 uploads, caption/hashtag editing and live previews, draft editing/deletion,
 durable scheduling, and a BullMQ publishing/recovery worker.
 The user verified real Instagram sign-in on 2026-10-12; the first real publishing test is pending.
 Automated provider tests use fixtures.
-Read the corresponding `docs/{instagram,facebook,tiktok}-setup.md` before changing an integration
-or running a live test. Facebook/TikTok authorization and publishing remain unverified.
+Read the corresponding `docs/{instagram,facebook,tiktok,youtube}-setup.md` before changing an integration
+or running a live test. Facebook/TikTok/YouTube authorization and publishing remain unverified.
 
 Email verification and password-reset delivery require a mail provider and remain unimplemented.
 Do not present empty scaffolding as a completed product feature.
@@ -41,7 +41,7 @@ There are three npm workspaces. Read `docs/codebase.md` for a walkthrough and co
   responses. `services` own business rules and transactions; `repositories` hold database
   queries when a separate query module makes the service easier to read.
 - `backend/src/middleware`, `config`, `lib`: reusable request guards, server configuration,
-  and focused helpers. `integrations/{instagram,facebook,tiktok}` own OAuth, provider calls, and encrypted tokens;
+  and focused helpers. `integrations/{instagram,facebook,tiktok,youtube}` own OAuth, provider calls, and encrypted tokens;
   `integrations/cloudinary` owns protected remote media storage.
   `worker/publishing` owns claims, publishing, recovery, and attempt outcomes.
 - `frontend`: Next.js App Router. `src/app` contains thin pages/layouts/proxies;
@@ -200,6 +200,27 @@ review phone/tablet/laptop/desktop layouts at 320, 390, 768, 820, 1024, 1280, 14
 - See `docs/tiktok-research.md` and `docs/tiktok-setup.md` for constraints and user-run live tests.
   Never migrate the creator database, contact live providers or claim feasibility from fixtures.
 
+## YouTube workflow
+
+- Connect a channel to an existing workspace through Google web OAuth with browser/session-bound
+  one-use state, PKCE and offline access. Require actual `youtube.upload`/`youtube.readonly` grants
+  and one immutable owned channel; no email matching or Google application sign-in.
+- Encrypt access/refresh tokens with TokenVault's `youtube` namespace. Serialize refresh; retain
+  omitted refresh tokens/scopes only from a previously validated bundle. Revalidate channel identity.
+- MP4 videos only, using the existing 64 MB/3-second–15-minute normalization. Titles, description,
+  explicit visibility, made-for-kids audience and publishing consent live in provider metadata.
+  Reset consent after edits/reopening; failed uploads require review/edit before rescheduling.
+- Initiate upload at the scheduled time; processing can delay completion. Persist the send marker
+  before initialization, encrypt the resumable session with `youtube-upload` and publication-bound
+  authenticated data, then send bytes. Never expose session capabilities to the browser or logs.
+- Probe known sessions before resuming their server-confirmed suffix; lost initialization/expired
+  sessions never trigger a new automatic upload. Persist video IDs and poll processing/channel/
+  visibility before success. Private delivery is not public release. Do not silently change visibility.
+- Read only owned prepared media through the bounded Cloudinary helper or legacy storage. Send
+  tokens/bytes only to exact allowed Google upload URLs. Keep the shared queue and independent providers.
+- The enum migration is user-applied on the creator database. Read `docs/youtube-setup.md` and
+  `docs/youtube-research.md`; live publishing and actual project quota/access remain unverified.
+
 ## Development flow
 
 1. Read the relevant product context, existing module, and package public interfaces.
@@ -248,7 +269,8 @@ Use Node 24 LTS (`.nvmrc`) and npm. From the repository root:
   the suite starts its own API and frontend on port 3159. Override `CHROMIUM_PATH` if needed.
 - `npm run test:load`: 1,000-user HTTP bursts and 1,000-publication Redis fixture recovery.
   Requires a loopback database ending in `_load_test` and dedicated loopback Redis database `/1`.
-  Reports and test boundaries are documented in `docs/regression-report-2026-10-25.md`.
+  Reports and test boundaries are documented in `docs/provider-regression-report-2026-10-25.md`
+  and the earlier `docs/regression-report-2026-10-25.md`.
 - `npm run build`: compile packages, API, worker, and Next.js.
 - `npm run infra:down`: stop services while retaining local volumes.
 

@@ -8,6 +8,10 @@ import { createAuthentication } from '../../backend/src/services/auth.service.js
 import { LocalMediaStorage } from '../../backend/src/lib/media/local-storage.js';
 import { deleteTestUsers } from '../integration/fixtures/database.js';
 import { TokenVault } from '../../backend/src/integrations/instagram/token-crypto.js';
+import { createLoadTikTok, tiktokLoadAccount } from './tiktok-provider.js';
+import { createLoadYouTube, youtubeLoadAccount } from './youtube-provider.js';
+import { fixtureVideo } from '../integration/fixtures/video.js';
+export type LoadProvider = 'INSTAGRAM' | 'TIKTOK' | 'YOUTUBE';
 
 export const origin = 'http://localhost:3000';
 const secret = 'load-test-only-secret-never-use-in-production';
@@ -25,12 +29,23 @@ function isolatedUrl() {
   return url.toString();
 }
 
-export async function createLoadFixture(count: number, webOrigin = origin) {
+export async function createLoadFixture(
+  count: number,
+  webOrigin = origin,
+  provider: LoadProvider = 'INSTAGRAM',
+) {
   const db = createDatabase(isolatedUrl());
   const directory = await mkdtemp('/tmp/scheduler-load-');
   const storage = new LocalMediaStorage(directory, secret, 'https://fixture.example');
-  const users = await seedUsers(db, count);
-  const auth = createAuthentication({ database: db, secret, webOrigin, production: false });
+  const users = await seedUsers(db, count, provider, storage);
+  const tiktok = provider === 'TIKTOK' ? createLoadTikTok(db, webOrigin) : undefined;
+  const youtube = provider === 'YOUTUBE' ? createLoadYouTube(db, webOrigin) : undefined;
+  const common = { database: db, secret, webOrigin, production: false };
+  const auth = createAuthentication({
+    ...common,
+    ...(tiktok ? { tiktok: { ...common, client: tiktok.client, vault: tiktok.vault } } : {}),
+    ...(youtube ? { youtube: { ...common, client: youtube.client, vault: youtube.vault } } : {}),
+  });
   const uploads = { signingKey: secret, apiOrigin: origin, webOrigin };
   const server = createServer(
     createApp({
@@ -41,6 +56,8 @@ export async function createLoadFixture(count: number, webOrigin = origin) {
         storage,
         instagramConfigured: true,
         uploads,
+        ...(tiktok ? { tiktok } : {}),
+        ...(youtube ? { youtube } : {}),
       },
       checks: { database: () => db.$queryRaw`SELECT 1`, redis: async () => {} },
     }),
@@ -53,6 +70,8 @@ export async function createLoadFixture(count: number, webOrigin = origin) {
     users,
     base,
     storage,
+    tiktok,
+    youtube,
     close: async () => {
       server.closeIdleConnections();
       await new Promise<void>((resolve, reject) =>
@@ -74,6 +93,8 @@ export async function createLoadFixture(count: number, webOrigin = origin) {
 async function seedUsers(
   db: ReturnType<typeof createDatabase>,
   count: number,
+  provider: LoadProvider,
+  storage: LocalMediaStorage,
 ): Promise<LoadUser[]> {
   const run = randomUUID();
   const vault = new TokenVault(Buffer.alloc(32, 7).toString('base64'));
@@ -102,22 +123,31 @@ async function seedUsers(
     data: users.map(({ id, channelId }) => ({
       id: channelId,
       userId: id,
-      provider: 'INSTAGRAM',
+      provider,
       providerAccountId: `${run}-${id}`,
       status: 'CONNECTED',
       tokenCiphertext: vault.seal(`${run}-${id}`, `${run}-${id}`),
       tokenExpiresAt: new Date(Date.now() + 86400000),
+      ...(provider === 'TIKTOK' ? tiktokLoadAccount(`${run}-${id}`) : {}),
+      ...(provider === 'YOUTUBE' ? youtubeLoadAccount(`${run}-${id}`) : {}),
     })),
   });
+  const video = provider === 'YOUTUBE' && count ? await fixtureVideo() : undefined;
+  if (video) {
+    // Queue load uses one real fixture video copied to independent owned assets;
+    // concurrent transcoding is separately bounded and is not this workload.
+    await Promise.all(users.map((user) => storage.put(user.mediaId, video, 'mp4')));
+  }
   await db.mediaAsset.createMany({
     data: users.map(({ id, mediaId }) => ({
       id: mediaId,
       userId: id,
       storageKey: `load:${mediaId}`,
-      mimeType: 'image/jpeg',
-      type: 'IMAGE',
+      mimeType: video ? 'video/mp4' : 'image/jpeg',
+      type: video ? 'VIDEO' : 'IMAGE',
       status: 'READY',
-      sizeBytes: 100,
+      sizeBytes: video?.length ?? 100,
+      ...(video ? { width: 320, height: 568, durationSeconds: 3 } : {}),
     })),
   });
   return users;

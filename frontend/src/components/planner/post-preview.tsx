@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Image as ImageIcon, Instagram, Facebook, Music2 } from 'lucide-react';
+import { Image as ImageIcon, Instagram, Facebook, Music2, Youtube } from 'lucide-react';
 import type { Channel } from '@social-scheduler/shared';
 import type { usePostEditor } from '@/hooks/planner/use-post-editor';
 import { channelName, channelProvider } from '@/lib/planner/channels';
@@ -15,11 +15,13 @@ export function PostPreview({
   const name = editor.tiktok.creator?.creator_nickname ?? channelName(channel);
   const provider = channelProvider(channel);
   const Icon =
-    channel?.provider === 'TIKTOK'
-      ? Music2
-      : channel?.provider === 'FACEBOOK'
-        ? Facebook
-        : Instagram;
+    channel?.provider === 'YOUTUBE'
+      ? Youtube
+      : channel?.provider === 'TIKTOK'
+        ? Music2
+        : channel?.provider === 'FACEBOOK'
+          ? Facebook
+          : Instagram;
   return (
     <aside
       className="min-w-0 space-y-3 xl:sticky xl:top-6 xl:self-start"
@@ -47,6 +49,11 @@ export function PostPreview({
         </div>
         <PreviewMedia media={media} />
         <div className="border-t border-line p-4">
+          {editor.youtube.active && editor.youtube.settings.title && (
+            <p className="mb-2 text-sm font-semibold [overflow-wrap:anywhere]">
+              {editor.youtube.settings.title}
+            </p>
+          )}
           {editor.composedCaption ? (
             <p className="text-sm leading-relaxed [overflow-wrap:anywhere] whitespace-pre-wrap">
               <span className="font-medium">{name}</span>{' '}
@@ -66,6 +73,8 @@ export function PostPreview({
         {provider === 'Facebook' && ' Posts to your Page are public.'}
         {provider === 'TikTok' &&
           ' Visibility follows your chosen TikTok setting; processing may take a few minutes.'}
+        {provider === 'YouTube' &&
+          ' Visibility follows your choice. Uploading and processing may finish after the scheduled time.'}
         {media?.mimeType === 'image/jpeg' &&
           ' Your full photo is kept; narrow or wide photos may have a white border.'}
       </p>

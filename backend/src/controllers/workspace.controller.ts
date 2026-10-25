@@ -14,6 +14,7 @@ export function createWorkspaceController(services: WorkspaceServices): RequestH
       instagramConfigured: services.instagramConfigured,
       facebookConfigured: services.facebookConfigured ?? false,
       tiktokConfigured: Boolean(services.tiktok),
+      youtubeConfigured: Boolean(services.youtube),
       ...workspace,
     });
   };

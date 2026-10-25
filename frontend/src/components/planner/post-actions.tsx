@@ -48,7 +48,7 @@ export function PostActions({
 function PostMenu({ post, act, pending, provider }: ActionsProps) {
   const cancellable = ['DRAFT', 'SCHEDULED'].includes(post.status);
   const deletable = ['DRAFT', 'CANCELLED'].includes(post.status) && post.attempts.length === 0;
-  const retryable = post.status === 'FAILED' && provider !== 'TIKTOK';
+  const retryable = post.status === 'FAILED' && provider !== 'TIKTOK' && provider !== 'YOUTUBE';
   if (!cancellable && !deletable && !retryable) return null;
   const confirm = (message: string, path: string, method?: string) => {
     if (window.confirm(message)) void act(path, method);

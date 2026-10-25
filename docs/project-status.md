@@ -1,5 +1,25 @@
 # Implementation status
 
+## TikTok regression and YouTube update — 2026-10-25
+
+Added YouTube channel connection through session-bound Google OAuth with PKCE/offline grants,
+encrypted token refresh, MP4-only drafts/scheduling, editable title/description, explicit
+visibility/audience/disclosures and per-post consent. The worker saves encrypted resumable
+sessions, probes before suffix recovery and polls processing/channel/visibility before success.
+Lost initialization and expired sessions never cause an automatic replacement upload.
+The new `YOUTUBE` enum migration is tested in isolated services; the user must apply it to
+the creator database before running the updated API/worker. See [YouTube setup](youtube-setup.md).
+
+Extended the 1,000-user lifecycle and 1,000-publication queue tests to TikTok and YouTube,
+plus actual browser connection/composer flows with provider navigation intercepted. TikTok
+remains implemented with private-test/audit gates; this update adds deeper regression coverage.
+Verification and repeated measurements are in [the provider report](provider-regression-report-2026-10-25.md).
+Final validation: 151 unit tests, 101 integration tests, five browser scenarios, formatting/lint/types,
+schema validation, all five migrations on a fresh test database and the production build passed.
+Two complete load runs each passed all six provider cases; a final focused YouTube rerun passed.
+All provider calls are fixtures; no real Google/TikTok publishing, creator migration or deployment
+was performed. Live authorization/publishing and actual provider quotas remain unverified.
+
 ## Regression update — 2026-10-25
 
 Reproduced failures with 1,000 simultaneous authenticated users, then fixed the shared session

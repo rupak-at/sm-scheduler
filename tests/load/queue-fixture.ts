@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { InstagramClient } from '../../backend/src/integrations/instagram/client.js';
 import type { createLoadFixture } from './fixture.js';
+import { tiktokLoadSettings } from './tiktok-provider.js';
+import { youtubeLoadSettings } from './youtube-provider.js';
 
 export function queueProvider() {
   const sends = new Map<string, number>();
@@ -51,6 +53,19 @@ export async function seedPublications(fixture: Awaited<ReturnType<typeof create
       socialAccountId: fixture.users[i]!.channelId,
       status: 'SCHEDULED',
       scheduledAt: new Date(0),
+      ...(fixture.tiktok
+        ? {
+            providerMetadata: { tiktok: tiktokLoadSettings, consentedAt: new Date().toISOString() },
+          }
+        : {}),
+      ...(fixture.youtube
+        ? {
+            providerMetadata: {
+              youtube: youtubeLoadSettings,
+              youtubeConsentedAt: new Date().toISOString(),
+            },
+          }
+        : {}),
     })),
   });
 }

@@ -31,7 +31,8 @@ export function LandingHero() {
           </Link>
         </div>
         <p className="mt-5 text-xs leading-5 text-muted">
-          Photo drafts and scheduling are ready. Connect your professional Instagram account.
+          Plan photos and videos across connected accounts. YouTube supports video; TikTok starts in
+          private testing.
         </p>
       </div>
       <div className="mt-14 overflow-hidden rounded-[24px] bg-ink sm:mt-16 sm:rounded-[32px]">

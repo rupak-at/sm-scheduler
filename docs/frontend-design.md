@@ -1,8 +1,15 @@
 # Frontend design
 
-Social Scheduler is a workspace for independent creators preparing Instagram content.
+Social Scheduler is a workspace for independent creators preparing photos and videos across connected channels.
 Use a precise, quiet interface with expressive typography and original studio photography.
 The public site introduces the product; the authenticated app prioritizes everyday clarity.
+
+YouTube extends the existing composer rather than introducing a separate editing surface.
+Keep the shared Roboto/neutral tokens and left-aligned controls: media and description first,
+then title, visibility, audience, disclosures and consent in one labelled section. Native selects
+begin without visibility/audience choices; checkboxes begin off. Show the actual video/title in
+the existing preview and the selected visibility in the saved row. Consent resets after edits
+and reopening. Provider availability and connection state always come from the API.
 
 ## Shared visual system
 

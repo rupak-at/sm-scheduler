@@ -33,10 +33,14 @@ export function PostRow({
                     : 'Reel'
                   : 'Photo'}
                 {post.tiktokSettings?.privacy === 'SELF_ONLY' && ' · Only me'}
+                {post.youtubeSettings?.privacy && ` · ${post.youtubeSettings.privacy}`}
               </span>
             </p>
             <PostStatus status={post.status} />
           </div>
+          {post.youtubeSettings?.title && (
+            <p className="mb-1 truncate text-sm font-medium">{post.youtubeSettings.title}</p>
+          )}
           <p className="line-clamp-3 text-[13px] leading-relaxed [overflow-wrap:anywhere] whitespace-pre-wrap sm:text-sm">
             {post.caption || (post.mediaMimeType === 'video/mp4' ? 'Video post' : 'Photo post')}
           </p>

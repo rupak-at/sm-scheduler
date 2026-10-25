@@ -256,3 +256,18 @@ System dark preference retained the explicitly light controls; reduced motion wa
 
 No real TikTok authorization/publication or live Cloudinary transport was performed. Physical
 Safari/iPad and provider-review acceptance remain unverified. No creator data was changed.
+
+## 2026-10-25 — YouTube settings and TikTok regression
+
+Applied frontend-design to the existing neutral Roboto composer and reviewed the changed
+provider controls against the current Web Interface Guidelines. YouTube title/selects/toggles
+have labels, names, visible focus and native keyboard behavior. Inline live guidance and focused
+submit errors cover incomplete choices. Visibility/audience have no default; consent resets after
+edits/media changes/reopening. Connection buttons show the actual provider and disable with a
+configuration explanation when unavailable. Existing draft-close protection and URL state remain.
+
+Chromium verifies simulated provider authorization through real start/callback endpoints, actual
+MP4 upload/normalization, draft round-trip, consent reset and scheduled worker completion.
+Checks cover 320/390/768/820/1024/1280/1440/1920px; phone/tablet/desktop screenshots were inspected.
+Public landing copy now describes the implemented provider scope without stale upcoming-feature
+claims. No real provider contact, visual redesign, new motion or physical Safari/iOS test.

@@ -1,4 +1,4 @@
-import { Instagram, Facebook, Music2 } from 'lucide-react';
+import { Instagram, Facebook, Music2, Youtube } from 'lucide-react';
 import type { Channel } from '@social-scheduler/shared';
 import { InstagramButton } from '@/components/auth/instagram-button';
 import { ChannelRow } from '@/components/planner/channel-row';
@@ -12,19 +12,20 @@ export function ProviderChannels({
   pending,
 }: {
   channels: Channel[];
-  provider: 'INSTAGRAM' | 'FACEBOOK' | 'TIKTOK';
+  provider: Channel['provider'];
   configured: boolean;
   act: (path: string) => Promise<void>;
   pending: boolean;
 }) {
   const facebook = provider === 'FACEBOOK';
   const tiktok = provider === 'TIKTOK';
-  const name = tiktok ? 'TikTok' : facebook ? 'Facebook' : 'Instagram';
-  const Icon = tiktok ? Music2 : facebook ? Facebook : Instagram;
+  const youtube = provider === 'YOUTUBE';
+  const name = youtube ? 'YouTube' : tiktok ? 'TikTok' : facebook ? 'Facebook' : 'Instagram';
+  const Icon = youtube ? Youtube : tiktok ? Music2 : facebook ? Facebook : Instagram;
   const connect =
-    facebook || tiktok ? (
+    facebook || tiktok || youtube ? (
       <ProviderConnectButton
-        provider={tiktok ? 'tiktok' : 'facebook'}
+        provider={youtube ? 'youtube' : tiktok ? 'tiktok' : 'facebook'}
         disabled={!configured || pending}
       />
     ) : (
@@ -44,11 +45,13 @@ export function ProviderChannels({
         </div>
       ) : (
         <p className="mt-3 text-[13px] leading-relaxed text-muted">
-          {tiktok
-            ? 'Connect TikTok to plan photos and videos with your chosen posting settings.'
-            : facebook
-              ? 'Connect Pages you manage to plan photos and videos with captions.'
-              : 'Connect a Business or Creator account to plan photos and Reels.'}
+          {youtube
+            ? 'Connect a YouTube channel to schedule MP4 videos with a title, description and visibility.'
+            : tiktok
+              ? 'Connect TikTok to plan photos and videos with your chosen posting settings.'
+              : facebook
+                ? 'Connect Pages you manage to plan photos and videos with captions.'
+                : 'Connect a Business or Creator account to plan photos and Reels.'}
         </p>
       )}
       {channels.length > 0 && channels.every((channel) => channel.status === 'CONNECTED') ? (

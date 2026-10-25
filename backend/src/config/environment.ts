@@ -3,6 +3,7 @@ import { loadEnvironment } from './load-env.js';
 import { instagramEnvironmentSchema, instagramConfigured } from './instagram.js';
 import { facebookEnvironmentSchema, facebookCredentials } from './facebook.js';
 import { tiktokEnvironmentSchema, tiktokCredentials } from './tiktok.js';
+import { youtubeEnvironmentSchema, youtubeCredentials } from './youtube.js';
 import { z } from 'zod';
 
 const baseSchema = z
@@ -20,6 +21,7 @@ const apiSchema = baseSchema
   .extend(instagramEnvironmentSchema.shape)
   .extend(facebookEnvironmentSchema.shape)
   .extend(tiktokEnvironmentSchema.shape)
+  .extend(youtubeEnvironmentSchema.shape)
   .extend({
     BETTER_AUTH_SECRET: z.string().min(32),
     API_PUBLIC_URL: z
@@ -58,11 +60,18 @@ const validatedApiSchema = apiSchema
       !tiktokCredentials(input) ||
       input.TIKTOK_REDIRECT_URI === `${input.WEB_ORIGIN}/api/auth/tiktok/callback`,
     { path: ['TIKTOK_REDIRECT_URI'], message: 'Callback must use the web origin' },
+  )
+  .refine(
+    (input) =>
+      !youtubeCredentials(input) ||
+      input.YOUTUBE_REDIRECT_URI === `${input.WEB_ORIGIN}/api/auth/youtube/callback`,
+    { path: ['YOUTUBE_REDIRECT_URI'], message: 'Callback must use the web origin' },
   );
 const workerSchema = baseSchema
   .extend(instagramEnvironmentSchema.shape)
   .extend(facebookEnvironmentSchema.shape)
   .extend(tiktokEnvironmentSchema.shape)
+  .extend(youtubeEnvironmentSchema.shape)
   .extend({
     WORKER_CONCURRENCY: z.coerce.number().int().min(1).max(20).default(2),
   });

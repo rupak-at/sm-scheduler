@@ -9,6 +9,7 @@ import type { Channel, PlannerPost } from '@social-scheduler/shared';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { usePostEditor } from '@/hooks/planner/use-post-editor';
 import { TikTokSettings } from '@/components/planner/tiktok-settings';
+import { YouTubeSettings } from '@/components/planner/youtube-settings';
 export function PostEditor({
   channels,
   post,
@@ -48,11 +49,7 @@ export function PostEditor({
             onSubmit={editor.submit}
             onChange={(event) => {
               editor.setDirty(true);
-              if (
-                editor.tiktok.settings.consent &&
-                (event.target as HTMLElement).id !== 'tiktok-consent'
-              )
-                editor.tiktok.update({ consent: false });
+              resetConsent(editor, (event.target as HTMLElement).id);
             }}
             className="grid gap-7 min-[860px]:grid-cols-[minmax(0,1fr)_300px]"
             aria-busy={editor.pending}
@@ -63,6 +60,7 @@ export function PostEditor({
               <CaptionFields editor={editor} />
               <PostFields editor={editor} channels={channels} />
               <TikTokSettings editor={editor} />
+              <YouTubeSettings editor={editor} />
               <p
                 ref={editor.errorRef}
                 id="post-editor-error"
@@ -83,4 +81,11 @@ export function PostEditor({
       </SheetContent>
     </Sheet>
   );
+}
+
+function resetConsent(editor: ReturnType<typeof usePostEditor>, id: string) {
+  if (editor.tiktok.settings.consent && id !== 'tiktok-consent')
+    editor.tiktok.update({ consent: false });
+  if (editor.youtube.settings.consent && id !== 'youtube-consent')
+    editor.youtube.update({ consent: false });
 }

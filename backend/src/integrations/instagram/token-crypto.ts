@@ -4,7 +4,8 @@ export class TokenVault {
   private readonly key: Buffer;
   constructor(
     base64Key: string,
-    private readonly provider: 'instagram' | 'facebook' | 'tiktok' = 'instagram',
+    private readonly provider:
+      'instagram' | 'facebook' | 'tiktok' | 'youtube' | 'youtube-upload' = 'instagram',
   ) {
     this.key = Buffer.from(base64Key, 'base64');
     if (this.key.length !== 32) throw new Error('Invalid encryption key');

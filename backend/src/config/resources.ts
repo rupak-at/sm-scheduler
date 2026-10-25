@@ -1,6 +1,7 @@
 import { createInstagramServices } from '../integrations/instagram/services.js';
 import { createFacebookServices } from '../integrations/facebook/services.js';
 import { createTikTokServices } from '../integrations/tiktok/services.js';
+import { createYouTubeServices } from '../integrations/youtube/services.js';
 import { createMediaStorage } from './media-storage.js';
 import type { WorkspaceServices } from '../types/workspace.types.js';
 import { createLogger } from './logger.js';
@@ -34,12 +35,13 @@ export function createResources(environment: ApiEnvironment): Resources {
   const instagram = createInstagramServices(environment, database);
   const facebook = createFacebookServices(environment, database);
   const tiktok = createTikTokServices(environment, database);
+  const youtube = createYouTubeServices(environment, database);
   const authentication = createAuthentication({
     database,
     secret: environment.BETTER_AUTH_SECRET,
     webOrigin: environment.WEB_ORIGIN,
     production: environment.NODE_ENV === 'production',
-    ...providerAuthentication(environment, database, instagram, facebook, tiktok),
+    ...providerAuthentication(environment, database, instagram, facebook, tiktok, youtube),
   });
   return {
     logger,
@@ -59,6 +61,7 @@ export function createResources(environment: ApiEnvironment): Resources {
       ...(instagram ? { tokens: instagram.tokens } : {}),
       ...(facebook ? { facebookTokens: facebook.tokens } : {}),
       ...(tiktok ? { tiktok } : {}),
+      ...(youtube ? { youtube } : {}),
     },
     auth: authentication,
     checks: {
@@ -78,6 +81,7 @@ function providerAuthentication(
   instagram: ReturnType<typeof createInstagramServices>,
   facebook: ReturnType<typeof createFacebookServices>,
   tiktok: ReturnType<typeof createTikTokServices>,
+  youtube: ReturnType<typeof createYouTubeServices>,
 ) {
   const common = {
     database,
@@ -92,5 +96,6 @@ function providerAuthentication(
       ? { facebook: { ...common, client: facebook.client, vault: facebook.vault } }
       : {}),
     ...(tiktok ? { tiktok: { ...common, client: tiktok.client, vault: tiktok.vault } } : {}),
+    ...(youtube ? { youtube: { ...common, client: youtube.client, vault: youtube.vault } } : {}),
   };
 }

@@ -10,46 +10,56 @@ import { createLoadFixture, origin } from './fixture.js';
 import { measure } from './measure.js';
 import type { Measurement } from './measure.js';
 import { exerciseUploads } from './uploads.js';
+import { tiktokLoadSettings } from './tiktok-provider.js';
+import { youtubeLoadSettings } from './youtube-provider.js';
 
-it('serves 1,000 independent authenticated users and preserves write isolation', async () => {
-  const internalErrors: Record<string, number> = {};
-  const handler = errors.errorHandler;
-  vi.spyOn(errors, 'errorHandler').mockImplementation((error, request, response, next) => {
-    const key =
-      error instanceof Error && 'code' in error ? String(error.code) : error.constructor.name;
-    internalErrors[key] = (internalErrors[key] ?? 0) + 1;
-    handler(error, request, response, next);
-  });
-  const fixture = await createLoadFixture(1000);
-  const results: Measurement[] = [];
-  const delay = monitorEventLoopDelay({ resolution: 20 });
-  delay.enable();
-  try {
-    await exercise(fixture, results);
-  } finally {
-    delay.disable();
-    const report = {
-      timestamp: new Date().toISOString(),
-      node: process.version,
-      cpus: cpus().length,
-      totalMemoryMiB: Math.round(totalmem() / 1024 ** 2),
-      peakRssMiB: Math.round(process.resourceUsage().maxRSS / 1024),
-      eventLoopP99Ms: Math.round(delay.percentile(99) / 1e6),
-      results,
-      internalErrors,
-    };
-    await writeFile(
-      process.env.LOAD_REPORT_PATH ?? '/tmp/scheduler-load-results.json',
-      JSON.stringify(report, null, 2) + '\n',
-    );
-    await fixture.close();
-    vi.restoreAllMocks();
-  }
-  expect(
-    results.filter((result) => result.failures),
-    JSON.stringify(results, null, 2),
-  ).toEqual([]);
-});
+it.each(['INSTAGRAM', 'TIKTOK', 'YOUTUBE'] as const)(
+  'serves 1,000 independent %s users and preserves write isolation',
+  async (provider) => {
+    const internalErrors: Record<string, number> = {};
+    const handler = errors.errorHandler;
+    vi.spyOn(errors, 'errorHandler').mockImplementation((error, request, response, next) => {
+      const key =
+        error instanceof Error && 'code' in error ? String(error.code) : error.constructor.name;
+      internalErrors[key] = (internalErrors[key] ?? 0) + 1;
+      handler(error, request, response, next);
+    });
+    const fixture = await createLoadFixture(1000, origin, provider);
+    const results: Measurement[] = [];
+    const delay = monitorEventLoopDelay({ resolution: 20 });
+    delay.enable();
+    try {
+      await exercise(fixture, results);
+    } finally {
+      delay.disable();
+      const report = {
+        timestamp: new Date().toISOString(),
+        provider,
+        node: process.version,
+        cpus: cpus().length,
+        totalMemoryMiB: Math.round(totalmem() / 1024 ** 2),
+        peakRssMiB: Math.round(process.resourceUsage().maxRSS / 1024),
+        eventLoopP99Ms: Math.round(delay.percentile(99) / 1e6),
+        results,
+        internalErrors,
+      };
+      await writeFile(
+        provider === 'YOUTUBE'
+          ? (process.env.YOUTUBE_LOAD_REPORT_PATH ?? '/tmp/scheduler-youtube-load-results.json')
+          : provider === 'INSTAGRAM'
+            ? (process.env.LOAD_REPORT_PATH ?? '/tmp/scheduler-load-results.json')
+            : (process.env.TIKTOK_LOAD_REPORT_PATH ?? '/tmp/scheduler-tiktok-load-results.json'),
+        JSON.stringify(report, null, 2) + '\n',
+      );
+      await fixture.close();
+      vi.restoreAllMocks();
+    }
+    expect(
+      results.filter((result) => result.failures),
+      JSON.stringify(results, null, 2),
+    ).toEqual([]);
+  },
+);
 
 async function exercise(
   fixture: Awaited<ReturnType<typeof createLoadFixture>>,
@@ -78,9 +88,11 @@ async function exercise(
     socialAccountId: fixture.users[i]!.channelId,
     scheduledAt: null,
     timezone: 'Asia/Kathmandu',
+    ...(fixture.tiktok ? { tiktokSettings: tiktokLoadSettings } : {}),
+    ...(fixture.youtube ? { youtubeSettings: youtubeLoadSettings } : {}),
   });
   await exerciseReads(fixture, results, send);
-  await exerciseUploads(fixture, results);
+  if (!fixture.youtube) await exerciseUploads(fixture, results);
   results.push(
     await measure('create-draft', 1000, async (i) => {
       const result = await send(i, '/api/workspace/posts', 'POST', payload(i));

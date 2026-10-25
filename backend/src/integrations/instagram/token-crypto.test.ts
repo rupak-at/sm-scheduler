@@ -3,6 +3,18 @@ import { TokenVault } from './token-crypto.js';
 import { LocalMediaStorage } from '../../lib/media/local-storage.js';
 const key = Buffer.alloc(32, 5).toString('base64');
 describe('provider secret and public media boundaries', () => {
+  it('separates YouTube account credentials from upload capabilities and other providers', () => {
+    const vault = new TokenVault(key, 'youtube');
+    const encrypted = vault.seal('secret', 'identity');
+    expect(() => new TokenVault(key, 'youtube-upload').open(encrypted, 'identity')).toThrow();
+    expect(() => new TokenVault(key, 'tiktok').open(encrypted, 'identity')).toThrow();
+    const uploads = new TokenVault(key, 'youtube-upload');
+    const session = uploads.seal(
+      'https://www.googleapis.com/upload/youtube/v3/videos?upload_id=fixture',
+      'publication-1',
+    );
+    expect(() => uploads.open(session, 'publication-2')).toThrow();
+  });
   it('encrypts with fresh nonces and authenticates the account and key version', () => {
     const vault = new TokenVault(key);
     const first = vault.seal('private-access-token', '123');

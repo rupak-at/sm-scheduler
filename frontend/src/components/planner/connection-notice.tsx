@@ -1,4 +1,12 @@
 const messages: Record<string, string> = {
+  YOUTUBE_connected:
+    'YouTube channel connected. Add an MP4 video and review its publishing settings.',
+  YOUTUBE_ACCOUNT_ALREADY_LINKED:
+    'This YouTube channel belongs to another workspace. Use that workspace or select another channel.',
+  YOUTUBE_OFFLINE_ACCESS_REQUIRED:
+    'Allow offline YouTube access so scheduled uploads can continue after you close the browser.',
+  YOUTUBE_CHANNEL_SELECTION_REQUIRED:
+    'Choose a Google or Brand account with one YouTube channel, then reconnect.',
   TIKTOK_connected:
     'TikTok connected. Review its posting settings when scheduling a photo or video.',
   TIKTOK_AUTHORIZATION_DECLINED:
@@ -40,11 +48,13 @@ export function ConnectionNotice({ code }: { code?: string | undefined }) {
   return (
     <p role="status" className="mb-6 rounded-lg border border-line bg-surface p-4 text-sm">
       {messages[code] ??
-        (code.startsWith('TIKTOK_')
-          ? 'TikTok could not connect. Check Login Kit and Content Posting app permissions, then try again.'
-          : code.startsWith('FACEBOOK_')
-            ? 'Facebook could not connect. Check Page access and Facebook app settings, then try again.'
-            : 'Instagram could not connect. Check your professional account and app settings, then try again.')}
+        (code.startsWith('YOUTUBE_')
+          ? 'YouTube could not connect. Check your Google app permissions and channel, then start a fresh connection.'
+          : code.startsWith('TIKTOK_')
+            ? 'TikTok could not connect. Check Login Kit and Content Posting app permissions, then try again.'
+            : code.startsWith('FACEBOOK_')
+              ? 'Facebook could not connect. Check Page access and Facebook app settings, then try again.'
+              : 'Instagram could not connect. Check your professional account and app settings, then try again.')}
     </p>
   );
 }

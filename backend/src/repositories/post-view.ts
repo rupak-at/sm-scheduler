@@ -1,5 +1,5 @@
 import type { PrismaClient } from '../database/index.js';
-import { postSchema, tiktokSettingsSchema } from '@social-scheduler/shared';
+import { postSchema, tiktokSettingsSchema, youtubeSettingsSchema } from '@social-scheduler/shared';
 import type { PlannerPost } from '@social-scheduler/shared';
 
 export const postInclude = {
@@ -39,6 +39,10 @@ export function postView(post: PostDetails): PlannerPost {
     metadata && typeof metadata === 'object' && 'tiktok' in metadata
       ? tiktokSettingsSchema.safeParse(metadata.tiktok)
       : null;
+  const youtube =
+    metadata && typeof metadata === 'object' && 'youtube' in metadata
+      ? youtubeSettingsSchema.safeParse(metadata.youtube)
+      : null;
   return postSchema.parse({
     id: post.id,
     editable:
@@ -51,6 +55,7 @@ export function postView(post: PostDetails): PlannerPost {
     mediaMimeType: media.mediaAsset.mimeType,
     mediaDurationSeconds: media.mediaAsset.durationSeconds,
     ...(tiktok?.success ? { tiktokSettings: { ...tiktok.data, consent: false } } : {}),
+    ...(youtube?.success ? { youtubeSettings: { ...youtube.data, consent: false } } : {}),
     publicationId: publication.id,
     socialAccountId: publication.socialAccountId,
     status: publication.status,

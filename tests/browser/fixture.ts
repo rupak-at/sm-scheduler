@@ -3,10 +3,12 @@ import type { ChildProcess } from 'node:child_process';
 import { once } from 'node:events';
 import { chromium } from 'playwright';
 import { createLoadFixture } from '../load/fixture.js';
+import type { LoadProvider } from '../load/fixture.js';
 
 export const webOrigin = 'http://localhost:3159';
-export async function createBrowserFixture() {
-  const api = await createLoadFixture(0, webOrigin);
+export async function createBrowserFixture(provider: LoadProvider = 'INSTAGRAM') {
+  const api = await createLoadFixture(0, webOrigin, provider);
+  await api.db.rateLimit.deleteMany();
   const web = spawn(
     process.execPath,
     ['../node_modules/next/dist/bin/next', 'start', '--port', '3159'],

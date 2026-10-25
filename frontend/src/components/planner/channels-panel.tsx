@@ -6,6 +6,7 @@ export function ChannelsPanel({
   configured,
   facebookConfigured,
   tiktokConfigured,
+  youtubeConfigured,
   act,
   pending,
 }: {
@@ -13,6 +14,7 @@ export function ChannelsPanel({
   configured: boolean;
   facebookConfigured: boolean;
   tiktokConfigured: boolean;
+  youtubeConfigured: boolean;
   act: (path: string) => Promise<void>;
   pending: boolean;
 }) {
@@ -43,6 +45,13 @@ export function ChannelsPanel({
         channels={channels.filter((channel) => channel.provider === 'TIKTOK')}
         provider="TIKTOK"
         configured={tiktokConfigured}
+        act={act}
+        pending={pending}
+      />
+      <ProviderChannels
+        channels={channels.filter((channel) => channel.provider === 'YOUTUBE')}
+        provider="YOUTUBE"
+        configured={youtubeConfigured}
         act={act}
         pending={pending}
       />

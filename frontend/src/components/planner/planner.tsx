@@ -60,6 +60,7 @@ export function Planner({
             configured={data.instagramConfigured}
             facebookConfigured={data.facebookConfigured}
             tiktokConfigured={data.tiktokConfigured}
+            youtubeConfigured={data.youtubeConfigured}
             act={act}
             pending={pending}
           />

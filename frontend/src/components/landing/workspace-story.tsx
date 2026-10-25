@@ -1,4 +1,4 @@
-import { CalendarDays, FileText, Instagram } from 'lucide-react';
+import { CalendarDays, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -17,8 +17,8 @@ export function WorkspaceStory() {
           content will go next.
         </p>
         <p className="mt-4 max-w-[40ch] text-sm leading-6 text-muted">
-          Create an account and explore your planner today. Instagram connection, drafts, and
-          scheduling are the next pieces we’re building.
+          Connect an eligible channel, prepare a photo or video, and save an idea as a draft.
+          Schedule when you’re ready and follow its publishing progress from your planner.
         </p>
         <Button
           asChild
@@ -57,8 +57,8 @@ function WorkspacePreview() {
         </p>
       </div>
       <figcaption className="flex items-center gap-3 bg-canvas px-5 py-4 text-xs text-muted">
-        <Instagram size={16} aria-hidden="true" />
-        Connect Instagram to start planning photos and Reels.
+        <CalendarDays size={16} aria-hidden="true" />
+        Connect a channel to start planning your next post.
       </figcaption>
     </figure>
   );

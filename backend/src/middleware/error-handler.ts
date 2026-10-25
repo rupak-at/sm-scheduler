@@ -4,12 +4,20 @@ import { InstagramError } from '../integrations/instagram/http.js';
 import { FacebookError } from '../integrations/facebook/http.js';
 import { TikTokError } from '../integrations/tiktok/http.js';
 import { tiktokMessage } from '../integrations/tiktok/messages.js';
+import { YouTubeError } from '../integrations/youtube/http.js';
 import type { ErrorRequestHandler } from 'express';
 
 // Keep implementation details and connection credentials out of public responses.
 export const errorHandler: ErrorRequestHandler = (error: unknown, _request, response, _next) => {
   if (error instanceof WorkspaceError) {
     response.status(error.status).json({ error: error.message });
+    return;
+  }
+  if (error instanceof YouTubeError) {
+    response.status(422).json({
+      error: 'YouTube could not verify this action. Review the connection and publishing settings.',
+      code: error.code,
+    });
     return;
   }
   if (error instanceof ZodError) {

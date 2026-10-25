@@ -10,6 +10,7 @@ import { useUnsavedChanges } from '@/hooks/planner/use-unsaved-changes';
 import { useCaption } from '@/hooks/planner/use-caption';
 import { useTikTokSettings } from '@/hooks/planner/use-tiktok-settings';
 import { validateEditorSchedule, scheduleRequested } from '@/lib/planner/post-schedule';
+import { useYouTubeSettings } from '@/hooks/planner/use-youtube-settings';
 
 export function usePostEditor(post: PlannerPost | undefined, channels: Channel[]) {
   const router = useRouter();
@@ -17,20 +18,10 @@ export function usePostEditor(post: PlannerPost | undefined, channels: Channel[]
   const caption = useCaption(post?.caption ?? '');
   const [channelId, setChannelId] = useState(post?.socialAccountId ?? channels[0]?.id ?? '');
   const [saving, setSaving] = useState(false);
-  const [dirty, setDirty] = useState(false);
+  const [dirty, setDirty] = useEditorDirty();
   const [mediaVersion, setMediaVersion] = useState(0);
-  const [error, setError] = useState('');
-  const errorRef = useRef<HTMLParagraphElement>(null);
-  useEffect(() => {
-    if (error) errorRef.current?.focus();
-  }, [error]);
+  const { error, errorRef, setError, fail } = useEditorFeedback();
   const schedule = useEditorSchedule(original.current?.scheduledAt ?? null);
-  useUnsavedChanges(dirty);
-  function fail(problem: unknown) {
-    setError(
-      problem === '' ? '' : problem instanceof Error ? problem.message : 'Could not save the post.',
-    );
-  }
   const media = useMediaUpload(
     original.current,
     () => {
@@ -45,6 +36,13 @@ export function usePostEditor(post: PlannerPost | undefined, channels: Channel[]
     post,
     mediaVersion,
   );
+  const youtube = useYouTubeSettings(
+    channels.find((channel) => channel.id === channelId)?.provider === 'YOUTUBE' ? channelId : null,
+    caption.composedCaption,
+    media.preview?.mimeType === 'video/mp4',
+    post,
+    mediaVersion,
+  );
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
@@ -55,6 +53,7 @@ export function usePostEditor(post: PlannerPost | undefined, channels: Channel[]
       if (caption.captionProblem) throw new Error(caption.captionProblem);
       if (!channelId) throw new Error('Choose an account to publish to.');
       if (scheduling && tiktok.active && tiktok.problem) throw new Error(tiktok.problem);
+      if (scheduling && youtube.active && youtube.problem) throw new Error(youtube.problem);
       validateEditorSchedule(schedule.scheduled, scheduling);
       setSaving(true);
       await workspaceRequest(post ? `/posts/${post.id}` : '/posts', post ? 'PUT' : 'POST', {
@@ -64,6 +63,7 @@ export function usePostEditor(post: PlannerPost | undefined, channels: Channel[]
         timezone: schedule.timezone,
         scheduledAt: scheduling ? new Date(schedule.scheduled).toISOString() : null,
         ...(tiktok.active ? { tiktokSettings: tiktok.settings } : {}),
+        ...(youtube.active ? { youtubeSettings: youtube.settings } : {}),
         ...(post ? { revision: original.current?.updatedAt } : {}),
       });
       setDirty(false);
@@ -80,6 +80,7 @@ export function usePostEditor(post: PlannerPost | undefined, channels: Channel[]
     ...schedule,
     ...caption,
     tiktok,
+    youtube,
     channelId,
     setChannelId,
     pending: saving || media.uploading,
@@ -90,4 +91,24 @@ export function usePostEditor(post: PlannerPost | undefined, channels: Channel[]
     errorRef,
     submit,
   };
+}
+
+function useEditorFeedback() {
+  const [error, setError] = useState('');
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (error) errorRef.current?.focus();
+  }, [error]);
+  function fail(problem: unknown) {
+    setError(
+      problem === '' ? '' : problem instanceof Error ? problem.message : 'Could not save the post.',
+    );
+  }
+  return { error, errorRef, setError, fail };
+}
+
+function useEditorDirty() {
+  const state = useState(false);
+  useUnsavedChanges(state[0]);
+  return state;
 }

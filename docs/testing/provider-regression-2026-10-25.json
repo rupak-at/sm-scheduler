@@ -1,0 +1,1232 @@
+{
+  "instagram": {
+    "httpRuns": [
+      {
+        "timestamp": "2026-10-25T03:30:56.845Z",
+        "provider": "INSTAGRAM",
+        "node": "v24.21.0",
+        "cpus": 12,
+        "totalMemoryMiB": 15227,
+        "peakRssMiB": 1121,
+        "eventLoopP99Ms": 88,
+        "results": [
+          {
+            "name": "session-check",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1772,
+            "requestsPerSecond": 564,
+            "p50Ms": 1079,
+            "p95Ms": 1678,
+            "p99Ms": 1726,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1883,
+            "requestsPerSecond": 531,
+            "p50Ms": 1716,
+            "p95Ms": 1842,
+            "p99Ms": 1863,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "upload-ticket",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1224,
+            "requestsPerSecond": 817,
+            "p50Ms": 1067,
+            "p95Ms": 1176,
+            "p99Ms": 1183,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "direct-photo-upload",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2000,
+            "requestsPerSecond": 500,
+            "p50Ms": 1889,
+            "p95Ms": 1950,
+            "p99Ms": 1952,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "create-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2919,
+            "requestsPerSecond": 343,
+            "p50Ms": 2150,
+            "p95Ms": 2818,
+            "p99Ms": 2875,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "schedule-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 3104,
+            "requestsPerSecond": 322,
+            "p50Ms": 2163,
+            "p95Ms": 2984,
+            "p99Ms": 3049,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read-populated",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1957,
+            "requestsPerSecond": 511,
+            "p50Ms": 1777,
+            "p95Ms": 1907,
+            "p99Ms": 1920,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cross-user-edit",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2327,
+            "requestsPerSecond": 430,
+            "p50Ms": 1780,
+            "p95Ms": 2245,
+            "p99Ms": 2285,
+            "statuses": {
+              "404": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cancel-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 958,
+            "requestsPerSecond": 1044,
+            "p50Ms": 735,
+            "p95Ms": 916,
+            "p99Ms": 930,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "delete-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1401,
+            "requestsPerSecond": 714,
+            "p50Ms": 949,
+            "p95Ms": 1340,
+            "p99Ms": 1370,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          }
+        ],
+        "internalErrors": {
+          "WorkspaceError": 1000
+        }
+      },
+      {
+        "timestamp": "2026-10-25T03:33:04.470Z",
+        "provider": "INSTAGRAM",
+        "node": "v24.21.0",
+        "cpus": 12,
+        "totalMemoryMiB": 15227,
+        "peakRssMiB": 1126,
+        "eventLoopP99Ms": 96,
+        "results": [
+          {
+            "name": "session-check",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1888,
+            "requestsPerSecond": 530,
+            "p50Ms": 1019,
+            "p95Ms": 1782,
+            "p99Ms": 1844,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1824,
+            "requestsPerSecond": 548,
+            "p50Ms": 1659,
+            "p95Ms": 1793,
+            "p99Ms": 1804,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "upload-ticket",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1086,
+            "requestsPerSecond": 921,
+            "p50Ms": 957,
+            "p95Ms": 1031,
+            "p99Ms": 1037,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "direct-photo-upload",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2002,
+            "requestsPerSecond": 500,
+            "p50Ms": 1829,
+            "p95Ms": 1960,
+            "p99Ms": 1969,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "create-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 4147,
+            "requestsPerSecond": 241,
+            "p50Ms": 3033,
+            "p95Ms": 4003,
+            "p99Ms": 4084,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "schedule-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 3122,
+            "requestsPerSecond": 320,
+            "p50Ms": 2165,
+            "p95Ms": 2989,
+            "p99Ms": 3059,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read-populated",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1976,
+            "requestsPerSecond": 506,
+            "p50Ms": 1816,
+            "p95Ms": 1939,
+            "p99Ms": 1949,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cross-user-edit",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2235,
+            "requestsPerSecond": 447,
+            "p50Ms": 1684,
+            "p95Ms": 2153,
+            "p99Ms": 2191,
+            "statuses": {
+              "404": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cancel-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1083,
+            "requestsPerSecond": 923,
+            "p50Ms": 833,
+            "p95Ms": 1038,
+            "p99Ms": 1055,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "delete-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1410,
+            "requestsPerSecond": 709,
+            "p50Ms": 981,
+            "p95Ms": 1351,
+            "p99Ms": 1379,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          }
+        ],
+        "internalErrors": {
+          "WorkspaceError": 1000
+        }
+      }
+    ],
+    "queueRuns": [
+      {
+        "publications": 1000,
+        "provider": "INSTAGRAM",
+        "workerConcurrency": 2,
+        "elapsedMs": 3599,
+        "published": 1000,
+        "attempts": 1000,
+        "remoteSends": 1000,
+        "duplicateSends": 0,
+        "failures": []
+      },
+      {
+        "publications": 1000,
+        "provider": "INSTAGRAM",
+        "workerConcurrency": 2,
+        "elapsedMs": 3146,
+        "published": 1000,
+        "attempts": 1000,
+        "remoteSends": 1000,
+        "duplicateSends": 0,
+        "failures": []
+      }
+    ]
+  },
+  "tiktok": {
+    "httpRuns": [
+      {
+        "timestamp": "2026-10-25T03:31:16.688Z",
+        "provider": "TIKTOK",
+        "node": "v24.21.0",
+        "cpus": 12,
+        "totalMemoryMiB": 15227,
+        "peakRssMiB": 1157,
+        "eventLoopP99Ms": 81,
+        "results": [
+          {
+            "name": "session-check",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1655,
+            "requestsPerSecond": 604,
+            "p50Ms": 748,
+            "p95Ms": 1586,
+            "p99Ms": 1632,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1736,
+            "requestsPerSecond": 576,
+            "p50Ms": 1591,
+            "p95Ms": 1702,
+            "p99Ms": 1710,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "upload-ticket",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1013,
+            "requestsPerSecond": 987,
+            "p50Ms": 898,
+            "p95Ms": 976,
+            "p99Ms": 981,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "direct-photo-upload",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1874,
+            "requestsPerSecond": 534,
+            "p50Ms": 1755,
+            "p95Ms": 1837,
+            "p99Ms": 1841,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "create-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2666,
+            "requestsPerSecond": 375,
+            "p50Ms": 1892,
+            "p95Ms": 2567,
+            "p99Ms": 2616,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "schedule-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 3791,
+            "requestsPerSecond": 264,
+            "p50Ms": 2796,
+            "p95Ms": 3664,
+            "p99Ms": 3738,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read-populated",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1969,
+            "requestsPerSecond": 508,
+            "p50Ms": 1803,
+            "p95Ms": 1934,
+            "p99Ms": 1944,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cross-user-edit",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2189,
+            "requestsPerSecond": 457,
+            "p50Ms": 1637,
+            "p95Ms": 2109,
+            "p99Ms": 2151,
+            "statuses": {
+              "404": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cancel-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 959,
+            "requestsPerSecond": 1043,
+            "p50Ms": 741,
+            "p95Ms": 918,
+            "p99Ms": 928,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "delete-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1419,
+            "requestsPerSecond": 705,
+            "p50Ms": 981,
+            "p95Ms": 1360,
+            "p99Ms": 1392,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          }
+        ],
+        "internalErrors": {
+          "WorkspaceError": 1000
+        }
+      },
+      {
+        "timestamp": "2026-10-25T03:33:24.995Z",
+        "provider": "TIKTOK",
+        "node": "v24.21.0",
+        "cpus": 12,
+        "totalMemoryMiB": 15227,
+        "peakRssMiB": 1164,
+        "eventLoopP99Ms": 89,
+        "results": [
+          {
+            "name": "session-check",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1819,
+            "requestsPerSecond": 550,
+            "p50Ms": 666,
+            "p95Ms": 1734,
+            "p99Ms": 1794,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1896,
+            "requestsPerSecond": 527,
+            "p50Ms": 1754,
+            "p95Ms": 1850,
+            "p99Ms": 1856,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "upload-ticket",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1016,
+            "requestsPerSecond": 984,
+            "p50Ms": 898,
+            "p95Ms": 961,
+            "p99Ms": 966,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "direct-photo-upload",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1845,
+            "requestsPerSecond": 542,
+            "p50Ms": 1735,
+            "p95Ms": 1804,
+            "p99Ms": 1811,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "create-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2990,
+            "requestsPerSecond": 334,
+            "p50Ms": 2130,
+            "p95Ms": 2876,
+            "p99Ms": 2945,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "schedule-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 3653,
+            "requestsPerSecond": 274,
+            "p50Ms": 2710,
+            "p95Ms": 3542,
+            "p99Ms": 3607,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read-populated",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1953,
+            "requestsPerSecond": 512,
+            "p50Ms": 1739,
+            "p95Ms": 1912,
+            "p99Ms": 1927,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cross-user-edit",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2314,
+            "requestsPerSecond": 432,
+            "p50Ms": 1745,
+            "p95Ms": 2224,
+            "p99Ms": 2265,
+            "statuses": {
+              "404": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cancel-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 932,
+            "requestsPerSecond": 1073,
+            "p50Ms": 723,
+            "p95Ms": 891,
+            "p99Ms": 907,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "delete-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1549,
+            "requestsPerSecond": 646,
+            "p50Ms": 1005,
+            "p95Ms": 1466,
+            "p99Ms": 1514,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          }
+        ],
+        "internalErrors": {
+          "WorkspaceError": 1000
+        }
+      }
+    ],
+    "queueRuns": [
+      {
+        "publications": 1000,
+        "provider": "TIKTOK",
+        "workerConcurrency": 2,
+        "elapsedMs": 4034,
+        "published": 1000,
+        "attempts": 1000,
+        "remoteSends": 1000,
+        "duplicateSends": 0,
+        "failures": []
+      },
+      {
+        "publications": 1000,
+        "provider": "TIKTOK",
+        "workerConcurrency": 2,
+        "elapsedMs": 4670,
+        "published": 1000,
+        "attempts": 1000,
+        "remoteSends": 1000,
+        "duplicateSends": 0,
+        "failures": []
+      }
+    ]
+  },
+  "youtube": {
+    "httpRuns": [
+      {
+        "timestamp": "2026-10-25T03:31:34.557Z",
+        "provider": "YOUTUBE",
+        "node": "v24.21.0",
+        "cpus": 12,
+        "totalMemoryMiB": 15227,
+        "peakRssMiB": 1233,
+        "eventLoopP99Ms": 75,
+        "results": [
+          {
+            "name": "session-check",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1700,
+            "requestsPerSecond": 588,
+            "p50Ms": 708,
+            "p95Ms": 1624,
+            "p99Ms": 1659,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1884,
+            "requestsPerSecond": 531,
+            "p50Ms": 1755,
+            "p95Ms": 1851,
+            "p99Ms": 1858,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "create-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2877,
+            "requestsPerSecond": 348,
+            "p50Ms": 2096,
+            "p95Ms": 2784,
+            "p99Ms": 2838,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "schedule-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 3840,
+            "requestsPerSecond": 260,
+            "p50Ms": 2820,
+            "p95Ms": 3718,
+            "p99Ms": 3787,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read-populated",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1913,
+            "requestsPerSecond": 523,
+            "p50Ms": 1740,
+            "p95Ms": 1872,
+            "p99Ms": 1889,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cross-user-edit",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2457,
+            "requestsPerSecond": 407,
+            "p50Ms": 1879,
+            "p95Ms": 2372,
+            "p99Ms": 2419,
+            "statuses": {
+              "404": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cancel-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1046,
+            "requestsPerSecond": 956,
+            "p50Ms": 821,
+            "p95Ms": 1001,
+            "p99Ms": 1021,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "delete-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1389,
+            "requestsPerSecond": 720,
+            "p50Ms": 962,
+            "p95Ms": 1325,
+            "p99Ms": 1359,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          }
+        ],
+        "internalErrors": {
+          "WorkspaceError": 1000
+        }
+      },
+      {
+        "timestamp": "2026-10-25T03:33:43.557Z",
+        "provider": "YOUTUBE",
+        "node": "v24.21.0",
+        "cpus": 12,
+        "totalMemoryMiB": 15227,
+        "peakRssMiB": 1186,
+        "eventLoopP99Ms": 73,
+        "results": [
+          {
+            "name": "session-check",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1703,
+            "requestsPerSecond": 587,
+            "p50Ms": 656,
+            "p95Ms": 1632,
+            "p99Ms": 1678,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1732,
+            "requestsPerSecond": 577,
+            "p50Ms": 1604,
+            "p95Ms": 1700,
+            "p99Ms": 1707,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "create-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2726,
+            "requestsPerSecond": 367,
+            "p50Ms": 2010,
+            "p95Ms": 2626,
+            "p99Ms": 2685,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "schedule-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 4003,
+            "requestsPerSecond": 250,
+            "p50Ms": 2837,
+            "p95Ms": 3864,
+            "p99Ms": 3956,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read-populated",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2548,
+            "requestsPerSecond": 392,
+            "p50Ms": 2322,
+            "p95Ms": 2500,
+            "p99Ms": 2520,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cross-user-edit",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2700,
+            "requestsPerSecond": 370,
+            "p50Ms": 2104,
+            "p95Ms": 2620,
+            "p99Ms": 2659,
+            "statuses": {
+              "404": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cancel-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1003,
+            "requestsPerSecond": 997,
+            "p50Ms": 774,
+            "p95Ms": 960,
+            "p99Ms": 975,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "delete-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1345,
+            "requestsPerSecond": 743,
+            "p50Ms": 933,
+            "p95Ms": 1289,
+            "p99Ms": 1317,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          }
+        ],
+        "internalErrors": {
+          "WorkspaceError": 1000
+        }
+      }
+    ],
+    "queueRuns": [
+      {
+        "publications": 1000,
+        "provider": "YOUTUBE",
+        "workerConcurrency": 2,
+        "elapsedMs": 4339,
+        "published": 1000,
+        "attempts": 1000,
+        "remoteSends": 1000,
+        "duplicateSends": 0,
+        "failures": []
+      },
+      {
+        "publications": 1000,
+        "provider": "YOUTUBE",
+        "workerConcurrency": 2,
+        "elapsedMs": 5723,
+        "published": 1000,
+        "attempts": 1000,
+        "remoteSends": 1000,
+        "duplicateSends": 0,
+        "failures": []
+      }
+    ],
+    "finalFocusedRun": {
+      "http": {
+        "timestamp": "2026-10-25T03:36:28.620Z",
+        "provider": "YOUTUBE",
+        "node": "v24.21.0",
+        "cpus": 12,
+        "totalMemoryMiB": 15227,
+        "peakRssMiB": 954,
+        "eventLoopP99Ms": 76,
+        "results": [
+          {
+            "name": "session-check",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2302,
+            "requestsPerSecond": 434,
+            "p50Ms": 1465,
+            "p95Ms": 2135,
+            "p99Ms": 2193,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2247,
+            "requestsPerSecond": 445,
+            "p50Ms": 2061,
+            "p95Ms": 2207,
+            "p99Ms": 2216,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "create-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 3167,
+            "requestsPerSecond": 316,
+            "p50Ms": 2401,
+            "p95Ms": 3064,
+            "p99Ms": 3123,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "schedule-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 3832,
+            "requestsPerSecond": 261,
+            "p50Ms": 2907,
+            "p95Ms": 3722,
+            "p99Ms": 3787,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read-populated",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1805,
+            "requestsPerSecond": 554,
+            "p50Ms": 1624,
+            "p95Ms": 1770,
+            "p99Ms": 1785,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cross-user-edit",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2440,
+            "requestsPerSecond": 410,
+            "p50Ms": 1910,
+            "p95Ms": 2358,
+            "p99Ms": 2395,
+            "statuses": {
+              "404": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cancel-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 997,
+            "requestsPerSecond": 1003,
+            "p50Ms": 771,
+            "p95Ms": 955,
+            "p99Ms": 969,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "delete-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1452,
+            "requestsPerSecond": 689,
+            "p50Ms": 1043,
+            "p95Ms": 1391,
+            "p99Ms": 1423,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          }
+        ],
+        "internalErrors": {
+          "WorkspaceError": 1000
+        }
+      },
+      "queue": {
+        "publications": 1000,
+        "provider": "YOUTUBE",
+        "workerConcurrency": 2,
+        "elapsedMs": 4420,
+        "published": 1000,
+        "attempts": 1000,
+        "remoteSends": 1000,
+        "duplicateSends": 0,
+        "failures": []
+      }
+    },
+    "finalCompatibilityRun": {
+      "http": {
+        "timestamp": "2026-10-25T03:44:24.815Z",
+        "provider": "YOUTUBE",
+        "node": "v24.21.0",
+        "cpus": 12,
+        "totalMemoryMiB": 15227,
+        "peakRssMiB": 937,
+        "eventLoopP99Ms": 79,
+        "results": [
+          {
+            "name": "session-check",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2003,
+            "requestsPerSecond": 499,
+            "p50Ms": 1150,
+            "p95Ms": 1859,
+            "p99Ms": 1937,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2074,
+            "requestsPerSecond": 482,
+            "p50Ms": 1910,
+            "p95Ms": 2031,
+            "p99Ms": 2041,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "create-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 3624,
+            "requestsPerSecond": 276,
+            "p50Ms": 2551,
+            "p95Ms": 3486,
+            "p99Ms": 3576,
+            "statuses": {
+              "201": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "schedule-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 4387,
+            "requestsPerSecond": 228,
+            "p50Ms": 3218,
+            "p95Ms": 4250,
+            "p99Ms": 4333,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "workspace-read-populated",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2075,
+            "requestsPerSecond": 482,
+            "p50Ms": 1850,
+            "p95Ms": 2034,
+            "p99Ms": 2059,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cross-user-edit",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 2660,
+            "requestsPerSecond": 376,
+            "p50Ms": 2051,
+            "p95Ms": 2566,
+            "p99Ms": 2613,
+            "statuses": {
+              "404": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "cancel-post",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1081,
+            "requestsPerSecond": 925,
+            "p50Ms": 825,
+            "p95Ms": 1037,
+            "p99Ms": 1052,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          },
+          {
+            "name": "delete-draft",
+            "concurrentUsers": 1000,
+            "requests": 1000,
+            "elapsedMs": 1599,
+            "requestsPerSecond": 625,
+            "p50Ms": 1095,
+            "p95Ms": 1509,
+            "p99Ms": 1569,
+            "statuses": {
+              "200": 1000
+            },
+            "failures": 0
+          }
+        ],
+        "internalErrors": {
+          "WorkspaceError": 1000
+        }
+      },
+      "queue": {
+        "publications": 1000,
+        "provider": "YOUTUBE",
+        "workerConcurrency": 2,
+        "elapsedMs": 5123,
+        "published": 1000,
+        "attempts": 1000,
+        "remoteSends": 1000,
+        "duplicateSends": 0,
+        "failures": []
+      }
+    }
+  }
+}

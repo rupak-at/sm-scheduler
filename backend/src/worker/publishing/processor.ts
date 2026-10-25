@@ -12,6 +12,9 @@ import { publishFacebook } from './facebook.js';
 import { publishTikTok } from './tiktok.js';
 import { TikTokError } from '../../integrations/tiktok/http.js';
 import type { TikTokServices } from '../../integrations/tiktok/services.js';
+import { YouTubeError } from '../../integrations/youtube/http.js';
+import type { YouTubeServices } from '../../integrations/youtube/services.js';
+import { publishYouTube } from './youtube.js';
 
 export interface PublishingServices {
   db: PrismaClient;
@@ -20,13 +23,17 @@ export interface PublishingServices {
   facebook?: NonNullable<ReturnType<typeof createFacebookServices>>;
   storage: MediaStorage;
   tiktok?: TikTokServices;
+  youtube?: YouTubeServices;
 }
 export function createPublicationProcessor(services: PublishingServices) {
   return async (id: string) => {
     const record = await claimPublication(services.db, id);
     if (!record) return;
     try {
-      if (record.socialAccount.provider === 'TIKTOK') {
+      if (record.socialAccount.provider === 'YOUTUBE') {
+        if (!services.youtube) throw new YouTubeError('PROVIDER_NOT_CONFIGURED');
+        await publishYouTube({ ...services, youtube: services.youtube }, record);
+      } else if (record.socialAccount.provider === 'TIKTOK') {
         if (!services.tiktok) throw new TikTokError('PROVIDER_NOT_CONFIGURED');
         await publishTikTok({ ...services, tiktok: services.tiktok }, record);
       } else if (record.socialAccount.provider === 'FACEBOOK') {
@@ -48,7 +55,8 @@ export function createPublicationProcessor(services: PublishingServices) {
       const code =
         error instanceof InstagramError ||
         error instanceof FacebookError ||
-        error instanceof TikTokError
+        error instanceof TikTokError ||
+        error instanceof YouTubeError
           ? error.code
           : 'PUBLISHING_UNAVAILABLE';
       if (

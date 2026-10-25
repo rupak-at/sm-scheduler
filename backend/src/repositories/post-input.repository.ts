@@ -14,7 +14,7 @@ export async function findPostInputs(
     where: {
       id: input.socialAccountId,
       userId,
-      provider: { in: ['INSTAGRAM', 'FACEBOOK', 'TIKTOK'] },
+      provider: { in: ['INSTAGRAM', 'FACEBOOK', 'TIKTOK', 'YOUTUBE'] },
     },
   });
   const media = await tx.mediaAsset.findFirst({

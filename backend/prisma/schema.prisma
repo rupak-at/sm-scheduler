@@ -13,6 +13,7 @@ enum Platform {
   INSTAGRAM
   FACEBOOK
   TIKTOK
+  YOUTUBE
 }
 
 enum ConnectionStatus {

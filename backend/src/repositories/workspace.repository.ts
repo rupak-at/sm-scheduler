@@ -22,12 +22,12 @@ export async function readWorkspace(
 ): Promise<
   Omit<
     z.infer<typeof workspaceSchema>,
-    'instagramConfigured' | 'facebookConfigured' | 'tiktokConfigured'
+    'instagramConfigured' | 'facebookConfigured' | 'tiktokConfigured' | 'youtubeConfigured'
   >
 > {
   const [channels, items, counts, upcoming] = await Promise.all([
     database.socialAccount.findMany({
-      where: { userId, provider: { in: ['INSTAGRAM', 'FACEBOOK', 'TIKTOK'] } },
+      where: { userId, provider: { in: ['INSTAGRAM', 'FACEBOOK', 'TIKTOK', 'YOUTUBE'] } },
       orderBy: { createdAt: 'asc' },
       select: {
         id: true,

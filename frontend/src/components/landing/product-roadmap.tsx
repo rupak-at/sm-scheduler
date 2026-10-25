@@ -8,7 +8,7 @@ const stages = [
   },
   {
     title: 'Your first channel',
-    description: 'Connect Instagram or Facebook Pages after setting up your Meta app.',
+    description: 'Connect Instagram, Facebook Pages, TikTok or YouTube after configuring its app.',
     available: true,
   },
   {
@@ -34,8 +34,8 @@ export function ProductRoadmap() {
             More to come.
           </h2>
           <p className="max-w-[40ch] text-sm leading-6 text-muted">
-            Plan Instagram and Facebook Page content. Here’s what you can use today and what comes
-            next.
+            Plan Instagram, Facebook Page and TikTok content, plus videos for YouTube. Each channel
+            needs its platform’s permissions; TikTok starts in private testing.
           </p>
         </div>
         <ol className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">

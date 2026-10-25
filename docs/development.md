@@ -239,6 +239,14 @@ and expiry. They create and clean up test users. CI provisions fresh services an
 unit/integration tests, and builds. Provider fixtures exercise Instagram/Facebook/TikTok OAuth,
 uploads, ownership, worker claims, duplicate delivery, token lifecycle and uncertain outcomes.
 
+Provider load tests now cover Instagram, TikTok and YouTube independently. TikTok runs the photo
+upload plus consent-aware lifecycle; YouTube uses pre-prepared MP4 fixtures for its lifecycle and
+worker load, because actual transcoding intentionally permits only two concurrent preparations.
+Each provider gets 1,000 distinct sessions/accounts and 1,000 queued publications. TikTok/YouTube
+report paths can be overridden with `TIKTOK_LOAD_REPORT_PATH`, `TIKTOK_QUEUE_REPORT_PATH`,
+`YOUTUBE_LOAD_REPORT_PATH` and `YOUTUBE_QUEUE_REPORT_PATH`. Browser tests include both real provider
+connection start/callback paths with provider navigation intercepted before any live request.
+
 Additional suites deliberately use a **separate loopback database whose name ends in
 `_load_test`**. Apply the existing migrations there using an explicit `DATABASE_URL` first.
 Do not reuse creator or shared development services. Queue load tests additionally require
@@ -276,6 +284,19 @@ limits remain. Without a trusted client-IP deployment configuration, credential 
 the auth library's shared fallback bucket: the load suite measures existing sessions, not mass signup.
 
 ## Verify running applications
+
+YouTube adds `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET` and `YOUTUBE_REDIRECT_URI` to API/worker
+configuration. Use the existing independent token encryption key; enable YouTube Data API v3
+and configure Google web OAuth. Apply `20261025050000_youtube_platform` through your own creator
+migration workflow before restarting the updated API/worker. Only isolated test databases were
+migrated by the agent. See [YouTube setup](youtube-setup.md) for scopes, channel selection, quotas,
+media limits, visibility/audience controls and live verification. Google processing can finish
+after the scheduled upload start; the app does not pre-upload or set Google's `publishAt`.
+
+`integrations/youtube` owns Google OAuth, token refresh, channel identity and resumable requests;
+`youtube-posts.service` validates video/settings and consent, while `worker/publishing/youtube`
+owns markers, encrypted session persistence, suffix recovery and video processing outcomes.
+The browser receives only safe post settings; upload sessions stay encrypted/server-only.
 
 ```sh
 curl http://localhost:4000/health/live
@@ -743,6 +764,20 @@ Verification: 135 unit tests, 84 integrations, three browser scenarios/eight wid
 10,000-request and 1,000-publication runs, formatting/lint/types, Prisma validation, build and
 zero-advisory npm audit. [The report](regression-report-2026-10-25.md) records fixtures and limits;
 mass signup, long-running production load and live providers are not verified by these tests.
+
+### 2026-10-25 — YouTube publishing and dedicated provider regressions
+
+Implemented Google channel connection, encrypted offline tokens, explicit video settings/consent
+and resumable worker uploads with saved-session recovery and processing/visibility checks.
+Added the user-applied YouTube platform enum migration, server environment examples and setup/
+research guides. Extended load tests to TikTok/YouTube and browser tests to their connection,
+video composer and consent flows. Fixed the new YouTube button's inherited TikTok label found
+by the browser regression; corrected stale landing capability text. No creator database migrated.
+
+Verification and repeatable local fixture measurements are recorded in
+[the provider regression report](provider-regression-report-2026-10-25.md). Live authorization,
+Cloudinary-to-Google transport, provider publishing and real project quotas still need user-run
+checks. Uploads begin at the requested time; asynchronous processing can finish later.
 
 ### Future entries
 

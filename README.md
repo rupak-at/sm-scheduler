@@ -1,9 +1,12 @@
 # Social Scheduler
 
-An Instagram, Facebook Page and TikTok scheduler for creators and small teams.
+An Instagram, Facebook Page, TikTok and YouTube scheduler for creators and small teams.
 Read [AGENTS.md](AGENTS.md) for product context, module boundaries, and development rules.
 Follow [the development guide](docs/development.md) for setup, feature work, migrations, testing,
 and commits. The guide and implementation status must be updated with every completed change.
+YouTube supports channel connection and scheduled MP4 uploads; see [YouTube setup](docs/youtube-setup.md).
+Apply its new platform migration before starting the updated application. Live YouTube publishing
+is unverified; automated provider tests use fixtures.
 The [regression report](docs/regression-report-2026-10-25.md) records adversarial tests and
 1,000-user local load results. Repeat them with `npm run test:browser` and `npm run test:load`
 using the isolated services described in the development guide.

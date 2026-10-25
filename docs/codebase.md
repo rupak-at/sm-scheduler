@@ -128,3 +128,16 @@ provides owned-domain non-redirecting bytes; `lib/media/remote-download` bounds 
 The shared contracts expose only browser-safe choices, creator info and prepared-media duration.
 The frontend `use-tiktok-settings` hook drives focused settings/interaction/disclosure/consent
 components. See [TikTok setup](tiktok-setup.md) and [research](tiktok-research.md).
+
+## YouTube additions
+
+`integrations/youtube` owns session-bound Google OAuth/PKCE, offline grants, immutable channel
+identity, encrypted token refresh and resumable HTTP requests. `youtube-posts.service` validates
+owned videos and per-post title/visibility/audience/disclosure/consent. `worker/publishing/youtube`
+persists encrypted session capabilities, probes interrupted uploads before suffix recovery, and
+checks final video ownership, processing and visibility. `youtube-media` reads bounded owned
+Cloudinary/legacy bytes. Upload capability URLs never enter the browser response or queue.
+The planner uses `use-youtube-settings` and `youtube-settings` within the existing composer.
+See [setup](youtube-setup.md), [research](youtube-research.md), and the
+[provider regression report](provider-regression-report-2026-10-25.md). Apply the enum migration
+through the user's creator-database workflow; fixture tests are not live provider feasibility.

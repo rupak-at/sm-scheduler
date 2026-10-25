@@ -6,3 +6,4 @@ export * from './scheduler.js';
 export * from './media.js';
 export * from './caption.js';
 export * from './tiktok.js';
+export * from './youtube.js';

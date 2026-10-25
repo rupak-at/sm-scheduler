@@ -1,6 +1,7 @@
 import { createInstagramServices } from '../../integrations/instagram/services.js';
 import { createFacebookServices } from '../../integrations/facebook/services.js';
 import { createTikTokServices } from '../../integrations/tiktok/services.js';
+import { createYouTubeServices } from '../../integrations/youtube/services.js';
 import { reconcilePublications } from './reconcile.js';
 import { startPoller } from './poller.js';
 import { publicationJobSchema } from '@social-scheduler/shared';
@@ -21,7 +22,8 @@ export function createPublishingRuntime(
   const instagram = createInstagramServices(env, db);
   const facebook = createFacebookServices(env, db);
   const tiktok = createTikTokServices(env, db);
-  if (!instagram && !facebook && !tiktok) {
+  const youtube = createYouTubeServices(env, db);
+  if (!instagram && !facebook && !tiktok && !youtube) {
     logger.info('Publishing disabled; configure provider credentials');
     return null;
   }
@@ -35,6 +37,7 @@ export function createPublishingRuntime(
     ...(instagram ? { client: instagram.client, tokens: instagram.tokens } : {}),
     ...(facebook ? { facebook } : {}),
     ...(tiktok ? { tiktok } : {}),
+    ...(youtube ? { youtube } : {}),
   });
   const worker = new Worker<{ publicationId: string }>(
     PUBLISH_QUEUE,
@@ -58,6 +61,7 @@ export function createPublishingRuntime(
         instagram?.tokens.maintain(),
         facebook?.tokens.maintain(),
         tiktok?.tokens.maintain(),
+        youtube?.tokens.maintain(),
       ]);
     },
     1800000,

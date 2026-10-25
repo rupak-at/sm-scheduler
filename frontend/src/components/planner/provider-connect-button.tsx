@@ -1,17 +1,17 @@
 'use client';
 import { useState } from 'react';
-import { Facebook, LoaderCircle, Music2 } from 'lucide-react';
+import { Facebook, LoaderCircle, Music2, Youtube } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function ProviderConnectButton({
   provider,
   disabled = false,
 }: {
-  provider: 'facebook' | 'tiktok';
+  provider: 'facebook' | 'tiktok' | 'youtube';
   disabled?: boolean;
 }) {
-  const name = provider === 'tiktok' ? 'TikTok' : 'Facebook';
-  const Icon = provider === 'tiktok' ? Music2 : Facebook;
+  const name = provider === 'youtube' ? 'YouTube' : provider === 'tiktok' ? 'TikTok' : 'Facebook';
+  const Icon = provider === 'youtube' ? Youtube : provider === 'tiktok' ? Music2 : Facebook;
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
   async function start() {
@@ -31,7 +31,10 @@ export function ProviderConnectButton({
             : `${name} could not start. Check app setup and try again.`,
         );
       const target = new URL(result.url);
-      if (target.origin !== `https://www.${provider}.com`)
+      if (
+        target.origin !==
+        (provider === 'youtube' ? 'https://accounts.google.com' : `https://www.${provider}.com`)
+      )
         throw new Error('Invalid authorization destination.');
       window.location.assign(target.toString());
     } catch (problem) {
@@ -57,7 +60,7 @@ export function ProviderConnectButton({
           ? `Opening ${name}…`
           : provider === 'facebook'
             ? 'Connect Facebook Pages'
-            : 'Connect TikTok'}
+            : `Connect ${name}`}
       </Button>
       <p role="alert" className="text-sm text-destructive empty:hidden">
         {error}
