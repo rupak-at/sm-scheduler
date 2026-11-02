@@ -19,7 +19,7 @@ const legacy = new LocalMediaStorage(
 );
 afterEach(() => vi.restoreAllMocks());
 
-function uploadMock(failure = false) {
+function uploadMock(failure = false, result: Partial<UploadApiResponse> | null = {}) {
   return vi
     .spyOn(cloudinary.uploader, 'upload_stream')
     .mockImplementation(
@@ -34,13 +34,14 @@ function uploadMock(failure = false) {
             failure
               ? { message: 'raw-secret-provider-message', name: 'Error', http_code: 503 }
               : undefined,
-            failure
+            failure || result === null
               ? undefined
               : ({
                   public_id: options?.public_id,
                   type: 'authenticated',
                   resource_type: options?.resource_type,
                   format: options?.resource_type === 'video' ? 'mp4' : 'jpg',
+                  ...result,
                 } as UploadApiResponse),
           ),
         );
@@ -95,7 +96,43 @@ describe('Cloudinary protected media storage', () => {
     uploadMock(true);
     const storage = new CloudinaryMediaStorage(environment, legacy);
     await expect(storage.put(id, Buffer.from('prepared'), 'jpg')).rejects.toThrow(
-      'Cloudinary could not confirm',
+      'Cloudinary upload failed (HTTP 503)',
+    );
+  });
+});
+
+describe('Cloudinary upload confirmation and cleanup', () => {
+  it.each(['public_id', 'type', 'resource_type', 'format'] as const)(
+    'rejects mismatched %s confirmations without exposing the returned value',
+    async (field) => {
+      uploadMock(false, { [field]: 'secret-provider-value' });
+      const storage = new CloudinaryMediaStorage(environment, legacy);
+      await expect(storage.put(id, Buffer.from('prepared'), 'mp4')).rejects.toThrow(
+        `Cloudinary upload confirmation did not match ${field}.`,
+      );
+    },
+  );
+  it('distinguishes a missing response from a provider rejection', async () => {
+    uploadMock(false, null);
+    const storage = new CloudinaryMediaStorage(environment, legacy);
+    await expect(storage.put(id, Buffer.from('prepared'), 'mp4')).rejects.toThrow(
+      'Cloudinary returned no upload confirmation.',
+    );
+  });
+  it('reports transport codes emitted by the upload stream safely', async () => {
+    vi.spyOn(cloudinary.uploader, 'upload_stream').mockImplementation(() => {
+      const stream = new PassThrough();
+      stream.on('finish', () => {
+        stream.emit(
+          'error',
+          Object.assign(new Error('secret-provider-message'), { code: 'EPIPE' }),
+        );
+      });
+      return stream as ReturnType<typeof cloudinary.uploader.upload_stream>;
+    });
+    const storage = new CloudinaryMediaStorage(environment, legacy);
+    await expect(storage.put(id, Buffer.from('prepared'), 'mp4')).rejects.toThrow(
+      "Cloudinary upload connection failed (EPIPE). Check the API server's network connection.",
     );
   });
   it('removes the matching image/video when persistence fails', async () => {

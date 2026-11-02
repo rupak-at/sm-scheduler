@@ -97,3 +97,31 @@ After configuring credentials and restarting API/worker:
 
 Follow [Instagram setup](instagram-setup.md) for account/app authorization. No real provider
 upload, creator-database migration, push, or deployment was performed during implementation.
+
+## Troubleshoot failed uploads
+
+The upload response distinguishes Cloudinary HTTP rejections, recognized transport failures,
+missing confirmation and mismatched confirmation fields. Messages contain only validated HTTP
+status numbers, allowlisted network codes and fixed field names; provider messages, returned
+values, credentials and signed URLs are never exposed. Upload failures continue to return HTTP
+503 locally; a provider status in the message belongs to the outbound Cloudinary request.
+
+- Provider HTTP 401: check that the API host uses the cloud name, API key and secret from the
+  same product environment. Restart the API after changing its environment.
+- Provider HTTP 403: check account permissions and upload restrictions.
+- Provider HTTP 413: check the prepared file against the account's upload size limit.
+- Provider HTTP 420/429: wait for Cloudinary's upload limit to clear.
+- Provider HTTP 499: the SDK timed out; check the API host's connection to Cloudinary.
+- Provider HTTP 5xx: Cloudinary returned a server failure; try again later.
+- Provider HTTP 400: inspect Cloudinary upload settings and account limits; this status alone
+  does not establish which parameter or limit was rejected.
+- `ENOTFOUND`/`EAI_AGAIN`, connection or certificate codes: check DNS, outbound connectivity or
+  TLS on the API host, according to the reported code.
+- Confirmation mismatch: inspect the named upload setting/preset; the asset is never marked
+  ready unless public ID, authenticated delivery type, resource type and format all match.
+
+For MP4s, a Cloudinary upload error occurs after local FFmpeg preparation. Missing FFmpeg or
+FFprobe instead reports **Video processing is temporarily unavailable**. After a failed attempt,
+choose the file again to obtain a new one-use ticket; do not replay the failed upload POST.
+The historical **Cloudinary could not confirm** message combined provider rejection with response
+mismatches, so it cannot identify a live failure's cause without a fresh attempt on updated code.

@@ -70,6 +70,10 @@ Never copy development credentials into staging or production.
 The root environment file serves API, worker, and Prisma CLI. Next.js reads its own
 workspace environment file. Hosting supplies production variables and keeps environments separate.
 
+Cloudinary upload errors include a validated provider HTTP status, known transport code or
+fixed confirmation-field name. See [upload troubleshooting](cloudinary-setup.md#troubleshoot-failed-uploads)
+before changing server credentials or video tools; never log raw SDK errors or signed parameters.
+
 ## Daily workflow
 
 1. Read the feature context and existing package/module.
@@ -778,6 +782,19 @@ Verification and repeatable local fixture measurements are recorded in
 [the provider regression report](provider-regression-report-2026-10-25.md). Live authorization,
 Cloudinary-to-Google transport, provider publishing and real project quotas still need user-run
 checks. Uploads begin at the requested time; asynchronous processing can finish later.
+
+### 2026-11-02 — safe Cloudinary upload diagnostics
+
+Separated provider failures from missing/mismatched upload confirmations. The planner receives
+safe HTTP-status guidance or allowlisted transport codes instead of one generic confirmation
+error. Authenticated-media validation and one-use upload behavior remain enforced. No raw
+provider messages, response values or credentials enter diagnostics. Added troubleshooting
+for MP4 preparation versus outbound upload failures; the reported live cause remains unverified.
+
+Verification: formatting, lint, strict types, all 177 unit tests and the production build passed
+under Node 24. Fixtures cover HTTP status/transport redaction, all four confirmation mismatches,
+missing results and stream errors. No live provider request, creator-database write, push or
+deployment was performed.
 
 ### Future entries
 

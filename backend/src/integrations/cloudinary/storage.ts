@@ -4,6 +4,7 @@ import { cloudinaryCredentials } from '../../config/cloudinary.js';
 import type { MediaExtension, MediaStorage } from '../../lib/media/media-storage.types.js';
 import type { LocalMediaStorage } from '../../lib/media/local-storage.js';
 import { WorkspaceError } from '../../lib/workspace-error.js';
+import { cloudinaryUploadError } from './upload-error.js';
 
 export class CloudinaryMediaStorage implements MediaStorage {
   private readonly credentials;
@@ -17,22 +18,24 @@ export class CloudinaryMediaStorage implements MediaStorage {
     const options = this.uploadOptions(id, extension);
     await new Promise<void>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
-        if (
-          error ||
-          !result ||
-          result.public_id !== options.public_id ||
-          result.type !== 'authenticated' ||
-          result.resource_type !== options.resource_type ||
-          result.format !== extension
-        ) {
-          reject(
-            new WorkspaceError(503, 'Cloudinary could not confirm the media upload. Try again.'),
-          );
-        } else resolve();
+        if (error) return reject(cloudinaryUploadError(error));
+        if (!result)
+          return reject(new WorkspaceError(503, 'Cloudinary returned no upload confirmation.'));
+        const expected = {
+          public_id: options.public_id,
+          type: 'authenticated',
+          resource_type: options.resource_type,
+          format: extension,
+        };
+        for (const field of Object.keys(expected) as (keyof typeof expected)[]) {
+          if (result[field] !== expected[field])
+            return reject(
+              new WorkspaceError(503, `Cloudinary upload confirmation did not match ${field}.`),
+            );
+        }
+        resolve();
       });
-      stream.on('error', () =>
-        reject(new WorkspaceError(503, 'Cloudinary upload unavailable. Try again.')),
-      );
+      stream.on('error', (error: unknown) => reject(cloudinaryUploadError(error)));
       stream.end(bytes);
     });
     return `cloudinary:${options.public_id}.${extension}`;

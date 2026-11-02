@@ -1,5 +1,20 @@
 # Implementation status
 
+## Cloudinary diagnostics update — 2026-11-02
+
+Upload failures now distinguish validated provider HTTP statuses and known transport codes
+from missing or mismatched confirmation fields. Only fixed guidance and safe identifiers enter
+the browser response; raw provider messages/values and secrets remain excluded. All existing
+authenticated-delivery, ID, format and resource-type checks remain required before media is ready.
+The user's reported MP4 failure reached Cloudinary storage after local video preparation, but
+the previous generic error does not establish its provider status or exact cause. A fresh
+user-run attempt with the updated API is needed; live Cloudinary delivery remains unverified.
+
+Verification: formatting, lint, strict types, all 177 unit tests and the production build passed
+under Node 24. Fixture tests cover HTTP status/transport redaction, all four confirmation fields,
+missing results and stream errors. No migration, creator-database write, live provider request,
+push or deployment.
+
 ## TikTok regression and YouTube update — 2026-10-25
 
 Added YouTube channel connection through session-bound Google OAuth with PKCE/offline grants,
@@ -226,6 +241,13 @@ Docker startup on this machine needs administrator access; temporary user-owned 
 were used for verification. A real Instagram publication is the user's next test.
 
 ## Update log
+
+### 2026-11-02 — Cloudinary upload failure diagnostics
+
+Added safe provider status/transport guidance and confirmation-field diagnostics, fixture
+regressions for error redaction and invalid responses, and an upload troubleshooting guide.
+The change improves diagnosis; it does not claim to repair or verify the live Cloudinary account.
+Verification results are recorded in the diagnostic update above.
 
 ### 2026-10-13 — fix development tunnel asset caching
 
