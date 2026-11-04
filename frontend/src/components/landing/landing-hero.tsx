@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowDown, ArrowUpRight, Layers2 } from 'lucide-react';
+import { ArrowDown, ArrowUpRight } from 'lucide-react';
+import { BrandMark } from '@/components/brand-mark';
 import { Button } from '@/components/ui/button';
 
 export function LandingHero() {
@@ -38,7 +39,7 @@ export function LandingHero() {
       <div className="mt-14 overflow-hidden rounded-[24px] bg-ink sm:mt-16 sm:rounded-[32px]">
         <div className="grid sm:min-h-[420px] sm:grid-cols-[0.9fr_1.1fr] lg:min-h-[480px] lg:grid-cols-[0.8fr_1.2fr]">
           <div className="order-2 flex flex-col justify-between gap-8 px-7 py-9 text-paper sm:order-1 sm:px-8 sm:py-10 lg:p-12">
-            <Layers2 size={28} strokeWidth={1.4} aria-hidden="true" />
+            <BrandMark className="size-8" />
             <div>
               <h2 className="text-[28px] leading-[1.15] font-medium tracking-tight sm:text-[30px] lg:text-[40px]">
                 A little structure.

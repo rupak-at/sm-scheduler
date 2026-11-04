@@ -1,5 +1,15 @@
 # Implementation status
 
+## Brand identity — 2026-11-04
+
+Replaced the generic layers icon with a custom routed-S symbol and refined Roboto
+wordmark across public, authentication, and planner surfaces. The browser icon matches,
+and downloadable SVG/512px/1024px exports are in `frontend/public/brand`.
+Verification: Node 24 formatting, lint, types, and 177 unit tests passed; the
+Webpack production build and responsive browser review passed. The default
+Turbopack build hit a local internal-port restriction. No provider call,
+database change, push, or deployment.
+
 ## Public legal pages — 2026-11-04
 
 Added public, static `/privacy-policy` and `/terms-of-service` pages with the Social

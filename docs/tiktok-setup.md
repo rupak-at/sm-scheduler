@@ -32,6 +32,10 @@ contact. Review their wording and complete production retention/account-erasure 
 submitting; public pages alone do not satisfy all review criteria. TikTok's current
 [app review guidelines](https://developers.tiktok.com/docs/en/app-review-guidelines) also
 require a fully developed public website, not only a landing or login page.
+The [app registration guide](https://developers.tiktok.com/docs/en/getting-started-create-an-app)
+specifies a 1024 × 1024 PNG/JPEG icon up to 5 MB. The downloadable project icon is
+`frontend/public/brand/social-scheduler-icon-1024.png`; review it alongside the app name
+before uploading it in TikTok's app details.
 
 Until the client passes its Direct Post audit, use a **private TikTok account** and explicitly
 choose **Only me**. Unaudited clients have a small test-user cap; provider quotas can block posts.

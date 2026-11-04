@@ -29,6 +29,17 @@ No gradients, autoplay animation, fake performance metrics, or invented creator 
 Keep shadcn/ui primitives and Tailwind utilities consistent with the root theme tokens.
 System dark preference must not partially darken controls in this explicitly light theme.
 
+## Brand mark — 2026-11-04
+
+The Social Scheduler mark is a custom continuous S-shaped route with a detached endpoint:
+the line carries a prepared idea forward, while the dot marks its destination. It is
+monochrome so it stays legible at 32px and does not add a provider-like accent color.
+The graphite rounded square is the app icon; the white path can also stand alone on dark
+surfaces. The wordmark uses the local Roboto variable font with a heavier “Social” and a
+lighter “Scheduler”. Use the same mark in headers, the landing editorial panel, and the
+browser icon. Downloadable SVG, 512px PNG, and TikTok-sized 1024px PNG files live in
+`frontend/public/brand`.
+
 ## Public landing page
 
 `/` is a static page that does not call the authentication API. It has a strong centered

@@ -133,6 +133,8 @@ ESLint limits authored source files to 250 nonblank lines and functions to 80.
 
 The frontend uses the requested frontend-design and web-design-guidelines skills.
 Landing, login/signup, and planner share a neutral theme and local Roboto typography.
+The custom brand icon is available as downloadable SVG, 512px PNG, and 1024px PNG files in
+`frontend/public/brand`.
 See [the design plan](docs/frontend-design.md). Roboto is vendored with its font license
 and loaded with `next/font/local`; font downloads are not required during builds.
 

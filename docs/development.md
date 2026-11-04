@@ -466,6 +466,16 @@ browser credential is introduced. API bandwidth is required for this provider's 
 
 ## Update log
 
+### 2026-11-04 — custom Social Scheduler brand mark
+
+Replaced the stock layers symbol with a custom routed-S mark and refined Roboto wordmark
+in the public, authentication, and planner headers. The landing editorial panel and
+browser icon now use the same vector shape. Exported SVG, 512px PNG, and TikTok-sized
+1024px PNG files for download at `/brand/`. Verification: Node 24 formatting, lint,
+types and 177 unit tests passed; the Next.js Webpack production build and responsive
+browser review passed. The default Turbopack build could not open its internal PostCSS
+port in this environment. No provider, database, or deployment change.
+
 ### 2026-11-04 — public Privacy Policy and Terms of Service
 
 Added standalone, API-independent `/privacy-policy` and `/terms-of-service` pages with
