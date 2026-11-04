@@ -35,7 +35,8 @@ npm run dev
 ```
 
 Open [localhost:3000](http://localhost:3000) and create an account.
-`/` is the public landing page. `/login` and `/signup` return authenticated users to `/planner`.
+`/` is the public landing page; `/privacy-policy` and `/terms-of-service` are static public
+legal pages linked from its footer. `/login` and `/signup` return authenticated users to `/planner`.
 The planner and its content filters live at `/planner` and `/planner?view=…`.
 PostgreSQL listens on port 5432, Redis on 6379, and the Express API on 4000.
 
@@ -464,6 +465,16 @@ Cloudinary hosts, response bytes/time/concurrency are bounded, and photo deliver
 browser credential is introduced. API bandwidth is required for this provider's media fetches.
 
 ## Update log
+
+### 2026-11-04 — public Privacy Policy and Terms of Service
+
+Added standalone, API-independent `/privacy-policy` and `/terms-of-service` pages with
+page metadata and a public contact address. The landing footer exposes both links for
+TikTok app configuration, and TikTok setup now records the full-HTTPS-URL and ownership
+verification steps. The policy describes current data handling and explicitly notes that
+production retention periods and self-service account deletion are still pending.
+Verification: formatting, lint, strict types, unit tests, production build, and static
+route checks passed. No provider call, deployment, or creator-database change.
 
 ### 2026-10-09 — initial foundation and authentication
 

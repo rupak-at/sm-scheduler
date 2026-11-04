@@ -26,9 +26,17 @@ export function LandingFooter() {
       <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-6 px-5 py-8 sm:px-8 lg:px-12">
         <Brand />
         <p className="text-xs text-muted">Made for your creative rhythm.</p>
-        <Link href="/login" className="rounded-sm py-2 text-sm text-muted hover:text-ink">
-          Log in to your workspace
-        </Link>
+        <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
+          <Link href="/privacy-policy" className="rounded-sm py-2 text-muted hover:text-ink">
+            Privacy Policy
+          </Link>
+          <Link href="/terms-of-service" className="rounded-sm py-2 text-muted hover:text-ink">
+            Terms of Service
+          </Link>
+          <Link href="/login" className="rounded-sm py-2 text-muted hover:text-ink">
+            Log in to your workspace
+          </Link>
+        </nav>
       </div>
     </footer>
   );

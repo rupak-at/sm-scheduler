@@ -38,7 +38,9 @@ npm run dev
 ```
 
 Open [localhost:3000](http://localhost:3000) and create an account.
-The public landing page is `/`; login/signup opens the protected workspace at `/planner`.
+The public landing page is `/`; its footer links to the public Privacy Policy at
+`/privacy-policy` and Terms of Service at `/terms-of-service`. Login/signup opens the
+protected workspace at `/planner`.
 The API runs at [localhost:4000](http://localhost:4000); the worker is a separate process.
 
 The planner brings status tabs with workspace-wide counts, your next three scheduled posts,

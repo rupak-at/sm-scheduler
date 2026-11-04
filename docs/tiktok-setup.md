@@ -24,6 +24,15 @@ limited to your team's accounts is not eligible intended use. Prepare a real cre
 product, privacy policy, appropriate required callbacks and review demonstration before applying.
 Existing production deauthorization/account-erasure work is recorded in project status.
 
+The frontend serves the Privacy Policy at `/privacy-policy` and Terms of Service at
+`/terms-of-service`, linked directly from the public homepage footer. In TikTok app details,
+enter their full HTTPS URLs on the same official website origin and verify those URL
+properties before production review. The pages use `rupakb802@gmail.com` as the public
+contact. Review their wording and complete production retention/account-erasure work before
+submitting; public pages alone do not satisfy all review criteria. TikTok's current
+[app review guidelines](https://developers.tiktok.com/docs/en/app-review-guidelines) also
+require a fully developed public website, not only a landing or login page.
+
 Until the client passes its Direct Post audit, use a **private TikTok account** and explicitly
 choose **Only me**. Unaudited clients have a small test-user cap; provider quotas can block posts.
 Do not treat a private test as approval for public posting or set the audit flag to bypass review.

@@ -1,5 +1,15 @@
 # Implementation status
 
+## Public legal pages — 2026-11-04
+
+Added public, static `/privacy-policy` and `/terms-of-service` pages with the Social
+Scheduler contact address and direct links from the homepage footer. These routes can be
+used as the TikTok app's policy URLs after HTTPS deployment and URL-property verification.
+The copy describes current product behavior; production retention rules, self-service
+account erasure, TikTok app review/audit and live publishing remain pending.
+Verification: formatting, lint, strict types, unit tests, production build, and static
+route checks passed. No provider call, deployment, or creator-database change.
+
 ## Cloudinary diagnostics update — 2026-11-02
 
 Upload failures now distinguish validated provider HTTP statuses and known transport codes
