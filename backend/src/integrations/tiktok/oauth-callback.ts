@@ -3,6 +3,7 @@ import { getSessionFromCtx } from 'better-auth/api';
 import { consumeOAuthState } from '../instagram/oauth/oauth-state.js';
 import { InstagramError } from '../instagram/http.js';
 import { TikTokError } from './http.js';
+import { tiktokOAuthFailure } from './oauth-error.js';
 import { saveTikTokAccount } from './accounts.js';
 import type { TikTokPluginOptions } from './tiktok.plugin.js';
 
@@ -27,7 +28,7 @@ export async function completeTikTokCallback(
     const session = await getSessionFromCtx(ctx);
     if (!session || session.user.id !== attempt.userId || session.session.id !== attempt.sessionId)
       throw new TikTokError('SESSION_CHANGED');
-    if (query.error || !query.code) throw new TikTokError('AUTHORIZATION_DECLINED');
+    if (query.error || !query.code) throw new TikTokError(tiktokOAuthFailure(query.error));
     await saveTikTokAccount(
       options.database,
       options.vault,

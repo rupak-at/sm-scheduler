@@ -18,6 +18,14 @@ Use your existing application login before selecting Connect TikTok. TikTok link
 account to that workspace; it does not provide application sign-in. Other creators cannot take
 an already-linked TikTok identity by matching its name/email.
 
+If connection returns to `/planner` with an error, the callback now classifies TikTok's
+documented OAuth `error` value without showing its raw description, authorization code,
+state, or tokens. `TIKTOK_OAUTH_PROVIDER_UNAVAILABLE` means TikTok returned
+`server_error` or `temporarily_unavailable`; retry later. `TIKTOK_OAUTH_INVALID_SCOPE`
+means review the Sandbox products/scopes and apply changes. `TIKTOK_OAUTH_APP_CONFIGURATION`
+means review the Sandbox client and Login Kit configuration. A provider error is not proof
+that the creator denied permission. Never share a complete callback URL when asking for help.
+
 TikTok's app review and Direct Post audit are separate from code completion. Its guidelines
 expect a broadly available app helping creators publish original content; an internal tool
 limited to your team's accounts is not eligible intended use. Prepare a real creator-facing

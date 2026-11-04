@@ -10,7 +10,17 @@ const messages: Record<string, string> = {
   TIKTOK_connected:
     'TikTok connected. Review its posting settings when scheduling a photo or video.',
   TIKTOK_AUTHORIZATION_DECLINED:
-    'TikTok access was declined. Connect again and allow profile and publishing access.',
+    'TikTok did not approve this connection. Check the Sandbox target user and try again.',
+  TIKTOK_OAUTH_INVALID_SCOPE:
+    'TikTok rejected a requested permission. Enable Login Kit and video.publish in Sandbox, apply changes, then reconnect.',
+  TIKTOK_OAUTH_APP_CONFIGURATION:
+    'TikTok rejected this app configuration. Check the Sandbox client key and Login Kit settings, then reconnect.',
+  TIKTOK_OAUTH_REQUEST_REJECTED:
+    'TikTok rejected the connection request. Check the exact HTTPS callback in Sandbox Login Kit, then reconnect.',
+  TIKTOK_OAUTH_PROVIDER_UNAVAILABLE:
+    'TikTok could not complete authorization right now. Try connecting again later.',
+  TIKTOK_OAUTH_FAILED:
+    'TikTok did not return an authorization code. Check Sandbox settings, then reconnect.',
   TIKTOK_INVALID_OAUTH_STATE:
     'This TikTok connection expired or belongs to another browser. Start again here.',
   TIKTOK_SESSION_CHANGED: 'Your session changed during TikTok connection. Log in and start again.',

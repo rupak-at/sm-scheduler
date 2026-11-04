@@ -1,5 +1,16 @@
 # Implementation status
 
+## TikTok OAuth error reporting — 2026-11-04
+
+The user's Sandbox attempt returned TikTok `server_error` after both permissions were
+allowed. The app's prior “access declined” notice was inaccurate. TikTok callback errors
+now map through fixed, safe categories, separating provider availability, scope, app
+configuration, request, and denial outcomes. Raw descriptions and authorization values
+are never forwarded to the browser. A fresh user-run connection is still needed; the
+reason for TikTok's server error is unknown. Verification: formatting, lint, types,
+unit tests, isolated OAuth integration checks, backend build, and Webpack frontend
+production build passed. Default Turbopack hit a PostCSS port-binding restriction here.
+
 ## Brand identity — 2026-11-04
 
 Replaced the generic layers icon with a custom routed-S symbol and refined Roboto

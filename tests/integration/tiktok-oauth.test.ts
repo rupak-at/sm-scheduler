@@ -78,6 +78,17 @@ describe('TikTok connection state and session security', () => {
       (await fixture.agent.get(`/api/auth/tiktok/callback?state=${denied}&error=access_denied`))
         .headers.location,
     ).toContain('TIKTOK_AUTHORIZATION_DECLINED');
+    const unavailable = await start();
+    const failed = await fixture.agent.get(
+      `/api/auth/tiktok/callback?state=${unavailable}&error=server_error&error_description=private-secret`,
+    );
+    expect(failed.headers.location).toContain('TIKTOK_OAUTH_PROVIDER_UNAVAILABLE');
+    expect(failed.headers.location).not.toContain('private-secret');
+    const scope = await start();
+    expect(
+      (await fixture.agent.get(`/api/auth/tiktok/callback?state=${scope}&error=invalid_scope`))
+        .headers.location,
+    ).toContain('TIKTOK_OAUTH_INVALID_SCOPE');
     const changed = await start();
     await fixture.agent.post('/api/auth/sign-out').set('Origin', testOrigin).send({});
     expect((await fixture.agent.get(callback(changed))).headers.location).toContain(

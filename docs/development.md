@@ -466,6 +466,19 @@ browser credential is introduced. API bandwidth is required for this provider's 
 
 ## Update log
 
+### 2026-11-04 — TikTok OAuth error categories
+
+A real Sandbox connection attempt returned TikTok `server_error` after the creator allowed
+both requested permissions. The callback previously mapped every TikTok OAuth error to
+`AUTHORIZATION_DECLINED`, which falsely blamed consent. It now maps only documented,
+allowlisted OAuth categories to fixed browser notices; raw provider descriptions, state,
+codes, and tokens do not enter the destination URL. Added failure and redaction tests.
+Verification: formatting, lint, types, unit tests, an isolated TikTok OAuth integration
+check, backend build, and a Webpack frontend production build passed. The default
+Turbopack frontend build hit its existing PostCSS subprocess port-binding restriction
+in this environment. The live TikTok connection still needs a fresh user-run attempt;
+this change does not establish why TikTok returned `server_error`.
+
 ### 2026-11-04 — custom Social Scheduler brand mark
 
 Replaced the stock layers symbol with a custom routed-S mark and refined Roboto wordmark
